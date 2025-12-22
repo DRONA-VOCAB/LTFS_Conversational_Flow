@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>L&T Finance Feedback Survey - Test Interface</title>
+    <link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎙️ L&T Finance Feedback Survey</h1>
+            <p class="subtitle">Voice-to-Voice Conversation Testing Interface</p>
+        </header>
+
+        <div class="main-content">
+            <!-- Call Initiation Section -->
+            <section class="card" id="initiate-section">
+                <h2>1. Initiate Call</h2>
+                <div class="form-group">
+                    <label for="agreement-no">Agreement Number:</label>
+                    <div style="display: flex; gap: 10px; width: 100%; flex-wrap: wrap;">
+                        <input type="text" id="agreement-no" placeholder="Enter agreement number" style="flex: 1; min-width: 200px;">
+                        <button id="load-customers-btn" class="btn btn-secondary">Load Customers</button>
+                        <button id="initiate-btn" class="btn btn-primary">Start Call</button>
+                    </div>
+                </div>
+                <div id="customers-list" class="customers-list" style="display: none; margin-top: 15px;">
+                    <h3 style="font-size: 1em; margin-bottom: 10px; color: #667eea;">Available Customers:</h3>
+                    <div id="customers-container" style="max-height: 200px; overflow-y: auto; background: #f8f9fa; padding: 10px; border-radius: 8px;"></div>
+                </div>
+                <div id="initiate-status" class="status-message"></div>
+            </section>
+
+            <!-- Conversation Section -->
+            <section class="card" id="conversation-section" style="display: none;">
+                <h2>2. Conversation</h2>
+                <div class="conversation-info">
+                    <div class="info-item">
+                        <strong>Call ID:</strong> <span id="call-id">-</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Current Step:</strong> <span id="current-step">-</span>
+                    </div>
+                    <div class="info-item">
+                        <strong>Status:</strong> <span id="call-status">-</span>
+                    </div>
+                    <div class="info-item" id="auto-mode-indicator" style="display: none;">
+                        <strong>Mode:</strong> <span style="color: #28a745; font-weight: bold;">🔄 Automatic 2-Way Conversation</span>
+                    </div>
+                </div>
+
+                <!-- Bot Response -->
+                <div class="message bot-message">
+                    <div class="message-header">
+                        <span class="message-label">Bot:</span>
+                        <span class="message-time" id="bot-time"></span>
+                    </div>
+                    <div class="message-content" id="bot-message">Waiting for call initiation...</div>
+                    <audio id="bot-audio" controls autoplay style="width: 100%; margin-top: 10px; display: none;"></audio>
+                    <button id="play-bot-audio-btn" class="btn btn-primary" style="display: none; margin-top: 10px;">
+                        ▶️ Play Bot Message
+                    </button>
+                </div>
+
+                <!-- User Response -->
+                <div class="message user-message">
+                    <div class="message-header">
+                        <span class="message-label">You:</span>
+                    </div>
+                    <div class="recording-controls">
+                        <!-- Buttons hidden - fully automatic mode -->
+                        <button id="record-btn" class="btn btn-record" style="display: none;">
+                            <span id="record-icon">🎤</span>
+                            <span id="record-text">Record Response</span>
+                        </button>
+                        <button id="stop-btn" class="btn btn-stop" style="display: none;">Stop Recording</button>
+                        <button id="play-btn" class="btn btn-secondary" style="display: none;">Play Recording</button>
+                        <button id="send-btn" class="btn btn-primary" style="display: none;">Send Audio</button>
+                    </div>
+                    <div id="recording-status" class="recording-status"></div>
+                    <div id="vad-info" style="margin-top: 10px; font-size: 12px; color: #666; display: block;">
+                        <small>💡 Automatic Voice-to-Voice: Recording starts automatically and stops when you finish speaking</small>
+                    </div>
+                    <audio id="user-audio" controls style="width: 100%; margin-top: 10px; display: none;"></audio>
+                </div>
+
+                <!-- Conversation Log -->
+                <div class="conversation-log">
+                    <h3>Conversation Log</h3>
+                    <div id="log-container"></div>
+                </div>
+            </section>
+
+            <!-- Feedback Section -->
+            <section class="card" id="feedback-section" style="display: none;">
+                <h2>3. Feedback Summary</h2>
+                <div id="feedback-content"></div>
+            </section>
+        </div>
+
+        <!-- Error Display -->
+        <div id="error-message" class="error-message" style="display: none;"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
+
