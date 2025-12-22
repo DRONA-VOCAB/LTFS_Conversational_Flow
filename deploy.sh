@@ -25,12 +25,51 @@ echo -e "${YELLOW}📦 Updating system packages...${NC}"
 sudo apt-get update
 sudo apt-get upgrade -y
 
+# Check Python version (requires 3.11 or 3.12)
+echo -e "${YELLOW}🐍 Checking Python version...${NC}"
+PYTHON_VERSION=$(python3 --version 2>&1 | awk '{print $2}' | cut -d. -f1,2)
+PYTHON_MAJOR=$(echo $PYTHON_VERSION | cut -d. -f1)
+PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
+
+if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 11 ]); then
+    echo -e "${RED}❌ Python 3.11 or higher is required. Found Python $PYTHON_VERSION${NC}"
+    echo -e "${YELLOW}Installing Python 3.11...${NC}"
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update
+    sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3.11-distutils
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to install Python 3.11${NC}"
+        exit 1
+    fi
+    PYTHON_CMD="python3.11"
+elif [ "$PYTHON_MINOR" -gt 12 ]; then
+    echo -e "${RED}❌ Python 3.13+ is not supported. Please use Python 3.11 or 3.12${NC}"
+    echo -e "${YELLOW}Installing Python 3.12...${NC}"
+    sudo apt-get install -y software-properties-common
+    sudo add-apt-repository -y ppa:deadsnakes/ppa
+    sudo apt-get update
+    # Note: python3.12-distutils doesn't exist (distutils removed in Python 3.12+)
+    sudo apt-get install -y python3.12 python3.12-venv python3.12-dev
+    if [ $? -ne 0 ]; then
+        echo -e "${RED}❌ Failed to install Python 3.12${NC}"
+        exit 1
+    fi
+    # Verify Python 3.12 is available
+    if ! command -v python3.12 &> /dev/null; then
+        echo -e "${RED}❌ Python 3.12 installation failed - command not found${NC}"
+        exit 1
+    fi
+    PYTHON_CMD="python3.12"
+else
+    echo -e "${GREEN}✅ Python $PYTHON_VERSION is compatible${NC}"
+    PYTHON_CMD="python3"
+fi
+
 # Install required system packages
 echo -e "${YELLOW}📦 Installing system dependencies...${NC}"
 sudo apt-get install -y \
-    python3 \
     python3-pip \
-    python3-venv \
     git \
     curl \
     build-essential \
@@ -59,9 +98,19 @@ fi
 
 cd $APP_DIR
 
+# Remove existing venv if it exists (to ensure clean installation with correct Python version)
+if [ -d "venv" ]; then
+    echo -e "${YELLOW}🗑️  Removing existing virtual environment...${NC}"
+    rm -rf venv
+fi
+
 # Create virtual environment
-echo -e "${YELLOW}🐍 Creating Python virtual environment...${NC}"
-python3 -m venv venv
+echo -e "${YELLOW}🐍 Creating Python virtual environment with $PYTHON_CMD...${NC}"
+$PYTHON_CMD -m venv venv
+if [ $? -ne 0 ]; then
+    echo -e "${RED}❌ Failed to create virtual environment${NC}"
+    exit 1
+fi
 source venv/bin/activate
 
 # Upgrade pip

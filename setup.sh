@@ -18,25 +18,49 @@ if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" 
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     sudo apt-get update
     sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3.11-distutils
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to install Python 3.11"
+        exit 1
+    fi
     PYTHON_CMD="python3.11"
+    NEED_NEW_VENV=true
 elif [ "$PYTHON_MINOR" -gt 12 ]; then
     echo "❌ Python 3.13+ is not supported. Please use Python 3.11 or 3.12"
     echo "Installing Python 3.12..."
     sudo apt-get install -y software-properties-common
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     sudo apt-get update
-    sudo apt-get install -y python3.12 python3.12-venv python3.12-dev python3.12-distutils
+    # Note: python3.12-distutils doesn't exist (distutils removed in Python 3.12+)
+    sudo apt-get install -y python3.12 python3.12-venv python3.12-dev
+    if [ $? -ne 0 ]; then
+        echo "❌ Failed to install Python 3.12"
+        exit 1
+    fi
+    # Verify Python 3.12 is available
+    if ! command -v python3.12 &> /dev/null; then
+        echo "❌ Python 3.12 installation failed - command not found"
+        exit 1
+    fi
     PYTHON_CMD="python3.12"
+    NEED_NEW_VENV=true
 else
     echo "✅ Python $PYTHON_VERSION is compatible"
     PYTHON_CMD="python3"
+    NEED_NEW_VENV=false
 fi
 
-# Check if virtual environment exists
+# Remove existing venv if we're switching Python versions or if it exists and we need a new one
 if [ -d "venv" ]; then
-    echo "✅ Virtual environment already exists"
-    echo "⚠️  Note: If you're switching Python versions, consider removing venv and recreating it"
-else
+    if [ "$NEED_NEW_VENV" = true ]; then
+        echo "🗑️  Removing existing virtual environment (switching Python versions)..."
+        rm -rf venv
+    else
+        echo "✅ Virtual environment already exists"
+    fi
+fi
+
+# Create virtual environment if it doesn't exist
+if [ ! -d "venv" ]; then
     echo "📦 Creating virtual environment with $PYTHON_CMD..."
     $PYTHON_CMD -m venv venv
     if [ $? -ne 0 ]; then
