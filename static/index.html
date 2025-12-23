@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>LTFS Chatbot</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+<div class="customer-select">
+    <select id="customer-dropdown">
+        <option value="">Select Customer</option>
+    </select>
+    <button onclick="startCall()">Start Call</button>
+</div>
+
+<div class="chat-wrapper">
+    <div class="chat-header">
+        LTFS Virtual Assistant
+    </div>
+
+    <div id="chat-box" class="chat-box"></div>
+
+    <div class="chat-input">
+        <input
+            type="text"
+            id="user-input"
+            placeholder="Type your message..."
+            onkeydown="handleKey(event)"
+        />
+        <button onclick="sendMessage()">Send</button>
+    </div>
+</div>
+
+<script src="/static/script.js"></script>
+</body>
+</html>
+
