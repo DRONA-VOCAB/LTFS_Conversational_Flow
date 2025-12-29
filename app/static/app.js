@@ -273,6 +273,34 @@ async function initiateCall() {
         hideAllButtons();
         recordingStatus.textContent = '🔄 Automatic mode - Bot will speak first, then recording starts automatically';
         
+        // Request microphone permission proactively (before recording starts)
+        if (isAutomaticMode) {
+            try {
+                // Request permission now so user can grant it before recording starts
+                const permissionState = await checkMicrophonePermission();
+                if (permissionState === 'prompt') {
+                    // Try to get permission now (this will show the browser prompt)
+                    try {
+                        const testStream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                        // Permission granted! Stop the test stream immediately
+                        testStream.getTracks().forEach(track => track.stop());
+                        addLogEntry('system', 'Microphone permission granted');
+                    } catch (permError) {
+                        // Permission denied or error - will handle when recording starts
+                        console.warn('Microphone permission not granted yet:', permError);
+                        recordingStatus.textContent = '⚠️ Microphone permission needed - you\'ll be prompted when recording starts';
+                    }
+                } else if (permissionState === 'denied') {
+                    showError('Microphone access is blocked. Please enable it in your browser settings and refresh the page.');
+                    recordingStatus.textContent = '❌ Microphone access blocked';
+                } else {
+                    addLogEntry('system', 'Microphone permission already granted');
+                }
+            } catch (error) {
+                console.warn('Error checking microphone permission:', error);
+            }
+        }
+        
         // Add to log
         addLogEntry('system', `Call initiated for agreement: ${agreementNo}`);
         addLogEntry('bot', data.text || 'Call opening message');
@@ -283,6 +311,20 @@ async function initiateCall() {
     } finally {
         initiateBtn.disabled = false;
         initiateBtn.innerHTML = 'Start Call';
+    }
+}
+
+// Check microphone permissions
+async function checkMicrophonePermission() {
+    try {
+        if (navigator.permissions) {
+            const result = await navigator.permissions.query({ name: 'microphone' });
+            return result.state; // 'granted', 'denied', or 'prompt'
+        }
+        return 'prompt'; // If permissions API not available, assume prompt
+    } catch (error) {
+        console.warn('Permission check failed:', error);
+        return 'prompt';
     }
 }
 
@@ -299,6 +341,17 @@ async function startRecording() {
             }
             isBotSpeaking = false;
             isWaitingForBotAudio = false;
+        }
+
+        // Check permissions first
+        const permissionState = await checkMicrophonePermission();
+        if (permissionState === 'denied') {
+            showError('Microphone access is blocked. Please enable it in your browser settings:\n\n' +
+                'Chrome/Edge: Click the lock icon in address bar → Site settings → Microphone → Allow\n' +
+                'Firefox: Click the lock icon → Permissions → Microphone → Allow\n' +
+                'Safari: Safari → Settings → Websites → Microphone → Allow for this site');
+            recordingStatus.textContent = '❌ Microphone access denied';
+            return;
         }
 
         const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -344,8 +397,26 @@ async function startRecording() {
         addLogEntry('system', 'Recording started automatically with VAD');
         
     } catch (error) {
-        showError('Microphone access denied. Please allow microphone access and try again.');
+        let errorMessage = 'Microphone access denied. ';
+        
+        if (error.name === 'NotAllowedError' || error.name === 'PermissionDeniedError') {
+            errorMessage += 'Please allow microphone access:\n\n' +
+                '1. Click the lock/camera icon in your browser\'s address bar\n' +
+                '2. Find "Microphone" or "Camera" settings\n' +
+                '3. Change it to "Allow"\n' +
+                '4. Refresh the page and try again';
+        } else if (error.name === 'NotFoundError' || error.name === 'DevicesNotFoundError') {
+            errorMessage += 'No microphone found. Please connect a microphone and try again.';
+        } else if (error.name === 'NotReadableError' || error.name === 'TrackStartError') {
+            errorMessage += 'Microphone is being used by another application. Please close other apps using the microphone and try again.';
+        } else {
+            errorMessage += 'Please check your browser settings and allow microphone access.';
+        }
+        
+        showError(errorMessage);
+        recordingStatus.textContent = '❌ Microphone access error';
         console.error('Recording error:', error);
+        addLogEntry('system', `Recording error: ${error.name} - ${error.message}`);
     }
 }
 

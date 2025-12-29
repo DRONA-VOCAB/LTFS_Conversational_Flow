@@ -234,6 +234,22 @@ class FeedbackFlowManager:
                 )
                 result = await self.db.execute(stmt)
                 self.customer_data = result.scalar_one_or_none()
+
+            # Restore previous conversation state (responses, compliance notes)
+            # so that feedback can be saved correctly when the call ends.
+            if self.call_event.conversation_state:
+                state = self.call_event.conversation_state
+                self.responses = dict(state.get("responses") or {})
+                self.compliance_notes = list(state.get("compliance_notes") or [])
+
+            # Restore previous conversation state (responses, compliance notes)
+            # so that feedback can be saved correctly when the call ends.
+            if self.call_event.conversation_state:
+                state = self.call_event.conversation_state
+                # These were serialized in _update_call_event, so we can safely
+                # assign them back as plain dict/list without special casting.
+                self.responses = dict(state.get("responses") or {})
+                self.compliance_notes = list(state.get("compliance_notes") or [])
         
         text = text.strip()
         if not text:
