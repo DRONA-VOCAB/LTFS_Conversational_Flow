@@ -1,10 +1,11 @@
 """Conversation API endpoints."""
 from fastapi import APIRouter, Depends, HTTPException, UploadFile, File, Response
-from fastapi.responses import StreamingResponse
+from fastapi.responses import StreamingResponse, FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 import time
 from app.database import get_db
 from app.services.outbound_call_service import OutboundCallService
+from app.services.conversation_recorder import ConversationRecorder
 from app.schema.feedback_request import CallInitiateRequest, TextMessageRequest
 from app.schema.feedback_response import (
     CallStatusResponse,
@@ -14,11 +15,15 @@ from app.schema.feedback_response import (
 )
 from app.models.call_event import CallEvent, CallStatus
 from app.models.feedback_responses import FeedbackResponse as FeedbackResponseModel
+from app.utils.exceptions import TTSServiceError
 from sqlalchemy import select, func
 from typing import Optional
 import io
 
 router = APIRouter(prefix="/api/v1", tags=["conversation"])
+
+# Global conversation recorder instance
+conversation_recorder = ConversationRecorder(recordings_dir="recordings")
 
 
 @router.post("/call/initiate", response_model=AudioResponse)
@@ -35,6 +40,11 @@ async def initiate_call(
         call_service = OutboundCallService(db)
         call_id, audio_data = await call_service.initiate_call(request.agreement_no)
         
+        # Start recording for this call
+        conversation_recorder.start_recording(call_id)
+        # Record opening bot message
+        conversation_recorder.record_bot_audio(call_id, audio_data)
+        
         return AudioResponse.from_audio_bytes(
             call_id=call_id,
             audio_data=audio_data,
@@ -45,6 +55,12 @@ async def initiate_call(
         )
     except ValueError as e:
         raise HTTPException(status_code=404, detail=str(e))
+    except TTSServiceError as e:
+        # TTS service is unavailable - provide helpful error with alternative
+        raise HTTPException(
+            status_code=503,  # Service Unavailable
+            detail=str(e)
+        )
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to initiate call: {str(e)}")
 
@@ -70,6 +86,9 @@ async def process_audio(
         if not audio_data:
             raise HTTPException(status_code=400, detail="No audio data provided")
         
+        # Record user audio
+        conversation_recorder.record_user_audio(call_id, audio_data)
+        
         # Process audio
         process_start = time.perf_counter()
         call_service = OutboundCallService(db)
@@ -81,6 +100,13 @@ async def process_audio(
         
         if not response_audio:
             raise HTTPException(status_code=500, detail="Failed to generate response audio")
+        
+        # Record bot audio response
+        conversation_recorder.record_bot_audio(call_id, response_audio)
+        
+        # If call is complete, finalize recording
+        if is_complete:
+            await conversation_recorder.finalize_recording(call_id)
         
         # Prepare response
         response_start = time.perf_counter()
@@ -145,6 +171,9 @@ async def process_audio_stream(
         if not audio_data:
             raise HTTPException(status_code=400, detail="No audio data provided")
         
+        # Record user audio
+        conversation_recorder.record_user_audio(call_id, audio_data)
+        
         call_service = OutboundCallService(db)
         response_audio, next_step, is_complete = await call_service.process_call_audio(
             call_id,
@@ -153,6 +182,13 @@ async def process_audio_stream(
         
         if not response_audio:
             raise HTTPException(status_code=500, detail="Failed to generate response audio")
+        
+        # Record bot audio response
+        conversation_recorder.record_bot_audio(call_id, response_audio)
+        
+        # If call is complete, finalize recording
+        if is_complete:
+            await conversation_recorder.finalize_recording(call_id)
         
         # Return audio as binary stream
         return Response(
@@ -316,4 +352,72 @@ async def list_customers(
         "offset": offset,
         "customers": customer_list
     }
+
+
+@router.get("/call/{call_id}/recording")
+async def get_call_recording(call_id: str):
+    """
+    Download the recording for a completed call.
+    
+    Returns the combined recording file (user + bot audio interleaved).
+    """
+    recording_path = conversation_recorder.get_recording_path(call_id)
+    
+    if not recording_path:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Recording not found for call: {call_id}"
+        )
+    
+    return FileResponse(
+        path=recording_path,
+        media_type="audio/wav",
+        filename=f"{call_id}_recording.wav"
+    )
+
+
+@router.get("/call/{call_id}/recording/user")
+async def get_user_recording(call_id: str):
+    """Download the user-only recording for a call."""
+    from pathlib import Path
+    recordings_dir = Path("recordings")
+    pattern = f"{call_id}_user_*.wav"
+    matching_files = list(recordings_dir.glob(pattern))
+    
+    if not matching_files:
+        raise HTTPException(
+            status_code=404,
+            detail=f"User recording not found for call: {call_id}"
+        )
+    
+    # Return the most recent one
+    file_path = max(matching_files, key=lambda p: p.stat().st_mtime)
+    return FileResponse(
+        path=str(file_path),
+        media_type="audio/wav",
+        filename=f"{call_id}_user_recording.wav"
+    )
+
+
+@router.get("/call/{call_id}/recording/bot")
+async def get_bot_recording(call_id: str):
+    """Download the bot-only recording for a call."""
+    from pathlib import Path
+    recordings_dir = Path("recordings")
+    pattern = f"{call_id}_bot_*.wav"
+    matching_files = list(recordings_dir.glob(pattern))
+    
+    if not matching_files:
+        raise HTTPException(
+            status_code=404,
+            detail=f"Bot recording not found for call: {call_id}"
+        )
+    
+    # Return the most recent one
+    file_path = max(matching_files, key=lambda p: p.stat().st_mtime)
+    return FileResponse(
+        path=str(file_path),
+        media_type="audio/wav",
+        filename=f"{call_id}_bot_recording.wav"
+    )
 
