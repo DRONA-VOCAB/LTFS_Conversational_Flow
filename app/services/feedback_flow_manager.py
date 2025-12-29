@@ -26,14 +26,15 @@ from app.utils.validators import (
     check_payment_mode_compliance,
 )
 from app.utils.formatter import format_customer_name, get_greeting
+from app.utils.exceptions import TTSServiceError
 
 
 class ConversationStep:
     """Conversation step constants."""
     CALL_OPENING = "call_opening"
     CUSTOMER_VERIFICATION = "customer_verification"
-    PURPOSE_EXPLANATION_PART1 = "purpose_explanation_part1"  # First part of purpose explanation
-    PURPOSE_EXPLANATION_PART2 = "purpose_explanation_part2"  # Second part of purpose explanation
+    PURPOSE_EXPLANATION_PART1 = "purpose_explanation_part1"  
+    PURPOSE_EXPLANATION_PART2 = "purpose_explanation_part2"  
     LOAN_CONFIRMATION = "loan_confirmation"
     PAYMENT_CONFIRMATION = "payment_confirmation"
     PAYMENT_MADE_BY = "payment_made_by"
@@ -42,6 +43,8 @@ class ConversationStep:
     PAYMENT_MODE = "payment_mode"
     FIELD_EXECUTIVE_DETAILS = "field_executive_details"
     PAYMENT_REASON = "payment_reason"
+    VEHICLE_USER = "vehicle_user"          # TW-only question: who is using the vehicle
+    VEHICLE_STATUS = "vehicle_status"      # TW-only question: status of the vehicle
     PAYMENT_AMOUNT = "payment_amount"
     CALL_CLOSING = "call_closing"
     CALL_ENDED = "call_ended"
@@ -79,6 +82,9 @@ class FeedbackFlowManager:
                 "emi", "emi+charges", "settlement", "foreclosure",
                 "charges", "loan_cancellation", "advance_emi"
             ],
+            # TW-only steps are treated as free-text; we don't enforce specific outcomes
+            ConversationStep.VEHICLE_USER: [],
+            ConversationStep.VEHICLE_STATUS: [],
             ConversationStep.PAYMENT_AMOUNT: ["amount"],
         }
     
@@ -126,14 +132,23 @@ class FeedbackFlowManager:
         try:
             audio_data, tts_latency = await self.tts_service.synthesize_with_retry(opening_text)
             if not audio_data:
-                raise Exception("Failed to generate TTS audio")
+                raise TTSServiceError(
+                    "Failed to generate TTS audio - service is unreachable or returned no data",
+                    service_url=self.tts_service.tts_url
+                )
             total_latency = time.perf_counter() - start_time
             print(f"[FlowManager] Call initialization latency: {total_latency:.3f}s (TTS: {tts_latency:.3f}s)")
             
             if len(audio_data) == 0:
-                raise Exception("TTS service returned empty audio data")
+                raise TTSServiceError(
+                    "TTS service returned empty audio data",
+                    service_url=self.tts_service.tts_url
+                )
             
             print(f"[FlowManager] Generated opening audio: {len(audio_data)} bytes")
+        except TTSServiceError:
+            # Re-raise TTS errors as-is
+            raise
         except Exception as e:
             # Log error with timing info if available
             try:
@@ -141,7 +156,11 @@ class FeedbackFlowManager:
                 print(f"[FlowManager] Error during call initialization after {elapsed:.3f}s: {str(e)}")
             except:
                 print(f"[FlowManager] Error during call initialization: {str(e)}")
-            raise
+            # Wrap unexpected errors as TTS errors
+            raise TTSServiceError(
+                f"Unexpected error during TTS generation: {str(e)}",
+                service_url=self.tts_service.tts_url
+            ) from e
         
         return call_id, audio_data
     
@@ -232,6 +251,13 @@ class FeedbackFlowManager:
                 print(f"[FlowManager] Date found in text '{text}': {payment_date}, proceeding directly to date handler (skipping intent check)")
                 return await self._handle_payment_date_text(text, None)
         
+        # Special handling for PAYMENT_AMOUNT - check for amount BEFORE intent checking
+        if current_step == ConversationStep.PAYMENT_AMOUNT:
+            amount = extract_amount_from_text(text)
+            if amount:
+                print(f"[FlowManager] Amount found in text '{text}': {amount}, proceeding directly to amount handler (skipping intent check)")
+                return await self._handle_payment_amount_text(text, None)
+        
         if current_step == ConversationStep.PURPOSE_EXPLANATION_PART1:
             print(f"[FlowManager] PURPOSE_EXPLANATION_PART1 step detected, proceeding directly to loan confirmation")
             self.call_event.current_step = ConversationStep.LOAN_CONFIRMATION
@@ -259,10 +285,76 @@ class FeedbackFlowManager:
         # Log intent extraction result
         if intent_result and intent_result.is_expected:
             print(f"[FlowManager] Step: {current_step}, Text: '{text[:50]}...', Intent: {intent_result.intent}, Extracted: {intent_result.extracted_value}, Status: SUCCESS")
+            # Reset retry counter on successful intent extraction
+            retry_key = f"{current_step}_retry_count"
+            if retry_key in self.responses:
+                self.responses[retry_key] = 0
         else:
             print(f"[FlowManager] Step: {current_step}, Text: '{text[:50]}...', Intent: {intent_result.intent if intent_result else 'None'}, Status: NEEDS_EMPATHETIC_RESPONSE")
         
+        # Check retry limit to prevent infinite loops (text flow)
+        retry_key = f"{current_step}_retry_count"
+        if retry_key not in self.responses:
+            self.responses[retry_key] = 0
+        
+        # Only increment retry counter if intent extraction failed
+        if intent_result and intent_result.needs_llm_response:
+            self.responses[retry_key] += 1
+        
+        max_retries = 3  # Maximum retries before skipping/ending
+        
         if intent_result.needs_llm_response:
+            # If we've exceeded max retries, skip this question or end call gracefully
+            if self.responses[retry_key] > max_retries:
+                print(f"[FlowManager] Max retries ({max_retries}) exceeded for step {current_step}, skipping to next step or ending call")
+                # Try to skip to next step based on current step
+                if current_step == ConversationStep.CALL_OPENING:
+                    return await self._handle_call_closing_text()
+                elif current_step == ConversationStep.LOAN_CONFIRMATION:
+                    return await self._handle_call_closing_text()
+                elif current_step == ConversationStep.PAYMENT_CONFIRMATION:
+                    return await self._handle_call_closing_text()
+                elif current_step == ConversationStep.PAYMENT_MADE_BY:
+                    self.responses["payment_made_by"] = "self"
+                    self.call_event.current_step = ConversationStep.PAYMENT_DATE
+                    response_text = "When did you make your last payment?"
+                    await self._update_call_event()
+                    return response_text, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_DATE:
+                    self.call_event.current_step = ConversationStep.PAYMENT_MODE
+                    response_text = "By which mode was the payment made? Options are: Online, UPI, NEFT, RTGS in LAN, Online or UPI to Field Executive, Cash, Branch, Outlet, or NACH which is auto debit from account."
+                    await self._update_call_event()
+                    return response_text, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_MODE:
+                    self.responses["payment_mode"] = "online"
+                    self.call_event.current_step = ConversationStep.PAYMENT_REASON
+                    response_text = "What was the reason for the payment? Was it for EMI, EMI plus charges, Settlement, Foreclosure, Charges, Loan cancellation, or Advance EMI?"
+                    await self._update_call_event()
+                    return response_text, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_REASON:
+                    self.responses["payment_reason"] = "emi"
+                    product = (self.customer_data.product or "").strip().upper() if self.customer_data else ""
+                    if product.startswith("TW") or "TWO WHEELER" in product:
+                        self.call_event.current_step = ConversationStep.VEHICLE_USER
+                        response_text = "Who is currently using the vehicle?"
+                    else:
+                        self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+                        response_text = "What was the actual amount paid?"
+                    await self._update_call_event()
+                    return response_text, self.call_event.current_step, False
+                elif current_step in [ConversationStep.VEHICLE_USER, ConversationStep.VEHICLE_STATUS]:
+                    if current_step == ConversationStep.VEHICLE_USER:
+                        self.responses["vehicle_user"] = "Not provided"
+                    else:
+                        self.responses["vehicle_status"] = "Not provided"
+                    self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+                    response_text = "What was the actual amount paid?"
+                    await self._update_call_event()
+                    return response_text, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_AMOUNT:
+                    return await self._handle_call_closing_text()
+                else:
+                    return await self._handle_call_closing_text()
             # Special handling for CALL_OPENING - try harder to detect yes/no
             if current_step == ConversationStep.CALL_OPENING:
                 direct_yes_no = validate_yes_no_response(text)
@@ -325,9 +417,13 @@ class FeedbackFlowManager:
         elif current_step == ConversationStep.FIELD_EXECUTIVE_DETAILS:
             return await self._handle_field_executive_details_text(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_REASON:
-            return await self._handle_payment_amount_text(text, intent_result)
+            return await self._handle_payment_reason_text(text, intent_result)
+        elif current_step == ConversationStep.VEHICLE_USER:
+            return await self._handle_vehicle_user_text(text, intent_result)
+        elif current_step == ConversationStep.VEHICLE_STATUS:
+            return await self._handle_vehicle_status_text(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_AMOUNT:
-            return await self._handle_call_closing_text()
+            return await self._handle_payment_amount_text(text, intent_result)
         else:
             return await self._handle_call_closing_text()
     
@@ -383,6 +479,20 @@ class FeedbackFlowManager:
         text = text.strip()
         current_step = self.call_event.current_step
         
+        # Special handling for PAYMENT_DATE - check for date BEFORE intent checking
+        if current_step == ConversationStep.PAYMENT_DATE:
+            payment_date = extract_date_from_text(text)
+            if payment_date:
+                print(f"[FlowManager] Date found in audio '{text}': {payment_date}, proceeding directly to date handler (skipping intent check)")
+                return await self._handle_payment_date(text, None)
+        
+        # Special handling for PAYMENT_AMOUNT - check for amount BEFORE intent checking
+        if current_step == ConversationStep.PAYMENT_AMOUNT:
+            amount = extract_amount_from_text(text)
+            if amount:
+                print(f"[FlowManager] Amount found in audio '{text}': {amount}, proceeding directly to amount handler (skipping intent check)")
+                return await self._handle_payment_amount(text, None)
+        
         if current_step == ConversationStep.PURPOSE_EXPLANATION_PART1:
             print(f"[FlowManager] PURPOSE_EXPLANATION_PART1 step detected, proceeding directly to loan confirmation")
             self.call_event.current_step = ConversationStep.LOAN_CONFIRMATION
@@ -417,9 +527,91 @@ class FeedbackFlowManager:
         # Log intent extraction result
         if intent_result and intent_result.is_expected:
             print(f"[FlowManager] Step: {current_step}, Text: '{text[:50]}...', Intent: {intent_result.intent}, Extracted: {intent_result.extracted_value}, Status: SUCCESS (proceeding with normal flow)")
+            # Reset retry counter on successful intent extraction
+            retry_key = f"{current_step}_retry_count"
+            if retry_key in self.responses:
+                self.responses[retry_key] = 0
         else:
             print(f"[FlowManager] Step: {current_step}, Text: '{text[:50]}...', Intent: {intent_result.intent if intent_result else 'None'}, Status: NEEDS_EMPATHETIC_RESPONSE (generating empathetic response)")
+        
+        # Check retry limit to prevent infinite loops
+        retry_key = f"{current_step}_retry_count"
+        if retry_key not in self.responses:
+            self.responses[retry_key] = 0
+        
+        # Only increment retry counter if intent extraction failed
+        if intent_result and intent_result.needs_llm_response:
+            self.responses[retry_key] += 1
+        
+        max_retries = 3  # Maximum retries before skipping/ending
+        
         if intent_result.needs_llm_response:
+            # If we've exceeded max retries, skip this question or end call gracefully
+            if self.responses[retry_key] > max_retries:
+                print(f"[FlowManager] Max retries ({max_retries}) exceeded for step {current_step}, skipping to next step or ending call")
+                # Try to skip to next step based on current step
+                if current_step == ConversationStep.CALL_OPENING:
+                    # Can't skip opening, end call
+                    return await self._handle_call_closing()
+                elif current_step == ConversationStep.LOAN_CONFIRMATION:
+                    # If can't confirm loan, end call
+                    return await self._handle_call_closing()
+                elif current_step == ConversationStep.PAYMENT_CONFIRMATION:
+                    # If can't confirm payment, end call
+                    return await self._handle_call_closing()
+                elif current_step == ConversationStep.PAYMENT_MADE_BY:
+                    # Skip to payment date (assume self)
+                    self.responses["payment_made_by"] = "self"
+                    self.call_event.current_step = ConversationStep.PAYMENT_DATE
+                    response_text = "When did you make your last payment?"
+                    response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+                    await self._update_call_event()
+                    return response_audio, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_DATE:
+                    # Skip to payment mode
+                    self.call_event.current_step = ConversationStep.PAYMENT_MODE
+                    response_text = "By which mode was the payment made? Options are: Online, UPI, NEFT, RTGS in LAN, Online or UPI to Field Executive, Cash, Branch, Outlet, or NACH which is auto debit from account."
+                    response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+                    await self._update_call_event()
+                    return response_audio, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_MODE:
+                    # Skip to payment reason (assume online)
+                    self.responses["payment_mode"] = "online"
+                    self.call_event.current_step = ConversationStep.PAYMENT_REASON
+                    response_text = "What was the reason for the payment? Was it for EMI, EMI plus charges, Settlement, Foreclosure, Charges, Loan cancellation, or Advance EMI?"
+                    response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+                    await self._update_call_event()
+                    return response_audio, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_REASON:
+                    # Skip to amount (assume EMI)
+                    self.responses["payment_reason"] = "emi"
+                    product = (self.customer_data.product or "").strip().upper() if self.customer_data else ""
+                    if product.startswith("TW") or "TWO WHEELER" in product:
+                        self.call_event.current_step = ConversationStep.VEHICLE_USER
+                        response_text = "Who is currently using the vehicle?"
+                    else:
+                        self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+                        response_text = "What was the actual amount paid?"
+                    response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+                    await self._update_call_event()
+                    return response_audio, self.call_event.current_step, False
+                elif current_step in [ConversationStep.VEHICLE_USER, ConversationStep.VEHICLE_STATUS]:
+                    # Skip vehicle questions, go to amount
+                    if current_step == ConversationStep.VEHICLE_USER:
+                        self.responses["vehicle_user"] = "Not provided"
+                    else:
+                        self.responses["vehicle_status"] = "Not provided"
+                    self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+                    response_text = "What was the actual amount paid?"
+                    response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+                    await self._update_call_event()
+                    return response_audio, self.call_event.current_step, False
+                elif current_step == ConversationStep.PAYMENT_AMOUNT:
+                    # Can't get amount, end call
+                    return await self._handle_call_closing()
+                else:
+                    # Default: end call
+                    return await self._handle_call_closing()
             # Special handling for CALL_OPENING - try harder to detect yes/no
             if current_step == ConversationStep.CALL_OPENING:
                 direct_yes_no = validate_yes_no_response(text)
@@ -486,17 +678,33 @@ class FeedbackFlowManager:
         elif current_step == ConversationStep.PAYEE_DETAILS:
             return await self._handle_payment_date(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_DATE:
-            return await self._handle_payment_mode(text, intent_result)
+            return await self._handle_payment_date(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_MODE:
             return await self._handle_payment_mode(text, intent_result)
         elif current_step == ConversationStep.FIELD_EXECUTIVE_DETAILS:
             return await self._handle_field_executive_details(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_REASON:
-            return await self._handle_payment_amount(text, intent_result)
+            return await self._handle_payment_reason(text, intent_result)
+        elif current_step == ConversationStep.VEHICLE_USER:
+            return await self._handle_vehicle_user(text, intent_result)
+        elif current_step == ConversationStep.VEHICLE_STATUS:
+            return await self._handle_vehicle_status(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_AMOUNT:
             return await self._handle_call_closing()
         else:
             return await self._handle_call_closing()
+    
+    def _reset_retry_counter(self, step: str):
+        """Reset retry counter for a step when successfully moving to next step."""
+        retry_key = f"{step}_retry_count"
+        if retry_key in self.responses:
+            self.responses[retry_key] = 0
+    
+    def _reset_all_retry_counters(self):
+        """Reset all retry counters (useful when moving to a new step)."""
+        keys_to_remove = [key for key in self.responses.keys() if key.endswith("_retry_count")]
+        for key in keys_to_remove:
+            self.responses[key] = 0
     
     async def _get_current_question_text(self, current_step: str) -> Optional[str]:
         """Get the current question text for re-asking."""
@@ -515,6 +723,8 @@ class FeedbackFlowManager:
             ConversationStep.PAYMENT_MODE: "By which mode was the payment made?",
             ConversationStep.FIELD_EXECUTIVE_DETAILS: "Could you please provide the field executive's name and contact?",
             ConversationStep.PAYMENT_REASON: "What was the reason for the payment?",
+            ConversationStep.VEHICLE_USER: "Who is currently using the vehicle?",
+            ConversationStep.VEHICLE_STATUS: "What is the status of the vehicle?",
             ConversationStep.PAYMENT_AMOUNT: "What was the actual amount paid?",
         }
         
@@ -556,7 +766,27 @@ class FeedbackFlowManager:
         if is_yes:
             # Customer confirmed, proceed to purpose explanation (Part 1)
             self.call_event.current_step = ConversationStep.PURPOSE_EXPLANATION_PART1
-            response_text = "This is a survey call and we would like to note your feedback regarding the experience with L&T Finance of your personal loan."
+            # Customize purpose text based on product/vehicle
+            product = (self.customer_data.product or "").strip().upper() if self.customer_data else ""
+            vehicle_name = (self.customer_data.asset or "").strip() if self.customer_data else ""
+            if product.startswith("TW") or "TWO WHEELER" in product:
+                # Two Wheeler loan – mention vehicle name if available
+                if vehicle_name:
+                    response_text = (
+                        f"This is a survey call and we would like to note your feedback regarding the experience "
+                        f"with L&T Finance of your {vehicle_name} loan."
+                    )
+                else:
+                    response_text = (
+                        "This is a survey call and we would like to note your feedback regarding the experience "
+                        "with L&T Finance of your two-wheeler loan."
+                    )
+            else:
+                # Default / PL and other products
+                response_text = (
+                    "This is a survey call and we would like to note your feedback regarding the experience "
+                    "with L&T Finance of your personal loan."
+                )
             response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
             if not response_audio:
                 raise Exception("Failed to synthesize audio for purpose explanation")
@@ -773,7 +1003,9 @@ class FeedbackFlowManager:
         intent_result = None
     ) -> Tuple[bytes, str, bool]:
         """Handle payment date question."""
+        print(f"[FlowManager] _handle_payment_date - Text: '{text}'")
         payment_date = extract_date_from_text(text)
+        print(f"[FlowManager] _handle_payment_date - Extracted date: {payment_date}")
         
         # Check if multiple dates mentioned - ask for confirmation
         import re
@@ -802,6 +1034,7 @@ class FeedbackFlowManager:
                 return response_audio, ConversationStep.PAYMENT_DATE, False
         
         if not payment_date:
+            print(f"[FlowManager] _handle_payment_date - No date extracted from text: '{text}'")
             # Ask for confirmation or try again
             if "date_attempts" not in self.responses:
                 self.responses["date_attempts"] = 0
@@ -955,12 +1188,67 @@ class FeedbackFlowManager:
         
         self.responses["payment_reason"] = reason
         
-        # Proceed to amount
+        # Decide next step based on product:
+        # - For Two Wheeler (TW) loans → ask additional vehicle questions
+        # - For PL / others → proceed directly to amount
+        product = (self.customer_data.product or "").strip().upper() if self.customer_data else ""
+        if product.startswith("TW") or "TWO WHEELER" in product:
+            # TW-only follow-up questions
+            self.call_event.current_step = ConversationStep.VEHICLE_USER
+            response_text = (
+                "Who is currently using the vehicle? "
+                "You can say: Customer self, Relative, Customer's friend, Sold to third party, Repossessed, or Vehicle surrendered."
+            )
+            response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+            if not response_audio:
+                raise Exception("Failed to synthesize audio")
+            await self._update_call_event()
+            return response_audio, self.call_event.current_step, False
+        else:
+            # Default path – proceed to amount
+            self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+            response_text = "What was the actual amount paid?"
+            response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+            if not response_audio:
+                raise Exception("Failed to synthesize audio")
+            await self._update_call_event()
+            return response_audio, self.call_event.current_step, False
+
+    async def _handle_vehicle_user(
+        self,
+        text: str,
+        intent_result = None
+    ) -> Tuple[bytes, str, bool]:
+        """Handle TW-only question: who is currently using the vehicle."""
+        # For now, capture free-text response
+        self.responses["vehicle_user"] = text.strip()
+        
+        self.call_event.current_step = ConversationStep.VEHICLE_STATUS
+        response_text = (
+            "What is the status of the vehicle? "
+            "You can say: Repossessed, Surrendered at dealership or L&T Finance branch, "
+            "Accidental case, Currently in use, In police custody, Vehicle stolen, or Currently not in use."
+        )
+        response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
+        if not response_audio:
+            raise Exception("Failed to synthesize audio for vehicle status question")
+        await self._update_call_event()
+        return response_audio, self.call_event.current_step, False
+
+    async def _handle_vehicle_status(
+        self,
+        text: str,
+        intent_result = None
+    ) -> Tuple[bytes, str, bool]:
+        """Handle TW-only question: status of the vehicle."""
+        self.responses["vehicle_status"] = text.strip()
+        
+        # After TW-specific questions, proceed to amount
         self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
         response_text = "What was the actual amount paid?"
         response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
         if not response_audio:
-            raise Exception("Failed to synthesize audio")
+            raise Exception("Failed to synthesize audio for payment amount question")
         await self._update_call_event()
         return response_audio, self.call_event.current_step, False
     
@@ -970,9 +1258,12 @@ class FeedbackFlowManager:
         intent_result = None
     ) -> Tuple[bytes, str, bool]:
         """Handle payment amount question."""
+        print(f"[FlowManager] _handle_payment_amount - Text: '{text}'")
         amount = extract_amount_from_text(text)
+        print(f"[FlowManager] _handle_payment_amount - Extracted amount: {amount}")
         
         if not amount:
+            print(f"[FlowManager] _handle_payment_amount - No amount extracted from text: '{text}'")
             response_text = "I'm sorry, I didn't catch the amount. Could you please tell me the actual amount paid?"
             response_audio, _ = await self.tts_service.synthesize_with_retry(response_text)
             return response_audio, ConversationStep.PAYMENT_AMOUNT, False
@@ -1197,6 +1488,7 @@ class FeedbackFlowManager:
                 if payment_date:
                     self.responses["last_payment_date"] = payment_date
                 else:
+                    print(f"[FlowManager] _handle_payment_date_text - No date extracted after multiple attempts, proceeding")
                     response_text = "I understand. Let me proceed to the next question. By which mode was the payment made? Options are: Online, UPI, NEFT, RTGS in LAN, Online or UPI to Field Executive, Cash, Branch, Outlet, or NACH which is auto debit from account."
                     self.call_event.current_step = ConversationStep.PAYMENT_MODE
                     await self._update_call_event()
@@ -1206,6 +1498,7 @@ class FeedbackFlowManager:
                 return response_text, ConversationStep.PAYMENT_DATE, False
         
         if not payment_date:
+            print(f"[FlowManager] _handle_payment_date_text - No date extracted from text: '{text}'")
             if "date_attempts" not in self.responses:
                 self.responses["date_attempts"] = 0
             
@@ -1308,15 +1601,89 @@ class FeedbackFlowManager:
         await self._update_call_event()
         return response_text, self.call_event.current_step, False
     
+    async def _handle_payment_reason_text(
+        self, 
+        text: str, 
+        intent_result = None
+    ) -> Tuple[str, str, bool]:
+        """Handle payment reason question (text version)."""
+        # For text flow we reuse the same validation as audio path
+        reason = validate_payment_reason(text)
+        if not reason and intent_result and intent_result.is_expected and intent_result.extracted_value:
+            reason = intent_result.extracted_value
+        
+        if not reason:
+            response_text = (
+                "I'm sorry, I didn't understand. What was the reason for the payment? "
+                "Please choose from: EMI, EMI plus charges, Settlement, Foreclosure, Charges, "
+                "Loan cancellation, or Advance EMI."
+            )
+            return response_text, ConversationStep.PAYMENT_REASON, False
+        
+        self.responses["payment_reason"] = reason
+
+        # Decide next step based on product (same logic as audio path)
+        product = (self.customer_data.product or "").strip().upper() if self.customer_data else ""
+        if product.startswith("TW") or "TWO WHEELER" in product:
+            # TW-only follow-up questions
+            self.call_event.current_step = ConversationStep.VEHICLE_USER
+            response_text = (
+                "Who is currently using the vehicle? "
+                "You can reply: Customer self, Relative, Customer's friend, Sold to third party, "
+                "Repossessed, or Vehicle surrendered."
+            )
+            await self._update_call_event()
+            return response_text, self.call_event.current_step, False
+        else:
+            # Default path – proceed to amount
+            self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+            response_text = "What was the actual amount paid?"
+            await self._update_call_event()
+            return response_text, self.call_event.current_step, False
+
+    async def _handle_vehicle_user_text(
+        self,
+        text: str,
+        intent_result = None
+    ) -> Tuple[str, str, bool]:
+        """Handle TW-only question: who is currently using the vehicle (text version)."""
+        self.responses["vehicle_user"] = text.strip()
+        
+        self.call_event.current_step = ConversationStep.VEHICLE_STATUS
+        response_text = (
+            "What is the status of the vehicle? "
+            "You can reply: Repossessed, Surrendered at dealership or L&T Finance branch, "
+            "Accidental case, Currently in use, In police custody, Vehicle stolen, or Currently not in use."
+        )
+        await self._update_call_event()
+        return response_text, self.call_event.current_step, False
+
+    async def _handle_vehicle_status_text(
+        self,
+        text: str,
+        intent_result = None
+    ) -> Tuple[str, str, bool]:
+        """Handle TW-only question: status of the vehicle (text version)."""
+        self.responses["vehicle_status"] = text.strip()
+        
+        # After TW-specific questions, proceed to amount
+        self.call_event.current_step = ConversationStep.PAYMENT_AMOUNT
+        response_text = "What was the actual amount paid?"
+        await self._update_call_event()
+        return response_text, self.call_event.current_step, False
+    
     async def _handle_payment_amount_text(
         self, 
         text: str, 
         intent_result = None
     ) -> Tuple[str, str, bool]:
         """Handle payment amount question (text version)."""
+        print(f"[FlowManager] _handle_payment_amount_text - Text: '{text}'")
         amount = extract_amount_from_text(text)
+        print(f"[FlowManager] _handle_payment_amount_text - Extracted amount: {amount}")
         
         if not amount:
+            print(f"[FlowManager] _handle_payment_amount_text - No amount extracted from text: '{text}'")
             response_text = "I'm sorry, I didn't catch the amount. Could you please tell me the actual amount paid?"
             return response_text, ConversationStep.PAYMENT_AMOUNT, False
         
@@ -1341,9 +1708,29 @@ class FeedbackFlowManager:
     async def _update_call_event(self):
         """Update call event in database."""
         if self.call_event:
+            # Reset retry counter for the new step (if step changed)
+            # This prevents retry counters from carrying over between steps
+            current_step = self.call_event.current_step
+            # Reset retry counter for the current step when updating
+            retry_key = f"{current_step}_retry_count"
+            if retry_key in self.responses:
+                # Only reset if we're moving to a new step (not retrying same step)
+                # We'll reset it when step actually changes
+                pass
+            
+            # Convert date objects to strings for JSON serialization
+            serializable_responses = {}
+            for key, value in self.responses.items():
+                if isinstance(value, date):
+                    serializable_responses[key] = str(value)
+                elif isinstance(value, Decimal):
+                    serializable_responses[key] = float(value)
+                else:
+                    serializable_responses[key] = value
+            
             self.call_event.conversation_state = {
                 "step": self.call_event.current_step,
-                "responses": self.responses,
+                "responses": serializable_responses,
                 "compliance_notes": self.compliance_notes,
             }
             await self.db.commit()
