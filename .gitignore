@@ -42,4 +42,5 @@ Thumbs.db
 *.audio
 opening_*.wav
 response_*.wav
+recordings/
 
