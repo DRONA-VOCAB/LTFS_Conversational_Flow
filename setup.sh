@@ -14,28 +14,73 @@ PYTHON_MINOR=$(echo $PYTHON_VERSION | cut -d. -f2)
 if [ "$PYTHON_MAJOR" -lt 3 ] || ([ "$PYTHON_MAJOR" -eq 3 ] && [ "$PYTHON_MINOR" -lt 11 ]); then
     echo "❌ Python 3.11 or higher is required. Found Python $PYTHON_VERSION"
     echo "Installing Python 3.11..."
+    
+    # Fix any broken packages first
+    echo "🔧 Fixing broken packages..."
+    sudo dpkg --configure -a || true
+    sudo apt-get install -f -y || true
+    
+    # Remove conflicting Python 3.11 packages if they exist (e.g., RC versions)
+    echo "🧹 Cleaning up any conflicting Python 3.11 packages..."
+    sudo apt-get remove --purge -y python3.11* libpython3.11* 2>/dev/null || true
+    sudo apt-get autoremove -y || true
+    
     sudo apt-get install -y software-properties-common
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     sudo apt-get update
-    sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3.11-distutils
-    if [ $? -ne 0 ]; then
+    
+    # Try installing Python 3.11
+    if ! sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3.11-distutils; then
         echo "❌ Failed to install Python 3.11"
+        echo ""
+        echo "💡 Try running these commands manually to fix the issue:"
+        echo "   sudo dpkg --configure -a"
+        echo "   sudo apt-get install -f"
+        echo "   sudo apt-get remove --purge python3.11* libpython3.11*"
+        echo "   sudo apt-get update"
+        echo "   sudo apt-get install -y python3.11 python3.11-venv python3.11-dev python3.11-distutils"
         exit 1
     fi
+    
+    # Verify Python 3.11 is available
+    if ! command -v python3.11 &> /dev/null; then
+        echo "❌ Python 3.11 installation failed - command not found"
+        exit 1
+    fi
+    
     PYTHON_CMD="python3.11"
     NEED_NEW_VENV=true
 elif [ "$PYTHON_MINOR" -gt 12 ]; then
     echo "❌ Python 3.13+ is not supported. Please use Python 3.11 or 3.12"
     echo "Installing Python 3.12..."
+    
+    # Fix any broken packages first
+    echo "🔧 Fixing broken packages..."
+    sudo dpkg --configure -a || true
+    sudo apt-get install -f -y || true
+    
+    # Remove conflicting Python 3.12 packages if they exist
+    echo "🧹 Cleaning up any conflicting Python 3.12 packages..."
+    sudo apt-get remove --purge -y python3.12* libpython3.12* 2>/dev/null || true
+    sudo apt-get autoremove -y || true
+    
     sudo apt-get install -y software-properties-common
     sudo add-apt-repository -y ppa:deadsnakes/ppa
     sudo apt-get update
+    
     # Note: python3.12-distutils doesn't exist (distutils removed in Python 3.12+)
-    sudo apt-get install -y python3.12 python3.12-venv python3.12-dev
-    if [ $? -ne 0 ]; then
+    if ! sudo apt-get install -y python3.12 python3.12-venv python3.12-dev; then
         echo "❌ Failed to install Python 3.12"
+        echo ""
+        echo "💡 Try running these commands manually to fix the issue:"
+        echo "   sudo dpkg --configure -a"
+        echo "   sudo apt-get install -f"
+        echo "   sudo apt-get remove --purge python3.12* libpython3.12*"
+        echo "   sudo apt-get update"
+        echo "   sudo apt-get install -y python3.12 python3.12-venv python3.12-dev"
         exit 1
     fi
+    
     # Verify Python 3.12 is available
     if ! command -v python3.12 &> /dev/null; then
         echo "❌ Python 3.12 installation failed - command not found"
