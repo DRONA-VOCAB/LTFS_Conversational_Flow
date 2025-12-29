@@ -1,9 +1,12 @@
 """TTS (Text-to-Speech) service integration."""
 import httpx
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 import struct
 import time
+import re
+import asyncio
 from app.config import settings
+from app.utils.exceptions import TTSServiceError
 
 
 class TTSService:
@@ -11,37 +14,162 @@ class TTSService:
     
     def __init__(self):
         self.tts_url = settings.tts_url
-        # Increased timeout for large audio files and added retry support
-        self.client = httpx.AsyncClient(timeout=60.0, follow_redirects=True)
+        
+        timeout = httpx.Timeout(
+            connect=10.0,  # Time to establish connection
+            read=30.0,     # Time to read response
+            write=10.0,    # Time to write request
+            pool=5.0       # Time to get connection from pool
+        )
+        self.client = httpx.AsyncClient(timeout=timeout, follow_redirects=True)
     
-    async def synthesize_with_retry(self, text: str, language: str = "en", voice: Optional[str] = None, max_retries: int = 2) -> Tuple[Optional[bytes], float]:
+    def _split_text_into_chunks(self, text: str, max_chunk_length: int = 200) -> List[str]:
+        """
+        Split text into chunks for chunk-wise TTS processing.
+        Tries to split at sentence boundaries first, then falls back to word boundaries.
+        
+        Args:
+            text: Text to split
+            max_chunk_length: Maximum characters per chunk (default: 200)
+        
+        Returns:
+            List of text chunks
+        """
+        if len(text) <= max_chunk_length:
+            return [text]
+        
+        chunks = []
+        # First, try to split by sentences
+        sentences = re.split(r'([.!?]\s+)', text)
+        current_chunk = ""
+        
+        for i in range(0, len(sentences), 2):
+            sentence = sentences[i] + (sentences[i+1] if i+1 < len(sentences) else "")
+            
+            # If single sentence is too long, split by words
+            if len(sentence) > max_chunk_length:
+                # Save current chunk if exists
+                if current_chunk:
+                    chunks.append(current_chunk.strip())
+                    current_chunk = ""
+                
+                # Split long sentence by words
+                words = sentence.split()
+                temp_chunk = ""
+                for word in words:
+                    if len(temp_chunk) + len(word) + 1 <= max_chunk_length:
+                        temp_chunk += (" " + word if temp_chunk else word)
+                    else:
+                        if temp_chunk:
+                            chunks.append(temp_chunk.strip())
+                        temp_chunk = word
+                if temp_chunk:
+                    current_chunk = temp_chunk
+            else:
+                # Check if adding this sentence would exceed limit
+                if len(current_chunk) + len(sentence) <= max_chunk_length:
+                    current_chunk += sentence
+                else:
+                    # Save current chunk and start new one
+                    if current_chunk:
+                        chunks.append(current_chunk.strip())
+                    current_chunk = sentence
+        
+        # Add remaining chunk
+        if current_chunk:
+            chunks.append(current_chunk.strip())
+        
+        return chunks if chunks else [text]
+    
+    async def synthesize_with_retry(self, text: str, language: str = "en", voice: Optional[str] = None, max_retries: int = 2, chunk_wise: bool = True, max_chunk_length: int = 200) -> Tuple[Optional[bytes], float]:
         """
         Synthesize with retry logic for handling connection errors.
+        Supports chunk-wise processing for long texts.
+        
+        Args:
+            text: Text to synthesize
+            language: Language code
+            voice: Voice type
+            max_retries: Maximum retry attempts
+            chunk_wise: If True, split long text into chunks and process separately
+            max_chunk_length: Maximum characters per chunk (only used if chunk_wise=True)
         
         Returns:
             Tuple of (audio_bytes, latency_in_seconds)
         """
         start_time = time.perf_counter()
+        
+        # For short texts, use regular synthesis
+        if not chunk_wise or len(text) <= max_chunk_length:
+            total_latency = 0.0
+            for attempt in range(max_retries + 1):
+                attempt_start = time.perf_counter()
+                audio = await self.synthesize(text, language, voice)
+                attempt_latency = time.perf_counter() - attempt_start
+                total_latency += attempt_latency
+                
+                if audio is not None and len(audio) > 0:
+                    final_latency = time.perf_counter() - start_time
+                    print(f"[TTS] Latency: {final_latency:.3f}s (attempt {attempt + 1}, {attempt_latency:.3f}s)")
+                    return audio, final_latency
+                if attempt < max_retries:
+                    print(f"[TTS] Retry attempt {attempt + 1}/{max_retries} for: {text[:50]}... (latency: {attempt_latency:.3f}s)")
+                    await asyncio.sleep(0.5)  # Brief delay before retry
+            
+            final_latency = time.perf_counter() - start_time
+            print(f"[TTS] Failed to synthesize after {max_retries + 1} attempts (total latency: {final_latency:.3f}s)")
+            return None, final_latency
+        
+        # Chunk-wise processing for long texts
+        print(f"[TTS] Processing text in chunks (length: {len(text)} chars, max_chunk: {max_chunk_length})")
+        chunks = self._split_text_into_chunks(text, max_chunk_length)
+        print(f"[TTS] Split into {len(chunks)} chunks")
+        
+        audio_chunks = []
         total_latency = 0.0
         
-        for attempt in range(max_retries + 1):
-            attempt_start = time.perf_counter()
-            audio = await self.synthesize(text, language, voice)
-            attempt_latency = time.perf_counter() - attempt_start
-            total_latency += attempt_latency
+        for i, chunk in enumerate(chunks):
+            print(f"[TTS] Processing chunk {i+1}/{len(chunks)}: '{chunk[:50]}...'")
+            chunk_start = time.perf_counter()
             
-            if audio is not None and len(audio) > 0:
-                final_latency = time.perf_counter() - start_time
-                print(f"[TTS] Latency: {final_latency:.3f}s (attempt {attempt + 1}, {attempt_latency:.3f}s)")
-                return audio, final_latency
-            if attempt < max_retries:
-                print(f"[TTS] Retry attempt {attempt + 1}/{max_retries} for: {text[:50]}... (latency: {attempt_latency:.3f}s)")
-                import asyncio
-                await asyncio.sleep(0.5)  # Brief delay before retry
+            # Synthesize each chunk with retry
+            chunk_audio = None
+            for attempt in range(max_retries + 1):
+                attempt_start = time.perf_counter()
+                chunk_audio = await self.synthesize(chunk, language, voice)
+                attempt_latency = time.perf_counter() - attempt_start
+                
+                if chunk_audio is not None and len(chunk_audio) > 0:
+                    break
+                if attempt < max_retries:
+                    print(f"[TTS] Retry chunk {i+1} attempt {attempt + 1}/{max_retries}")
+                    await asyncio.sleep(0.3)  # Shorter delay for chunks
+            
+            if chunk_audio is None or len(chunk_audio) == 0:
+                print(f"[TTS] Failed to synthesize chunk {i+1}, skipping...")
+                continue
+            
+            audio_chunks.append(chunk_audio)
+            chunk_latency = time.perf_counter() - chunk_start
+            total_latency += chunk_latency
+            print(f"[TTS] Chunk {i+1} synthesized: {len(chunk_audio)} bytes, latency: {chunk_latency:.3f}s")
+            
+            # Small delay between chunks to avoid overwhelming the service
+            if i < len(chunks) - 1:
+                await asyncio.sleep(0.1)
+        
+        if not audio_chunks:
+            final_latency = time.perf_counter() - start_time
+            print(f"[TTS] Failed to synthesize any chunks (total latency: {final_latency:.3f}s)")
+            return None, final_latency
+        
+        # Concatenate audio chunks
+        print(f"[TTS] Concatenating {len(audio_chunks)} audio chunks...")
+        combined_audio = self._concatenate_audio_chunks(audio_chunks)
         
         final_latency = time.perf_counter() - start_time
-        print(f"[TTS] Failed to synthesize after {max_retries + 1} attempts (total latency: {final_latency:.3f}s)")
-        return None, final_latency
+        print(f"[TTS] Chunk-wise synthesis complete: {len(combined_audio)} bytes, total latency: {final_latency:.3f}s")
+        return combined_audio, final_latency
     
     async def synthesize(self, text: str, language: str = "en", voice: Optional[str] = None) -> Optional[bytes]:
         """
@@ -195,13 +323,19 @@ class TTSService:
                 print(f"[TTS] Error: {response.status_code} - {response.text} (latency: {latency:.3f}s)")
                 return None
                 
+        except httpx.ConnectTimeout as e:
+            latency = time.perf_counter() - start_time
+            print(f"[TTS] Error: Connection timeout - TTS service at {self.tts_url} is unreachable or took too long to connect (latency: {latency:.3f}s)")
+            print(f"[TTS] Connection timeout details: {str(e)}")
+            return None
         except httpx.ReadTimeout:
             latency = time.perf_counter() - start_time
-            print(f"[TTS] Error: Request timeout - TTS service took too long to respond (latency: {latency:.3f}s)")
+            print(f"[TTS] Error: Read timeout - TTS service took too long to respond (latency: {latency:.3f}s)")
             return None
         except httpx.ConnectError as e:
             latency = time.perf_counter() - start_time
-            print(f"[TTS] Error: Connection error - {str(e)} (latency: {latency:.3f}s)")
+            print(f"[TTS] Error: Connection error - TTS service at {self.tts_url} is unreachable (latency: {latency:.3f}s)")
+            print(f"[TTS] Connection error details: {str(e)}")
             return None
         except httpx.ReadError as e:
             latency = time.perf_counter() - start_time
@@ -295,6 +429,68 @@ class TTSService:
         header += struct.pack('<I', data_chunk_size)  # Data size
         
         return header
+    
+    def _concatenate_audio_chunks(self, audio_chunks: List[bytes]) -> bytes:
+        """
+        Concatenate multiple WAV audio chunks into a single WAV file.
+        
+        Args:
+            audio_chunks: List of audio byte chunks (should be WAV format)
+        
+        Returns:
+            Combined audio bytes as WAV format
+        """
+        if not audio_chunks:
+            return b''
+        
+        if len(audio_chunks) == 1:
+            return audio_chunks[0]
+        
+        # Extract PCM data from each chunk and combine
+        combined_pcm_data = b''
+        sample_rate = 24000  # Default, will be updated from first chunk
+        channels = 1
+        bits_per_sample = 16
+        
+        for chunk in audio_chunks:
+            if len(chunk) < 44:  # WAV header is at least 44 bytes
+                # Assume raw PCM, use as-is
+                combined_pcm_data += chunk
+                continue
+            
+            # Check if it's a WAV file
+            if chunk[:4] == b'RIFF' and chunk[8:12] == b'WAVE':
+                # Parse WAV header to get format info
+                fmt_chunk_offset = 12
+                # Find 'fmt ' chunk
+                i = fmt_chunk_offset
+                while i < len(chunk) - 8:
+                    if chunk[i:i+4] == b'fmt ':
+                        fmt_size = struct.unpack('<I', chunk[i+4:i+8])[0]
+                        audio_format = struct.unpack('<H', chunk[i+8:i+10])[0]
+                        channels = struct.unpack('<H', chunk[i+10:i+12])[0]
+                        sample_rate = struct.unpack('<I', chunk[i+12:i+16])[0]
+                        bits_per_sample = struct.unpack('<H', chunk[i+22:i+24])[0]
+                        break
+                    i += 1
+                
+                # Find 'data' chunk
+                i = fmt_chunk_offset
+                while i < len(chunk) - 8:
+                    if chunk[i:i+4] == b'data':
+                        data_size = struct.unpack('<I', chunk[i+4:i+8])[0]
+                        data_start = i + 8
+                        pcm_data = chunk[data_start:data_start + data_size]
+                        combined_pcm_data += pcm_data
+                        break
+                    i += 1
+            else:
+                # Not a WAV file, assume raw PCM
+                combined_pcm_data += chunk
+        
+        # Create new WAV header for combined audio
+        wav_header = self._create_wav_header(len(combined_pcm_data), sample_rate, channels, bits_per_sample)
+        return wav_header + combined_pcm_data
     
     async def close(self):
         """Close HTTP client."""
