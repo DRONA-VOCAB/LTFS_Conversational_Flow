@@ -52,13 +52,52 @@ function hideAllButtons() {
     if (recordingControls) recordingControls.style.display = 'none';
 }
 
+// Check if HTTPS is required for microphone access
+function checkHTTPSRequirement() {
+    const isLocalhost = window.location.hostname === 'localhost' || 
+                       window.location.hostname === '127.0.0.1' ||
+                       window.location.hostname === '[::1]';
+    const isHTTPS = window.location.protocol === 'https:';
+    
+    if (!isHTTPS && !isLocalhost) {
+        const warningDiv = document.createElement('div');
+        warningDiv.id = 'https-warning';
+        warningDiv.style.cssText = `
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            background: #ff6b6b;
+            color: white;
+            padding: 15px;
+            text-align: center;
+            z-index: 10000;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+        `;
+        warningDiv.innerHTML = `
+            <strong>⚠️ HTTPS Required:</strong> Microphone access requires HTTPS or localhost. 
+            Current URL: <code>${window.location.protocol}//${window.location.host}</code>
+            <br>
+            <small>Please access via HTTPS or use localhost. Microphone features will not work over HTTP.</small>
+        `;
+        document.body.insertBefore(warningDiv, document.body.firstChild);
+        console.warn('HTTPS required for microphone access. Current protocol:', window.location.protocol);
+        return false;
+    }
+    return true;
+}
+
 // Initialize
 document.addEventListener('DOMContentLoaded', () => {
+    // Check HTTPS requirement
+    checkHTTPSRequirement();
+    
     // Hide all manual buttons immediately
     hideAllButtons();
     
     initiateBtn.addEventListener('click', initiateCall);
     document.getElementById('load-customers-btn').addEventListener('click', loadCustomers);
+    document.getElementById('end-call-btn').addEventListener('click', endCall);
     // Removed manual button listeners - fully automatic mode
     playBotAudioBtn.addEventListener('click', () => {
         if (botAudio.src) {
@@ -140,6 +179,54 @@ function selectCustomer(agreementNo, customerName) {
 }
 
 // Initiate Call
+async function endCall() {
+    if (!callId) {
+        showError('No active call to end');
+        return;
+    }
+    
+    if (!confirm('Are you sure you want to end this call?')) {
+        return;
+    }
+    
+    try {
+        showStatus(recordingStatus, 'Ending call...', 'info');
+        
+        const response = await fetch(`${API_BASE}/call/${callId}/end`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        if (!response.ok) {
+            const error = await response.json();
+            throw new Error(error.detail || 'Failed to end call');
+        }
+        
+        const data = await response.json();
+        
+        // Stop recording if active
+        if (isRecording) {
+            stopRecording();
+        }
+        
+        // Update UI
+        document.getElementById('call-status').textContent = 'Ended';
+        document.getElementById('end-call-btn').style.display = 'none';
+        
+        // Show feedback
+        await fetchFeedback();
+        
+        showStatus(recordingStatus, 'Call ended successfully', 'success');
+        addLogEntry('system', 'Call ended by user');
+        
+    } catch (error) {
+        console.error('Error ending call:', error);
+        showError('Failed to end call: ' + error.message);
+    }
+}
+
 async function initiateCall() {
     const agreementNo = agreementNoInput.value.trim();
     
@@ -258,6 +345,9 @@ async function initiateCall() {
         // Ensure audio element is visible
         botAudio.style.display = 'block';
         
+        // Show end call button
+        document.getElementById('end-call-btn').style.display = 'inline-block';
+        
         // Show conversation section
         conversationSection.style.display = 'block';
         initiateStatus.innerHTML = '';
@@ -341,6 +431,25 @@ async function startRecording() {
             }
             isBotSpeaking = false;
             isWaitingForBotAudio = false;
+        }
+
+        // Check HTTPS requirement first
+        const isLocalhost = window.location.hostname === 'localhost' || 
+                           window.location.hostname === '127.0.0.1' ||
+                           window.location.hostname === '[::1]';
+        const isHTTPS = window.location.protocol === 'https:';
+        
+        if (!isHTTPS && !isLocalhost) {
+            const errorMsg = '❌ HTTPS Required: Microphone access requires HTTPS or localhost.\n\n' +
+                'Current URL: ' + window.location.protocol + '//' + window.location.host + '\n\n' +
+                'Solutions:\n' +
+                '1. Use HTTPS: Access via https://' + window.location.host + '\n' +
+                '2. Use localhost: Access via http://localhost:8000\n' +
+                '3. Set up SSL certificate (Let\'s Encrypt) for production';
+            showError(errorMsg);
+            recordingStatus.textContent = '❌ HTTPS required for microphone';
+            addLogEntry('system', 'Microphone blocked: HTTPS required (current: ' + window.location.protocol + ')');
+            return;
         }
 
         // Check permissions first

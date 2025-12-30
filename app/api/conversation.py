@@ -354,6 +354,49 @@ async def list_customers(
     }
 
 
+@router.post("/call/{call_id}/end")
+async def end_call(call_id: str, db: AsyncSession = Depends(get_db)):
+    """
+    Manually end a call.
+    
+    This endpoint allows ending a call before it naturally completes.
+    """
+    try:
+        from app.services.feedback_flow_manager import FeedbackFlowManager
+        from app.services.outbound_call_service import OutboundCallService
+        
+        call_service = OutboundCallService(db)
+        flow_manager = FeedbackFlowManager(db)
+        
+        # Load call event
+        stmt = select(CallEvent).where(CallEvent.call_id == call_id)
+        result = await db.execute(stmt)
+        call_event = result.scalar_one_or_none()
+        
+        if not call_event:
+            raise HTTPException(status_code=404, detail="Call not found")
+        
+        if call_event.status == CallStatus.COMPLETED:
+            raise HTTPException(status_code=400, detail="Call is already completed")
+        
+        # End the call
+        flow_manager.call_event = call_event
+        await flow_manager._end_call()
+        
+        # Finalize recording
+        await conversation_recorder.finalize_recording(call_id)
+        
+        return {
+            "call_id": call_id,
+            "status": "ended",
+            "message": "Call ended successfully"
+        }
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to end call: {str(e)}")
+
+
 @router.get("/call/{call_id}/recording")
 async def get_call_recording(call_id: str):
     """
@@ -372,7 +415,7 @@ async def get_call_recording(call_id: str):
     return FileResponse(
         path=recording_path,
         media_type="audio/wav",
-        filename=f"{call_id}_recording.wav"
+        filename=f"{call_id}_combined_recording.wav"
     )
 
 
