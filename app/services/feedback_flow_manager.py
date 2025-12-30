@@ -234,7 +234,7 @@ class FeedbackFlowManager:
                 )
                 result = await self.db.execute(stmt)
                 self.customer_data = result.scalar_one_or_none()
-
+        
             # Restore previous conversation state (responses, compliance notes)
             # so that feedback can be saved correctly when the call ends.
             if self.call_event.conversation_state:
@@ -259,6 +259,22 @@ class FeedbackFlowManager:
             return response_text, self.call_event.current_step, False
         
         current_step = self.call_event.current_step
+        
+        # Check for "thank you" or ending phrases - if all responses collected, end call
+        thank_you_phrases = ["thank you", "thanks", "thankyou", "thank u", "thanks a lot", "thank you so much"]
+        text_lower = text.lower()
+        if any(phrase in text_lower for phrase in thank_you_phrases):
+            # Check if we have all required responses
+            has_all_responses = (
+                self.responses.get("took_loan") is not None and
+                self.responses.get("made_payment_last_month") is not None and
+                (self.responses.get("actual_amount_paid") is not None or 
+                 current_step == ConversationStep.PAYMENT_AMOUNT or
+                 current_step == ConversationStep.CALL_CLOSING)
+            )
+            if has_all_responses:
+                print(f"[FlowManager] User said 'thank you' after all responses collected (text flow), ending call")
+                return await self._handle_call_closing_text()
         
         # Special handling for PAYMENT_DATE - check for date BEFORE intent checking
         if current_step == ConversationStep.PAYMENT_DATE:
@@ -368,7 +384,7 @@ class FeedbackFlowManager:
                     await self._update_call_event()
                     return response_text, self.call_event.current_step, False
                 elif current_step == ConversationStep.PAYMENT_AMOUNT:
-                    return await self._handle_call_closing_text()
+                    return await self._handle_payment_amount_text(text, intent_result)
                 else:
                     return await self._handle_call_closing_text()
             # Special handling for CALL_OPENING - try harder to detect yes/no
@@ -494,6 +510,22 @@ class FeedbackFlowManager:
         
         text = text.strip()
         current_step = self.call_event.current_step
+        
+        # Check for "thank you" or ending phrases - if all responses collected, end call
+        thank_you_phrases = ["thank you", "thanks", "thankyou", "thank u", "thanks a lot", "thank you so much"]
+        text_lower = text.lower()
+        if any(phrase in text_lower for phrase in thank_you_phrases):
+            # Check if we have all required responses
+            has_all_responses = (
+                self.responses.get("took_loan") is not None and
+                self.responses.get("made_payment_last_month") is not None and
+                (self.responses.get("actual_amount_paid") is not None or 
+                 current_step == ConversationStep.PAYMENT_AMOUNT or
+                 current_step == ConversationStep.CALL_CLOSING)
+            )
+            if has_all_responses:
+                print(f"[FlowManager] User said 'thank you' after all responses collected, ending call")
+                return await self._handle_call_closing()
         
         # Special handling for PAYMENT_DATE - check for date BEFORE intent checking
         if current_step == ConversationStep.PAYMENT_DATE:
@@ -706,7 +738,7 @@ class FeedbackFlowManager:
         elif current_step == ConversationStep.VEHICLE_STATUS:
             return await self._handle_vehicle_status(text, intent_result)
         elif current_step == ConversationStep.PAYMENT_AMOUNT:
-            return await self._handle_call_closing()
+            return await self._handle_payment_amount(text, intent_result)
         else:
             return await self._handle_call_closing()
     
@@ -854,10 +886,12 @@ class FeedbackFlowManager:
         intent_result = None
     ) -> Tuple[bytes, str, bool]:
         """Handle loan confirmation question."""
-        # Use intent result if available
-        if intent_result and intent_result.is_expected and intent_result.extracted_value is not None:
+        # Use intent result if available (check extracted_value even if is_expected is False)
+        if intent_result and intent_result.extracted_value is not None:
+            # extracted_value is a boolean (True for yes, False for no)
             is_yes = intent_result.extracted_value
         else:
+            # Fallback to validation if intent_result doesn't have extracted_value
             is_yes = validate_yes_no_response(text)
             if is_yes is None:
                 llm_result = await self.llm_service.classify_intent(text, ["yes", "no"], "yes_no")
@@ -1366,9 +1400,12 @@ class FeedbackFlowManager:
         intent_result = None
     ) -> Tuple[str, str, bool]:
         """Handle loan confirmation question (text version)."""
-        if intent_result and intent_result.is_expected and intent_result.extracted_value is not None:
+        # Use intent result if available (check extracted_value even if is_expected is False)
+        if intent_result and intent_result.extracted_value is not None:
+            # extracted_value is a boolean (True for yes, False for no)
             is_yes = intent_result.extracted_value
         else:
+            # Fallback to validation if intent_result doesn't have extracted_value
             is_yes = validate_yes_no_response(text)
             if is_yes is None:
                 llm_result = await self.llm_service.classify_intent(text, ["yes", "no"], "yes_no")
