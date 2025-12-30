@@ -1,26 +1,20 @@
 #!/bin/bash
-set -e
 
-echo "Starting minimal deploy..."
+# Deploy script for L&T Finance Feedback Survey System
 
-# Use python3 (assumes 3.11/3.12 is already available)
-PYTHON_CMD="python3"
-
-# Create/refresh venv
-if [ -d "venv" ]; then
-  echo "Removing existing venv..."
-  rm -rf venv
+# Check if virtual environment exists
+if [ ! -d "venv" ]; then
+    echo "❌ Virtual environment not found. Please run ./setup.sh first"
+    exit 1
 fi
-echo "Creating venv..."
-$PYTHON_CMD -m venv venv
+
+# Activate virtual environment and run uvicorn using venv's Python
 source venv/bin/activate
 
-echo "Upgrading pip..."
-pip install --upgrade pip
+# Use the venv's Python directly to ensure correct interpreter
+echo "🚀 Starting L&T Finance Feedback Survey API..."
+echo "📍 Using Python: $(which python3)"
+echo ""
 
-echo "Installing requirements..."
-pip install -r requirements.txt
-
-echo "Done. Run the app with:"
-echo "source venv/bin/activate && uvicorn app.main:app --host 0.0.0.0 --port 8000"
-
+# Run uvicorn using venv's Python
+venv/bin/python3 -m uvicorn app.main:app --host 0.0.0.0 --port 8000 --reload
