@@ -1,45 +1,91 @@
-# Feedback Call System
+# L&T Finance Voice Feedback System
 
-This project implements an automated feedback calling system that collects customer responses through an intelligent voice flow. It handles outbound call initiation, dynamic question logic, response validation, and structured data capture.It ensures consistent customer interactions while reducing manual effort.
+A voice-to-voice feedback call system for L&T Finance customer feedback collection.
 
-# Core Components
+## Features
 
-- Voice Platform – call initiation, IVR/telephony
-- ASR (Speech-to-Text) – converts audio to text
-- Hybrid AI Brain – intent classifier + LLM for natural responses
-- Orchestration Engine – manages the full feedback workflow
-- Business Logic Layer – validation, summary creation, correction handling
-- Data Layer – Excel/DB updates with full or partial feedback
-- TTS (Text-to-Speech) – responds in customer's detected language
+- Voice-to-voice conversation in Hindi
+- 9 predefined feedback questions
+- Real-time speech-to-text and text-to-speech
+- Intelligent response tracking using Gemini AI
+- Graceful exit handling
+- Customer data management
+- React web interface
 
-# Folder Structure
+## Setup
+
+### Backend Setup
+
+1. Install Python dependencies:
+```bash
+pip install -r requirements.txt
+```
+
+2. Set up environment variables (create `.env` file in root directory):
+```
+GEMINI_API_KEY=your_gemini_api_key
+ASR_API_URL=http://27.111.72.52:5073/transcribe
+LOCAL_TTS_URL=http://27.111.72.52:5057/synthesize
+DATABASE_URL=your_database_url
+```
+
+3. Run the backend:
+```bash
+cd backend
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload
+```
+
+Or use the Python run script:
+```bash
+python run_backend.py
+```
+
+Or use the shell script:
+```bash
+chmod +x run_backend.sh
+./run_backend.sh
+```
+
+### Frontend Setup
+
+1. Install dependencies:
+```bash
+cd frontend
+npm install
+```
+
+2. Start the development server:
+```bash
+npm start
+```
+
+## API Endpoints
+
+- `GET /api/customers` - Get list of customers
+- `GET /api/customers/{customer_id}` - Get customer details
+- `POST /api/call/start/{customer_id}` - Start a call session
+- `GET /api/call/{session_id}/summary` - Get call summary
+- `WS /ws/call/{session_id}` - WebSocket for voice conversation
+
+## Project Structure
 
 ```
-project-root/
-├── app/
-│   ├── __init__.py
-│   ├── main.py
+LnT/
+├── backend/
 │   ├── config.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── conversation.py
-│   ├── schema/
-│   │   ├── __init__.py
-│   │   ├── feedback_request.py
-│   │   ├── feedback_response.py
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── outbound_call_service.py
-│   │   ├── feedback_flow_manager.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── validators.py
-│   │   ├── formatter.py
+│   ├── database.py
+│   ├── main.py
 │   ├── models/
-│   │   ├── __init__.py
-│   │   ├── call_event.py
-│   │   ├── feedback_responses.py
-│
-├── requirements.txt
-└── README.md
+│   │   └── conversation.py
+│   └── services/
+│       ├── asr_service.py
+│       ├── tts_service.py
+│       ├── gemini_service.py
+│       └── conversation_manager.py
+├── frontend/
+│   ├── src/
+│   ├── public/
+│   └── package.json
+└── requirements.txt
 ```
+
