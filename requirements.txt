@@ -10,4 +10,8 @@ httpx==0.25.2
 websockets==12.0
 aiohttp==3.9.1
 python-multipart==0.0.6
+torch>=2.0.0
+silero-vad>=4.0.0
+numpy>=1.24.0
+pydub>=0.25.1
 
