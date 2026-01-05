@@ -1,8 +1,7 @@
-"""ASR Queue for processing audio transcriptions"""
 import asyncio
-from typing import Tuple, Optional
-from collections import deque
 
-# Queue: (websocket, audio_bytes, utterance_id)
-asr_queue: asyncio.Queue = asyncio.Queue()
-
+# This queue holds incoming audio chunks from the client's microphone.
+# Each item in the queue is a tuple: (websocket, audio_data)
+# - websocket: The WebSocket connection object for the client.
+# - audio_data: The binary audio chunk.
+asr_queue = asyncio.Queue()

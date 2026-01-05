@@ -23,6 +23,7 @@ from services.summary_service import (
     generate_human_summary,
     get_closing_statement,
     is_survey_completed,
+    transliterate_to_devanagari,
 )
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
@@ -45,9 +46,13 @@ async def create_session_endpoint(request: CreateSessionRequest):
         # Generate unique session ID
         session_id = f"session_{uuid.uuid4().hex[:8]}_{int(datetime.now().timestamp())}"
 
-        # Create session
-        customer_name = request.customer_name.strip() or "Customer"
-        session = create_session(session_id, customer_name)
+        # Create session with transliterated customer name
+        customer_name_english = request.customer_name.strip() or "Customer"
+        customer_name_hindi = transliterate_to_devanagari(customer_name_english)
+        
+        # Use Hindi name for TTS, store both
+        session = create_session(session_id, customer_name_hindi)
+        session["customer_name_english"] = customer_name_english  # Store original
         save_session(session)
 
         # Get first question
@@ -56,7 +61,7 @@ async def create_session_endpoint(request: CreateSessionRequest):
 
         return CreateSessionResponse(
             session_id=session_id,
-            customer_name=customer_name,
+            customer_name=customer_name_english,  # Return English for frontend display
             question=question_text,
             status="ACTIVE",
         )

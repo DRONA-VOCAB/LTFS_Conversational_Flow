@@ -1,7 +1,8 @@
 def create_session(session_id, customer_name):
     return {
         "session_id": session_id,
-        "customer_name": customer_name,
+        "customer_name": customer_name,  # Devanagari name for TTS
+        "customer_name_english": None,   # Original English name (set in routes)
         "identify_confirmation": None,
         "availability": None,
         "user_contact": None,
@@ -19,4 +20,7 @@ def create_session(session_id, customer_name):
         "current_question": 0,
         "retry_count": 0,
         "call_should_end": False,
+        "phase": "questions",  # Tracks flow: questions -> summary -> confirmation -> closing
+        "generated_summary": None,
+        "summary_confirmed": False,
     }

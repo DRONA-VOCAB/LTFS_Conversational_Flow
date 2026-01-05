@@ -1,98 +1,124 @@
-"""ASR Service using API"""
-
-import os
 import io
-import traceback
 import logging
-import httpx
-from typing import Dict, Any, Optional
-from config.settings import ASR_API_URL
+import wave
 
+import aiohttp
+
+from config.settings import ASR_API_URL
+from queues.asr_queue import asr_queue
+from queues.llm_queue import llm_queue
+from utils.latency_tracker import record_event
+
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
-# Allowed dominant languages
-ALLOWED_LANGUAGES = ["hi", "en"]
+# --- Audio Parameters (match your ASR / WebRTC settings) ---
+SAMPLE_RATE = 16000
+CHANNELS = 1
+SAMPLE_WIDTH = 2  # 16-bit PCM = 2 bytes per sample
 
 
-# ---------------------------------------------------------
-# Helper: Detect Hinglish (code-mix)
-# ---------------------------------------------------------
-def detect_code_mix(text: str) -> bool:
-    has_hi = any("\u0900" <= c <= "\u097f" for c in text)
-    has_en = any("a" <= c.lower() <= "z" for c in text)
-    return has_hi and has_en
-
-
-# ---------------------------------------------------------
-# ASR Processing
-# ---------------------------------------------------------
-async def transcribe_audio(
-    audio_bytes: bytes, save_dir: str = "output_audios"
-) -> Dict[str, Any]:
+def pcm16_to_wav(pcm_bytes, sample_rate=SAMPLE_RATE, channels=CHANNELS):
     """
-    Transcribe audio bytes using ASR API
-
-    Args:
-        audio_bytes: Raw audio bytes (WAV format expected)
-        save_dir: Directory to save audio files for debugging (not used for API)
-
-    Returns:
-        Dictionary with transcription results
+    Convert raw 16-bit PCM audio bytes into a valid WAV file (in-memory).
     """
-    try:
-        logger.info(
-            f"🎤 ASR: Starting transcription, audio size: {len(audio_bytes)} bytes"
-        )
-        logger.info(f"🎤 ASR: API URL: {ASR_API_URL}/transcribe")
+    with io.BytesIO() as wav_buffer:
+        with wave.open(wav_buffer, "wb") as wf:
+            wf.setnchannels(channels)
+            wf.setsampwidth(SAMPLE_WIDTH)
+            wf.setframerate(sample_rate)
+            wf.writeframes(pcm_bytes)
+        return wav_buffer.getvalue()
 
-        # Prepare file for multipart/form-data
-        files = {"file": ("audio.wav", io.BytesIO(audio_bytes), "audio/wav")}
 
-        # Make API call to ASR service
-        logger.info(f"📤 ASR: Sending POST request to {ASR_API_URL}/transcribe")
-        logger.info(
-            f"📤 ASR: Payload: multipart/form-data with audio.wav ({len(audio_bytes)} bytes)"
-        )
-        async with httpx.AsyncClient(timeout=30.0) as client:
-            response = await client.post(f"{ASR_API_URL}/transcribe", files=files)
-            logger.info(f"📥 ASR: Response status: {response.status_code}")
-            response.raise_for_status()
-            result = response.json()
-            logger.info(f"📥 ASR: Response received: {result}")
+async def transcribe_audio(audio_bytes: bytes) -> dict:
+    """
+    Transcribe audio bytes using ASR API.
+    Returns dict with transcription and optional language info.
+    """
+    async with aiohttp.ClientSession() as session:
+        # Convert PCM16 raw data → valid WAV
+        wav_data = pcm16_to_wav(audio_bytes)
 
-        # Extract transcription and metadata
-        transcription = result.get("transcription", "").strip()
-        detected_lang = result.get("detected_language", "en")
-        detected_conf = result.get("language_confidence", 0.0)
-        forced_lang = result.get("forced_language", detected_lang)
-        is_code_mixed = result.get("is_code_mixed", False)
-        segments = result.get("segments", [])
-
-        logger.info(f"✅ ASR: Transcription: '{transcription}'")
-        logger.info(
-            f"✅ ASR: Detected language: {detected_lang}, Confidence: {detected_conf:.2f}"
-        )
-        logger.info(
-            f"✅ ASR: Forced language: {forced_lang}, Code-mixed: {is_code_mixed}"
+        # Prepare payload (sending raw bytes as file)
+        form_data = aiohttp.FormData()
+        form_data.add_field(
+            "file", wav_data, filename="audio.wav", content_type="audio/wav"
         )
 
-        # Return in same format as before
-        return {
-            "detected_language": detected_lang,
-            "language_confidence": detected_conf,
-            "forced_language": forced_lang,
-            "is_code_mixed": is_code_mixed,
-            "transcription": transcription,
-            "segments": segments,
-        }
-    except httpx.HTTPError as e:
-        logger.error(f"❌ ASR: HTTP Error: {e}")
-        logger.error(f"❌ ASR: Request URL: {ASR_API_URL}/transcribe")
-        if hasattr(e, "response") and e.response:
-            logger.error(f"❌ ASR: Response status: {e.response.status_code}")
-            logger.error(f"❌ ASR: Response text: {e.response.text[:500]}")
-        return {"error": f"ASR API error: {str(e)}", "transcription": ""}
-    except Exception as e:
-        logger.error(f"❌ ASR: Error: {e}")
-        traceback.print_exc()
-        return {"error": str(e), "transcription": ""}
+        # Call the ASR API
+        async with session.post(ASR_API_URL, data=form_data) as response:
+            if response.status == 200:
+                result = await response.json()
+                transcription = result.get("transcription", "").strip()
+                return {
+                    "transcription": transcription,
+                    "detected_language": result.get("detected_language"),
+                    "language_confidence": result.get("language_confidence"),
+                }
+            else:
+                error_text = await response.text()
+                logger.error(
+                    f"ASR API request failed with status {response.status}: {error_text}"
+                )
+                return {"transcription": ""}
+
+
+async def asr_service_consumer():
+    """
+    This consumer pulls audio data (file paths or bytes) from the asr_queue,
+    sends it to the ASR REST API, and puts the transcribed text into the llm_queue.
+    """
+    logger.info("ASR service consumer started.")
+    async with aiohttp.ClientSession() as session:
+        while True:
+            try:
+                # Get the next audio item
+                websocket, audio_bytes, utterance_id = await asr_queue.get()
+                logger.info(f"ASR received {len(audio_bytes)} bytes of audio data.")
+
+                # Convert PCM16 raw data → valid WAV
+                wav_data = pcm16_to_wav(audio_bytes)
+                logger.info(
+                    f"Converted {len(audio_bytes)} bytes PCM → {len(wav_data)} bytes WAV"
+                )
+
+                # --- Prepare payload (sending raw bytes as file) ---
+                form_data = aiohttp.FormData()
+                form_data.add_field(
+                    "file", wav_data, filename="audio.wav", content_type="audio/wav"
+                )
+
+                # --- Call the ASR API ---
+                async with session.post(ASR_API_URL, data=form_data) as response:
+                    if response.status == 200:
+                        result = await response.json()
+                        # transcription = result.get("text", "").strip()
+                        transcription = result.get("transcription", "").strip()
+                        logger.info(f"ASR transcription: {transcription}")
+
+                        if transcription:
+                            record_event(utterance_id, "ASR_FINISHED")
+                            # Push to LLM queue for next step
+                            await llm_queue.put(
+                                (websocket, transcription, utterance_id)
+                            )
+                            await websocket.send_json(
+                                {"event": "asr_final", "text": transcription}
+                            )
+                        else:
+                            logger.warning("ASR returned empty transcription.")
+                    else:
+                        error_text = await response.text()
+                        logger.error(
+                            f"ASR API request failed with status {response.status}: {error_text}"
+                        )
+
+            except Exception as e:
+                logger.error(
+                    f"Error in ASR service consumer ({e.__class__.__name__}): {e}"
+                )
+
+            # Mark the queue task as done
+            asr_queue.task_done()

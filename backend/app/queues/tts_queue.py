@@ -1,7 +1,7 @@
-"""TTS Queue for processing text-to-speech requests"""
 import asyncio
-from typing import Tuple, Optional
 
-# Queue: (websocket, text, language, utterance_id)
-tts_queue: asyncio.Queue = asyncio.Queue()
-
+# This queue holds the generated text responses from the LLM service.
+# Each item in the queue is a tuple: (websocket, text)
+# - websocket: The WebSocket connection object for the client.
+# - text: The string of text to be converted to speech.
+tts_queue = asyncio.Queue()

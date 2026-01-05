@@ -8,3 +8,5 @@ torch
 torchaudio
 packaging
 psycopg2-binary
+aiohttp==3.8.4
+numpy

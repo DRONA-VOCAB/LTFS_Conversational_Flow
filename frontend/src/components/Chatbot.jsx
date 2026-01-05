@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react'
 import { createSession, submitAnswer, getSummary, confirmSummary, getCustomers } from '../services/api'
+import { useVoiceWebSocket } from '../hooks/useVoiceWebSocket'
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
@@ -21,6 +22,19 @@ const Chatbot = () => {
   const [confirmationRetries, setConfirmationRetries] = useState(0)
   const messagesEndRef = useRef(null)
   const inputRef = useRef(null)
+
+  // Voice WebSocket hook for outbound calls
+  const {
+    isConnected,
+    connectionStatus,
+    isStreaming,
+    isPlayingTTS,
+    currentTranscript,
+    transcripts,
+    connect,
+    disconnect,
+    clearTranscripts,
+  } = useVoiceWebSocket()
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
@@ -64,21 +78,30 @@ const Chatbot = () => {
   }
 
   const handleCustomerSelect = async (customer) => {
+    console.log("📞 Customer selected:", customer)
     setSelectedCustomer(customer)
     setCustomerName(customer.customer_name)
-    
-    // Trigger the call immediately with selected customer
+
+    // Trigger the outbound call with selected customer
     setIsLoading(true)
     try {
+      // Create session via API
+      console.log("📝 Creating session for:", customer.customer_name)
       const response = await createSession(customer.customer_name)
+      console.log("✅ Session created:", response.session_id)
       setSessionId(response.session_id)
+
+      // Connect WebSocket and start voice call
+      console.log("🔗 Connecting WebSocket with session:", response.session_id)
+      await connect("traditional", response.session_id, customer.customer_name)
+      console.log("✅ Connect call completed")
+
       setSurveyState('survey')
-      addMessage('user', `Selected customer: ${customer.customer_name}`)
-      if (response.question) {
-        addMessage('bot', response.question)
-      }
+      addMessage('user', `Calling: ${customer.customer_name}`)
+      // Connection status will be updated via useVoiceWebSocket hook
     } catch (error) {
-      addMessage('bot', `Error starting survey: ${error.message}`)
+      console.error("❌ Error in handleCustomerSelect:", error)
+      addMessage('bot', `Error starting call: ${error.message}`)
       setSelectedCustomer(null)
       setCustomerName('')
     } finally {
@@ -187,12 +210,12 @@ const Chatbot = () => {
       // More robust confirmation detection - check for yes patterns
       const yesPatterns = [
         'yes', 'haan', 'ha', 'sahi', 'bilkul', 'theek', 'ok', 'okay', 'y', 'h',
-        'haa', 'haaa', 'haaaa', 'sahi hai', 'sahi h', 'haa sahi', 'haa sahi h', 
+        'haa', 'haaa', 'haaaa', 'sahi hai', 'sahi h', 'haa sahi', 'haa sahi h',
         'haa shai', 'haa shai h', 'theek hai', 'bilkul sahi', 'sahi hai ji',
         'haan sahi', 'haan sahi hai', 'haan sahi h', 'haan shai', 'haan shai h',
         'ji haan', 'ji haa', 'haan ji', 'haa ji'
       ]
-      
+
       // Check if answer contains any yes pattern
       const confirmed = yesPatterns.some(pattern => {
         // Exact match
@@ -203,7 +226,7 @@ const Chatbot = () => {
         if (answer.startsWith(pattern) && pattern.length >= 2) return true
         return false
       })
-      
+
       if (confirmed) {
         const response = await confirmSummary(sessionId)
         setSurveyState('confirmed')
@@ -243,6 +266,12 @@ const Chatbot = () => {
   }
 
   const handleRestart = () => {
+    // Disconnect WebSocket if connected
+    if (isConnected) {
+      disconnect()
+    }
+    clearTranscripts()
+
     setMessages([
       {
         type: 'bot',
@@ -259,15 +288,59 @@ const Chatbot = () => {
     setConfirmationRetries(0)
   }
 
+  // Update messages when transcripts change from WebSocket
+  useEffect(() => {
+    if (transcripts && transcripts.length > 0) {
+      const latestTranscript = transcripts[transcripts.length - 1]
+      if (latestTranscript.asrText) {
+        // Add user transcript as user message
+        const existingUserMsg = messages.find(
+          m => m.type === 'user' && m.text === latestTranscript.asrText
+        )
+        if (!existingUserMsg) {
+          addMessage('user', latestTranscript.asrText)
+        }
+      }
+      if (latestTranscript.chatbotResponse) {
+        // Add bot response as bot message
+        const existingBotMsg = messages.find(
+          m => m.type === 'bot' && m.text === latestTranscript.chatbotResponse
+        )
+        if (!existingBotMsg) {
+          addMessage('bot', latestTranscript.chatbotResponse)
+        }
+      }
+    }
+  }, [transcripts])
+
+  // Clear loading state when call starts
+  useEffect(() => {
+    if (isConnected && connectionStatus && connectionStatus.includes('starting')) {
+      setIsLoading(false)
+    }
+  }, [isConnected, connectionStatus])
+
   return (
     <div className="flex items-center justify-center min-h-screen p-4">
       <div className="w-full max-w-4xl bg-white rounded-2xl shadow-2xl overflow-hidden flex flex-col h-[90vh]">
         {/* Header */}
         <div className="bg-gradient-to-r from-blue-600 to-indigo-600 text-white p-6">
-          <h1 className="text-2xl font-bold">L and T Finance Customer Survey</h1>
-          <p className="text-blue-100 text-sm mt-1">
-            Please provide your information to help us serve you better
-          </p>
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-2xl font-bold">L&T Finance Customer Survey</h1>
+              <p className="text-blue-100 text-sm mt-1">
+                Please provide your information to help us serve you better
+              </p>
+            </div>
+            {isConnected && (
+              <div className="flex items-center space-x-2">
+                <div className={`w-3 h-3 rounded-full ${isStreaming ? 'bg-green-400 animate-pulse' : 'bg-gray-400'}`}></div>
+                <span className="text-sm">
+                  {isPlayingTTS ? '🔊 Playing...' : isStreaming ? '🎤 Listening...' : connectionStatus}
+                </span>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Messages Container */}
@@ -275,22 +348,19 @@ const Chatbot = () => {
           {messages.map((message, index) => (
             <div
               key={index}
-              className={`flex ${
-                message.type === 'user' ? 'justify-end' : 'justify-start'
-              }`}
+              className={`flex ${message.type === 'user' ? 'justify-end' : 'justify-start'
+                }`}
             >
               <div
-                className={`max-w-[80%] rounded-2xl px-4 py-3 ${
-                  message.type === 'user'
-                    ? 'bg-blue-600 text-white'
-                    : 'bg-white text-gray-800 shadow-md border border-gray-200'
-                }`}
+                className={`max-w-[80%] rounded-2xl px-4 py-3 ${message.type === 'user'
+                  ? 'bg-blue-600 text-white'
+                  : 'bg-white text-gray-800 shadow-md border border-gray-200'
+                  }`}
               >
                 <p className="whitespace-pre-wrap break-words">{message.text}</p>
                 <span
-                  className={`text-xs mt-1 block ${
-                    message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
-                  }`}
+                  className={`text-xs mt-1 block ${message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
+                    }`}
                 >
                   {message.timestamp.toLocaleTimeString()}
                 </span>

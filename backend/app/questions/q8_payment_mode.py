@@ -3,7 +3,7 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "भुगतान किस माध्यम से किया गया था? आपने ऑनलाइन, UPI या nagad दिया था?"
+    return "भुगतान किस माध्यम से किया गया था? क्या आपने ऑनलाइन, यूपीआई या नगद दिया था?"
 
 
 PROMPT = """
