@@ -4,6 +4,7 @@ from app.flow.flow_manager import get_question_text, process_answer
 from app.sessions.session_schema import create_session
 from app.sessions.session_store import save_session, get_session
 import sys
+import json
 
 
 def main():
@@ -68,32 +69,44 @@ def main():
 
         if result == "END":
             print("Maximum retries exceeded. Session ended.")
+            # Print final JSON even if session ended
+            final_json = {
+                k: v
+                for k, v in session.items()
+                if v is not None and k not in [
+                    "current_question",
+                    "retry_count",
+                ]
+            }
+            print("\nFinal JSON:")
+            print("=" * 60)
+            print(json.dumps(final_json, indent=2, ensure_ascii=False))
+            print("=" * 60)
             break
         elif result == "REPEAT":
             print("(Please provide a clearer answer)")
             print()
         elif result == "COMPLETED":
             print("=" * 60)
-            if session.get("call_should_end"):
-                print("Dhanyawad aapke samay ke liye.")
-                print(
-                    "Hum aapke dwara bataye gaye samay par customer se sampark karenge."
-                )
-                print("Aapka din shubh ho!")
-            else:
-                print("Survey completed! Thank you for your time.")
+            from app.services.summary_service import get_closing_statement
+            closing = get_closing_statement(session)
+            print(closing)
             print("=" * 60)
-            print("\nSession Summary:")
-            print("-" * 60)
-            for key, value in session.items():
-                if value is not None and key not in [
-                    "session_id",
+            
+            # Prepare final JSON (excluding internal fields)
+            final_json = {
+                k: v
+                for k, v in session.items()
+                if v is not None and k not in [
                     "current_question",
                     "retry_count",
-                    "call_should_end",
-                ]:
-                    print(f"{key}: {value}")
-            print("-" * 60)
+                ]
+            }
+            
+            print("\nFinal JSON:")
+            print("=" * 60)
+            print(json.dumps(final_json, indent=2, ensure_ascii=False))
+            print("=" * 60)
             break
         elif result == "NEXT":
             # Continue to next question

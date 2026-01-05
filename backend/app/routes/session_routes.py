@@ -13,7 +13,9 @@ from schemas.session_schemas import (
     SummaryResponse,
     ConfirmRequest,
     ConfirmResponse,
+    CustomersListResponse,
 )
+from config.database import get_all_customers
 from sessions.session_schema import create_session
 from sessions.session_store import save_session, get_session
 from flow.flow_manager import get_question_text, process_answer
@@ -24,6 +26,16 @@ from services.summary_service import (
 )
 
 router = APIRouter(prefix="/sessions", tags=["sessions"])
+
+
+@router.get("/customers", response_model=CustomersListResponse)
+async def get_customers():
+    """Get list of all customers from database"""
+    try:
+        customers = get_all_customers()
+        return CustomersListResponse(customers=customers)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error fetching customers: {str(e)}")
 
 
 @router.post("", response_model=CreateSessionResponse)

@@ -1,5 +1,17 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
+
+
+class CustomerResponse(BaseModel):
+    """Response schema for customer data"""
+    id: int
+    customer_name: str
+    contact_number: Optional[str] = None
+
+
+class CustomersListResponse(BaseModel):
+    """Response schema for customers list"""
+    customers: List[CustomerResponse]
 
 
 class CreateSessionRequest(BaseModel):

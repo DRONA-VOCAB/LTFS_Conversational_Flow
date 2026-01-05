@@ -7,3 +7,4 @@ httpx
 torch
 torchaudio
 packaging
+psycopg2-binary

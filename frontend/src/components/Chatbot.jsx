@@ -1,19 +1,22 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { createSession, submitAnswer, getSummary, confirmSummary } from '../services/api'
+import { createSession, submitAnswer, getSummary, confirmSummary, getCustomers } from '../services/api'
 
 const Chatbot = () => {
   const [messages, setMessages] = useState([
     {
       type: 'bot',
-      text: 'Welcome! Let\'s start the survey. Please enter your name to begin.',
+      text: 'Welcome! Please select a customer to start the survey.',
       timestamp: new Date(),
     },
   ])
   const [sessionId, setSessionId] = useState(null)
+  const [customers, setCustomers] = useState([])
+  const [selectedCustomer, setSelectedCustomer] = useState(null)
   const [customerName, setCustomerName] = useState('')
   const [inputValue, setInputValue] = useState('')
   const [isLoading, setIsLoading] = useState(false)
-  const [surveyState, setSurveyState] = useState('name') // 'name', 'survey', 'summary', 'confirmation', 'confirmed'
+  const [isLoadingCustomers, setIsLoadingCustomers] = useState(true)
+  const [surveyState, setSurveyState] = useState('customer_selection') // 'customer_selection', 'name', 'survey', 'summary', 'confirmation', 'confirmed'
   const [summary, setSummary] = useState(null)
   const [confirmationRetries, setConfirmationRetries] = useState(0)
   const messagesEndRef = useRef(null)
@@ -26,6 +29,22 @@ const Chatbot = () => {
   useEffect(() => {
     scrollToBottom()
   }, [messages])
+
+  useEffect(() => {
+    // Fetch customers on mount
+    const fetchCustomers = async () => {
+      try {
+        setIsLoadingCustomers(true)
+        const response = await getCustomers()
+        setCustomers(response.customers || [])
+      } catch (error) {
+        addMessage('bot', `Error loading customers: ${error.message}`)
+      } finally {
+        setIsLoadingCustomers(false)
+      }
+    }
+    fetchCustomers()
+  }, [])
 
   useEffect(() => {
     if (surveyState === 'survey' || surveyState === 'name' || surveyState === 'confirmation') {
@@ -42,6 +61,29 @@ const Chatbot = () => {
         timestamp: new Date(),
       },
     ])
+  }
+
+  const handleCustomerSelect = async (customer) => {
+    setSelectedCustomer(customer)
+    setCustomerName(customer.customer_name)
+    
+    // Trigger the call immediately with selected customer
+    setIsLoading(true)
+    try {
+      const response = await createSession(customer.customer_name)
+      setSessionId(response.session_id)
+      setSurveyState('survey')
+      addMessage('user', `Selected customer: ${customer.customer_name}`)
+      if (response.question) {
+        addMessage('bot', response.question)
+      }
+    } catch (error) {
+      addMessage('bot', `Error starting survey: ${error.message}`)
+      setSelectedCustomer(null)
+      setCustomerName('')
+    } finally {
+      setIsLoading(false)
+    }
   }
 
   const handleStartSurvey = async () => {
@@ -204,14 +246,15 @@ const Chatbot = () => {
     setMessages([
       {
         type: 'bot',
-        text: 'Welcome! Let\'s start the survey. Please enter your name to begin.',
+        text: 'Welcome! Please select a customer to start the survey.',
         timestamp: new Date(),
       },
     ])
     setSessionId(null)
+    setSelectedCustomer(null)
     setCustomerName('')
     setInputValue('')
-    setSurveyState('name')
+    setSurveyState('customer_selection')
     setSummary(null)
     setConfirmationRetries(0)
   }
@@ -272,6 +315,44 @@ const Chatbot = () => {
 
         {/* Input Area */}
         <div className="border-t border-gray-200 p-4 bg-white">
+          {surveyState === 'customer_selection' && (
+            <div className="space-y-4">
+              {isLoadingCustomers ? (
+                <div className="text-center py-4">
+                  <div className="inline-flex items-center space-x-2 text-gray-600">
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce"></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.2s' }}></div>
+                    <div className="w-2 h-2 bg-gray-400 rounded-full animate-bounce" style={{ animationDelay: '0.4s' }}></div>
+                    <span className="ml-2">Loading customers...</span>
+                  </div>
+                </div>
+              ) : customers.length > 0 ? (
+                <div className="space-y-2 max-h-64 overflow-y-auto">
+                  <p className="text-sm font-semibold text-gray-700 mb-2">Select a customer to start the call:</p>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {customers.map((customer) => (
+                      <button
+                        key={customer.id}
+                        onClick={() => handleCustomerSelect(customer)}
+                        disabled={isLoading}
+                        className="px-4 py-3 bg-white border-2 border-gray-300 rounded-lg text-left hover:border-blue-500 hover:bg-blue-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                      >
+                        <div className="font-semibold text-gray-800">{customer.customer_name}</div>
+                        {customer.contact_number && (
+                          <div className="text-sm text-gray-500 mt-1">{customer.contact_number}</div>
+                        )}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              ) : (
+                <div className="text-center py-4 text-gray-500">
+                  No customers found. Please try again later.
+                </div>
+              )}
+            </div>
+          )}
+
           {surveyState === 'name' && (
             <div className="flex gap-2">
               <input
