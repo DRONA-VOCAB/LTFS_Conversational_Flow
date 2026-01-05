@@ -51,6 +51,15 @@ export const confirmSummary = async (sessionId) => {
   }
 }
 
+export const getCustomers = async () => {
+  try {
+    const response = await api.get('/sessions/customers')
+    return response.data
+  } catch (error) {
+    throw new Error(error.response?.data?.detail || 'Failed to fetch customers')
+  }
+}
+
 export default api
 
 
