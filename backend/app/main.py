@@ -4,6 +4,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import session_router
+from routes.websocket_routes import websocket_audio_endpoint
 
 # Create FastAPI app
 app = FastAPI(
@@ -24,6 +25,9 @@ app.add_middleware(
 # Include routers
 app.include_router(session_router)
 
+# WebSocket endpoint
+app.websocket("/ws/audio")(websocket_audio_endpoint)
+
 
 @app.get("/")
 async def root():
@@ -38,6 +42,7 @@ async def root():
             "GET /sessions/{session_id}/summary": "Get human-readable summary",
             "POST /sessions/{session_id}/confirm": "Confirm summary and get closing statement",
             "GET /sessions/{session_id}": "Get session information",
+            "WS /ws/audio": "WebSocket endpoint for bidirectional audio streaming",
         },
     }
 

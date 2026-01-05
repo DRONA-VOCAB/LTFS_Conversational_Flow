@@ -1,4 +1,9 @@
 python-dotenv 
 google-generativeai
 fastapi
-uvicorn
+uvicorn[standard]
+websockets
+httpx
+torch
+torchaudio
+packaging
