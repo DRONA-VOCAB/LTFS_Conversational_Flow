@@ -1,6 +1,5 @@
 import axios from 'axios'
-
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000'
+import { API_BASE_URL, API_ENDPOINTS } from '../config/settings'
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -11,7 +10,7 @@ const api = axios.create({
 
 export const createSession = async (customerName) => {
   try {
-    const response = await api.post('/sessions', {
+    const response = await api.post(API_ENDPOINTS.CREATE_SESSION, {
       customer_name: customerName,
     })
     return response.data
@@ -22,7 +21,7 @@ export const createSession = async (customerName) => {
 
 export const submitAnswer = async (sessionId, answer) => {
   try {
-    const response = await api.post(`/sessions/${sessionId}/answer`, {
+    const response = await api.post(API_ENDPOINTS.SUBMIT_ANSWER(sessionId), {
       answer: answer,
     })
     return response.data
@@ -33,7 +32,7 @@ export const submitAnswer = async (sessionId, answer) => {
 
 export const getSummary = async (sessionId) => {
   try {
-    const response = await api.get(`/sessions/${sessionId}/summary`)
+    const response = await api.get(API_ENDPOINTS.GET_SUMMARY(sessionId))
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.detail || 'Failed to get summary')
@@ -42,7 +41,7 @@ export const getSummary = async (sessionId) => {
 
 export const confirmSummary = async (sessionId) => {
   try {
-    const response = await api.post(`/sessions/${sessionId}/confirm`, {
+    const response = await api.post(API_ENDPOINTS.CONFIRM_SUMMARY(sessionId), {
       confirmed: true,
     })
     return response.data
@@ -53,7 +52,7 @@ export const confirmSummary = async (sessionId) => {
 
 export const getCustomers = async () => {
   try {
-    const response = await api.get('/sessions/customers')
+    const response = await api.get(API_ENDPOINTS.GET_CUSTOMERS)
     return response.data
   } catch (error) {
     throw new Error(error.response?.data?.detail || 'Failed to fetch customers')

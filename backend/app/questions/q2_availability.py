@@ -4,26 +4,83 @@ from llm.gemini_client import call_gemini
 
 def get_text():
     customer_name = "{{customer_name}}"
-    return f"Kripya bataiye ki shriman/shrimati {customer_name} ji se kis samay par sampark karna uchit rahega? Sath hi, yadi koi alternate number uplabdh ho to kripya share karein."
+    return f"कृपया बताइए कि {customer_name} जी से किस समय बात करना ठीक रहेगा? अगर कोई दूसरा नंबर हो तो वह भी बता दीजिए।"
 
 
 PROMPT = """
-    You are an intelligent assistant. Your task is to extract availability information and alternate contact number from the user's response.
-    
-    Extract:
-    1. Preferred time to connect (if mentioned) - extract any time reference like "5 baje", "5pm", "evening", "morning", "abhi", "now"
-    2. Alternate contact number (if provided) - extract any phone number, even if it's just digits like "123456789"
-    
-    Examples:
-    - "123456789 ye unka number h" → alternate_contact: "123456789"
-    - "9876543210" → alternate_contact: "9876543210"
-    - "wo 5bje available hongi" → preferred_time: "5 baje" or "5pm"
-    - "abhi phone kar lijiye" → preferred_time: "now" or "immediately"
-    - "isi same number pr call kr dena" → preferred_time: "now" (if time not mentioned, but indicates availability)
-    
-    IMPORTANT: Return ONLY valid JSON, no markdown, no code blocks, no explanations.
-    
-    Return JSON:
+        You are an intelligent assistant. Your task is to extract availability information and an alternate contact number
+        from the user's response.
+
+        ========================
+        EXTRACTION TARGETS
+        ========================
+
+        1. preferred_time:
+        - Extract ANY time or availability reference if mentioned.
+        - Examples include:
+            - Explicit times: "5 बजे", "5 bje", "5pm", "5 pm", "17:00"
+            - Time ranges: "शाम को", "सुबह", "दोपहर", "रात", "evening", "morning"
+            - Immediate availability: "अभी", "अभी कॉल करें", "अब", "now", "right now", "immediately"
+            - Implied availability without time:
+            - "इसी नंबर पर कॉल कर देना"
+            - "यहीं बात हो जाएगी"
+            - "अभी बात कर सकते हैं"
+            → In such cases, set preferred_time as "now"
+
+        2. alternate_contact:
+        - Extract ANY phone number if present.
+        - Accept:
+            - Pure digits: "123456789", "9876543210"
+            - Numbers spoken with context: "ये उनका नंबर है 9876543210"
+            - Short or incomplete numbers should still be extracted as-is.
+        - Ignore formatting symbols like spaces, dashes, or country codes if present.
+
+        ========================
+        EXAMPLES (DEVANAGARI FIRST)
+        ========================
+
+        "123456789 ये उनका नंबर है"
+        → alternate_contact: "123456789"
+
+        "उनका नंबर 9876543210 है"
+        → alternate_contact: "9876543210"
+
+        "वो 5 बजे उपलब्ध होंगी"
+        → preferred_time: "5 बजे"
+
+        "शाम को कॉल कर लेना"
+        → preferred_time: "शाम"
+
+        "अभी फोन कर लीजिए"
+        → preferred_time: "now"
+
+        "इसी नंबर पर कॉल कर देना"
+        → preferred_time: "now"
+
+        "कल सुबह बात कर सकते हैं"
+        → preferred_time: "सुबह"
+
+        "9876543210 पर शाम को कॉल करना"
+        → alternate_contact: "9876543210"
+        → preferred_time: "शाम"
+
+        ========================
+        IMPORTANT INSTRUCTIONS
+        ========================
+
+        - Extract only what is explicitly or clearly implied
+        - If an item is not mentioned, set it to null
+        - If at least one of preferred_time or alternate_contact is extracted, set is_clear = true
+        - If nothing relevant is found, set both values to null and is_clear = false
+        - Do NOT guess missing information
+        - Do NOT explain your reasoning
+        - Do NOT add extra fields
+        - Return ONLY valid JSON (no markdown, no text outside JSON)
+
+        ========================
+        OUTPUT FORMAT (STRICT)
+        ========================
+
         {
         "value": {
             "preferred_time": "time mentioned or null",
@@ -31,7 +88,8 @@ PROMPT = """
         },
         "is_clear": true/false
         }
-"""
+    """
+
 
 
 def handle(user_input, session):

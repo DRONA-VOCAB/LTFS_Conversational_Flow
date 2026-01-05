@@ -7,26 +7,74 @@ def get_text():
 
 
 PROMPT = """
-        You are an intelligent assistant. Your task is to classify the user's response for identity confirmation.
-        Classify response for identity confirmation.
+    You are an intelligent assistant. Your task is to classify the user's response for identity confirmation
+    (whether the user confirms they are the intended person).
 
-        YES → user confirms name (examples: "haa", "haan", "haaa", "ha", "yes", "y", "main hi hoon", "bilkul", "sahi hai", "theek hai")
-        NO → wrong person (examples: "nhi", "nahi", "no", "galat", "wo nahi hai", "main unki beti hu", "main santhosh nhi hu")
-        UNCLEAR → completely unrelated responses
+    ========================
+    CLASSIFICATION RULES
+    ========================
 
-        IMPORTANT: 
-        - Accept variations: "haa", "haan", "haaa", "ha", "yes", "y" → all should be YES
-        - "nhi", "nahi", "no" should always be classified as NO
-        - If user says they are someone else (like "main unki beti hu", "main santhosh nhi hu"), classify as NO
-        - Be lenient with YES responses - even simple "haa" or "haan" should be accepted as YES
-        - Only mark as UNCLEAR if the response is completely unrelated or truly unclear
-        - Return ONLY valid JSON, no markdown, no code blocks, no explanations.
+    YES → User confirms identity.
+    Be VERY lenient. Even short or casual confirmations count.
 
-        Return JSON:
-        {
-        "value": "YES/NO/UNCLEAR",
-        "is_clear": true/false
-        }
+    Devanagari (priority examples):
+    "हाँ", "हां", "हाँ जी", "हां जी", "हा", "हाँ बिल्कुल", "बिल्कुल", "सही है", "ठीक है",
+    "मैं ही हूँ", "मैं ही हूं", "जी हाँ", "जी", "जी बिल्कुल"
+
+    Roman / English examples:
+    "haa", "haan", "haaa", "ha", "han",
+    "yes", "y", "yeah", "yep",
+    "main hi hoon", "main hi hu",
+    "bilkul", "sahi hai", "theek hai"
+
+
+    NO → User denies identity or says they are someone else.
+
+    Devanagari (priority examples):
+    "नहीं", "नही", "ना", "नहीं जी",
+    "मैं नहीं हूँ", "मैं वो नहीं हूँ",
+    "मैं उनकी बेटी हूँ", "मैं उनका बेटा हूँ",
+    "यह गलत है", "वो व्यक्ति मैं नहीं हूँ"
+
+    Roman / English examples:
+    "nhi", "nahi", "na", "no", "nope",
+    "main nahi hoon", "main wo nahi hu",
+    "main santhosh nahi hu",
+    "galat", "wrong number"
+
+
+    UNCLEAR → Response is completely unrelated, meaningless, or does not answer identity confirmation.
+
+    Examples:
+    "क्या?", "कौन?", "क्या बोल रहे हो?",
+    "busy hoon", "call later",
+    "sorry", "hello",
+    random words, emojis, silence, or noise
+
+
+    ========================
+    IMPORTANT INSTRUCTIONS
+    ========================
+
+    - Prefer YES or NO whenever possible
+    - Use UNCLEAR ONLY if the response is truly unrelated
+    - Do NOT explain your reasoning
+    - Do NOT add extra fields
+    - Do NOT add markdown or text outside JSON
+    - Return ONLY valid JSON
+
+    ========================
+    OUTPUT FORMAT (STRICT)
+    ========================
+
+    {
+    "value": "YES/NO/UNCLEAR",
+    "is_clear": true/false
+    }
+
+    Rules:
+    - is_clear = true for YES or NO
+    - is_clear = false only for UNCLEAR
 """
 
 
