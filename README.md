@@ -1,45 +1,34 @@
-# Feedback Call System
+# L&T Finance Customer Survey - Frontend
 
-This project implements an automated feedback calling system that collects customer responses through an intelligent voice flow. It handles outbound call initiation, dynamic question logic, response validation, and structured data capture.It ensures consistent customer interactions while reducing manual effort.
+React frontend for the L&T Finance Customer Survey chatbot.
 
-# Core Components
+## Setup
 
-- Voice Platform – call initiation, IVR/telephony
-- ASR (Speech-to-Text) – converts audio to text
-- Hybrid AI Brain – intent classifier + LLM for natural responses
-- Orchestration Engine – manages the full feedback workflow
-- Business Logic Layer – validation, summary creation, correction handling
-- Data Layer – Excel/DB updates with full or partial feedback
-- TTS (Text-to-Speech) – responds in customer's detected language
+1. Create a `.env` file in the root directory
 
-# Folder Structure
-
+```bash
+    GEMINI_MODEL=""
+    GEMINI_API_KEY=""
+    MAX_RETRIES=2
+    DATABASE_URL=""
+    ASR_API_URL=http://27.111.72.52:5073/transcribe
+    TTS_API_URL=http://27.111.72.52:5057/synthesize
+    VITE_API_URL=http://27.111.72.55:8001
 ```
-project-root/
-├── app/
-│   ├── __init__.py
-│   ├── main.py
-│   ├── config.py
-│   ├── api/
-│   │   ├── __init__.py
-│   │   ├── conversation.py
-│   ├── schema/
-│   │   ├── __init__.py
-│   │   ├── feedback_request.py
-│   │   ├── feedback_response.py
-│   ├── services/
-│   │   ├── __init__.py
-│   │   ├── outbound_call_service.py
-│   │   ├── feedback_flow_manager.py
-│   ├── utils/
-│   │   ├── __init__.py
-│   │   ├── validators.py
-│   │   ├── formatter.py
-│   ├── models/
-│   │   ├── __init__.py
-│   │   ├── call_event.py
-│   │   ├── feedback_responses.py
-│
-├── requirements.txt
-└── README.md
+
+2. Frontend:
+
+```bash
+    cd frontend
+    npm install
+    npm run dev
+```
+
+3. Backend:
+
+```bash
+    cd backend
+    pip install -r requirements.txt
+    cd app
+    uvicorn main:app --reload
 ```
