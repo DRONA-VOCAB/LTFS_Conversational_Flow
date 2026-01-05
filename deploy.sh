@@ -20,11 +20,41 @@ if [ "$EUID" -ne 0 ]; then
     exit 1
 fi
 
+# Function to check if command exists
+command_exists() {
+    command -v "$1" >/dev/null 2>&1
+}
+
 # 1. Install dependencies
 echo ""
 echo "📦 Installing system packages..."
 apt update -qq
-apt install -y python3 python3-venv python3-pip nginx nodejs npm git
+
+# Install basic packages
+apt install -y python3 python3-venv python3-pip nginx git || true
+
+# Install Node.js (check if already installed)
+if ! command_exists node || ! command_exists npm; then
+    echo "📦 Installing Node.js..."
+    # Try NodeSource repository first (includes npm)
+    curl -fsSL https://deb.nodesource.com/setup_18.x | bash - 2>/dev/null || {
+        echo "⚠️  NodeSource setup failed, trying system packages..."
+        # Try installing just nodejs (npm comes with it in newer versions)
+        apt install -y nodejs 2>/dev/null || {
+            echo "⚠️  Node.js installation had issues, but continuing..."
+        }
+    }
+    # Install nodejs after adding NodeSource repo
+    apt install -y nodejs 2>/dev/null || true
+fi
+
+# Verify Node.js installation
+if command_exists node && command_exists npm; then
+    echo "✓ Node.js $(node --version) and npm $(npm --version) are ready"
+else
+    echo "⚠️  Warning: Node.js or npm may not be properly installed"
+    echo "   You may need to install them manually"
+fi
 
 # 2. Setup project directory
 echo ""
