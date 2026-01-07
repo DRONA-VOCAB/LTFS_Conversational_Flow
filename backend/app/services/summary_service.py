@@ -3,6 +3,7 @@
 from flow.flow_manager import get_next_question_index
 from flow.question_order import QUESTIONS
 from llm.gemini_client import model
+from config.settings import PAYMENT_MODE_MAP, FALLBACK_SUMMARY_TEMPLATE, COMPANY_NAME, get_message
 
 
 def generate_human_summary(session: dict) -> str:
@@ -59,16 +60,7 @@ def generate_fallback_summary(data: dict) -> str:
         amount = data.get("amount")
         mode = data.get("mode_of_payment")
         # Convert mode to readable format
-        mode_map = {
-            "online": "online",
-            "online_lan": "online",
-            "online_field_executive": "online field executive",
-            "cash": "cash",
-            "branch": "branch",
-            "outlet": "outlet",
-            "nach": "NACH",
-        }
-        mode_text = mode_map.get(mode, mode)
+        mode_text = PAYMENT_MODE_MAP.get(mode, mode)
         summary_parts.append(
             f" ₹{amount} ka payment kiya tha aur ye payment {mode_text} madhyam se kiya hai."
         )
@@ -85,7 +77,7 @@ def generate_fallback_summary(data: dict) -> str:
     if not summary_parts:
         # Fallback if no key data
         summary_parts.append(
-            "Aapne L&T Finance se loan liya hai aur aapne payment kiya hai."
+            FALLBACK_SUMMARY_TEMPLATE.format(company_name=COMPANY_NAME)
         )
 
     return " ".join(summary_parts)
@@ -102,24 +94,12 @@ def get_closing_statement(session: dict) -> str:
     if session.get("call_should_end"):
         # Check if it's a wrong number case (loan_taken is NO)
         if session.get("loan_taken") == "NO":
-            return "धन्यवाद आपके समय के लिए।\nआपका दिन शुभ हो!"
+            return get_message("closing_wrong_number")
         # Check if alternate number was provided
         elif session.get("user_contact"):
-            return (
-                "धन्यवाद आपके समय के लिए।\n"
-                "हम आपके द्वारा बताए गए समय पर उनसे संपर्क करेंगे।\n"
-                "आपका दिन शुभ हो!"
-            )
+            return get_message("closing_alternate_contact")
         # Otherwise, it's availability case without alternate number
         else:
-            return (
-                "धन्यवाद आपके समय के लिए।\n"
-                "हम आपके द्वारा बताए गए समय पर ग्राहक से संपर्क करेंगे।\n"
-                "आपका दिन शुभ हो!"
-            )
+            return get_message("closing_availability")
     else:
-        return (
-            "धन्यवाद आपके समय के लिए।\n"
-            "आपकी फीडबैक हमारे लिए बहुत महत्वपूर्ण है।\n"
-            "आपका दिन शुभ हो!"
-        )
+        return get_message("closing_success")

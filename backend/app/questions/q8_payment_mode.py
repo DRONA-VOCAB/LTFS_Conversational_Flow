@@ -1,178 +1,140 @@
-from questions.base import QuestionResult
-from llm.gemini_client import call_gemini
+from app.questions.base import QuestionResult
+from app.llm.gemini_client import call_gemini
+from app.config.settings import COMPANY_NAME_FORMAL
 
 
 def get_text():
-    return "भुगतान किस माध्यम से किया गया था? आपने ऑनलाइन, UPI या nagad दिया था?"
+    return "भुगतान किस माध्यम से किया गया था? क्या आपने ऑनलाइन, यूपीआई या नगद दिया था?"
 
 
-PROMPT = """
-        You are an intelligent assistant.
+def _get_prompt_template():
+    """Get the prompt template with dynamic company name"""
+    return f"""
+You are an intelligent conversational AI assistant for {COMPANY_NAME_FORMAL} conducting a customer survey call.
 
-        Question asked to the user:
-        "भुगतान (पेमेंट) किस माध्यम से किया गया था?"
+The agent just asked:
+"भुगतान किस माध्यम से किया गया था? क्या आपने ऑनलाइन, यूपीआई या नगद दिया था?"
 
-        Your task is to extract the PAYMENT MODE from the user's response.
+You receive the caller's reply (in Hindi, Hinglish, or English).
 
-        ========================
-        AVAILABLE PAYMENT MODES
-        ========================
+Your task is to:
+1. Understand the caller's intent completely
+2. Extract payment mode OR handle out-of-bound questions
+3. Decide what action to take next
+4. Generate an appropriate response if needed
 
-        1. online_lan
-        - Online payments made directly by the customer
+MAIN TASK - Extract payment mode:
+Map to one of: "online_lan", "online_field_executive", "cash", "branch", "outlet", "nach"
 
-        2. online_field_executive
-        - Online payment done through a field executive
+IMPORTANT PAYMENT MODE MAPPINGS:
+- "auto-debit", "auto debit", "automatic", "NACH", "auto", "ऑटो डेबिट", "स्वचालित" → "nach"
+- "online", "UPI", "netbanking", "ऑनलाइन", "यूपीआई" → "online_lan"
+- "cash", "नगद", "cash in hand" → "cash"
+- "branch", "बैंक", "शाखा" → "branch"
 
-        3. cash
-        - Cash / cash-in-hand payment
+OUT-OF-BOUND HANDLING:
+If the caller asks questions NOT related to payment mode (e.g., "कौन हो आप?", "क्यों कॉल कर रहे हो?", 
+asks about amount, date, etc.), classify as:
+- "ROLE_CLARIFICATION" → asking about who you are, why calling, etc. (cooperative)
+- "OFF_TOPIC" → asking about something else - redirect politely
 
-        4. branch
-        - Payment done at bank / company branch
+CLASSIFICATION CATEGORIES:
 
-        5. outlet
-        - Payment done at an outlet
+1. "ANSWERED" → caller clearly indicates payment mode
+   Examples: "ऑनलाइन", "यूपीआई", "नगद", "cash", "online", "branch"
+   Action: NEXT (proceed to next question)
+   Response: null
 
-        6. nach
-        - Automated / auto-debit / NACH payments
+2. "ROLE_CLARIFICATION" → caller asks about who you are, why calling, etc.
+   Action: CLARIFY (provide explanation, then repeat question)
+   Response: Generate friendly Hindi explanation of your role, then repeat the payment mode question
 
-        ========================
-        MAPPING RULES
-        ========================
+3. "REFUSE" → caller explicitly refuses to participate
+   Action: CLOSING (end call gracefully)
+   Response: Generate polite closing message in Hindi
 
-        Map the user's response to ONE of the following modes:
+4. "OFF_TOPIC" → caller asks about something else (amount, date, etc.)
+   Action: CLARIFY (acknowledge and redirect)
+   Response: Generate polite Hindi response acknowledging their question, explaining you'll get to that, 
+   and asking the payment mode question again
 
-        online_lan →
-        "ऑनलाइन", "ऑनलाइन किया", "ऑनलाइन से", "ऑनलाइन माध्यम से",
-        "यूपीआई", "यु पी आई", "नेट बैंकिंग", "इंटरनेट बैंकिंग",
-        "फोन से किया", "गूगल पे", "फोनपे", "पेटीएम"
+5. "UNCLEAR" → reply is too ambiguous or unrelated
+   Action: REPEAT (ask question again)
+   Response: Generate polite request to repeat the answer in Hindi
 
-        online_field_executive →
-        "फील्ड एग्जीक्यूटिव को दिया",
-        "एग्जीक्यूटिव के माध्यम से",
-        "फील्ड एग्जीक्यूटिव से",
-        "एग्जीक्यूटिव ने ऑनलाइन किया"
+Return ONLY this JSON (no extra text):
+{
+  "value": "online_lan" | "online_field_executive" | "cash" | "branch" | "outlet" | "nach" | "ROLE_CLARIFICATION" | "REFUSE" | "OFF_TOPIC" | "UNCLEAR",
+  "is_clear": true | false,
+  "action": "NEXT" | "CLARIFY" | "REPEAT" | "CLOSING",
+  "response_text": "string or null"
+}
 
-        cash →
-        "कैश", "नगद", "नकद",
-        "कैश दिया", "नगद भुगतान", "हाथ से दिया"
-
-        branch →
-        "ब्रांच में किया",
-        "शाखा में किया",
-        "बैंक में किया",
-        "ब्रांच जाकर किया"
-
-        outlet →
-        "आउटलेट में किया",
-        "आउटलेट जाकर किया"
-
-        nach →
-        "नाच", "नैच",
-        "ऑटो डेबिट",
-        "ऑटोमैटिक कटता है",
-        "अपने आप कट जाता है",
-        "NACH", "auto debit"
-
-
-        ========================
-        EXAMPLES (DEVANAGARI FIRST)
-        ========================
-
-        "मैंने ऑनलाइन किया था"
-        → mode: "online_lan"
-
-        "यूपीआई से किया"
-        → mode: "online_lan"
-
-        "फील्ड एग्जीक्यूटिव को ऑनलाइन दिया था"
-        → mode: "online_field_executive"
-
-        "कैश दिया था"
-        → mode: "cash"
-
-        "ब्रांच में जाकर पेमेंट किया"
-        → mode: "branch"
-
-        "आउटलेट में किया था"
-        → mode: "outlet"
-
-        "ऑटो डेबिट से कटता है"
-        → mode: "nach"
-
-
-        Roman examples:
-        "online kiya tha"
-        → mode: "online_lan"
-
-        "upi se payment ki"
-        → mode: "online_lan"
-
-        "field executive ko diya tha"
-        → mode: "online_field_executive"
-
-        "cash diya"
-        → mode: "cash"
-
-        "branch mein kiya"
-        → mode: "branch"
-
-        "outlet mein payment ki"
-        → mode: "outlet"
-
-        "auto debit hota hai"
-        → mode: "nach"
-
-
-        ========================
-        UNCLEAR CASES
-        ========================
-
-        If the response:
-        - Does not mention payment method
-        - Is ambiguous or unrelated
-        - User says "yaad nahi", "pata nahi"
-
-        Examples:
-        "याद नहीं",
-        "पता नहीं",
-        "समझ नहीं आया"
-
-        → is_clear = false
-
-        ========================
-        IMPORTANT INSTRUCTIONS
-        ========================
-
-        - Choose the BEST matching mode
-        - Be lenient (e.g., just "online" → online_lan)
-        - Do NOT guess if unclear
-        - Do NOT explain reasoning
-        - Do NOT add extra fields
-        - Return ONLY valid JSON
-
-        ========================
-        OUTPUT FORMAT (STRICT)
-        ========================
-
-        {
-        "value": {
-            "mode": "online_lan/online_field_executive/cash/branch/outlet/nach"
-        },
-        "is_clear": true/false
-        }
-    """
-
+CRITICAL GUIDELINES:
+- If caller indicates payment mode → ANSWERED (one of the modes), action=NEXT, response_text=null
+- If caller asks about role → ROLE_CLARIFICATION, action=CLARIFY, generate response
+- If caller refuses → REFUSE, action=CLOSING, generate closing message
+- If caller asks off-topic → OFF_TOPIC, action=CLARIFY, redirect politely
+- If unclear → UNCLEAR, action=REPEAT, generate clarification request
+- All response_text should be in natural, conversational Hindi (Devanagari script)
+"""
 
 
 def handle(user_input, session):
-    r = call_gemini(PROMPT + user_input)
-    if not r["is_clear"]:
+    """Handle user input using LLM to decide classification, action, and response"""
+    PROMPT = _get_prompt_template()
+    r = call_gemini(PROMPT + "\n\nCaller's reply: " + user_input)
+    
+    print(f"DEBUG q8_payment_mode LLM response: {r}")
+    
+    value = r.get("value")
+    is_clear = r.get("is_clear", False)
+    action = r.get("action", "REPEAT")
+    response_text = r.get("response_text")
+    
+    if not is_clear:
+        print(f"DEBUG: LLM returned unclear response for: '{user_input}'")
+        if action == "REPEAT" and response_text:
+            session["needs_clarification"] = True
+            session["clarification_response"] = response_text
+            return QuestionResult(True, value="UNCLEAR", extra={"action": action, "response_text": response_text})
         return QuestionResult(False)
-    session["mode_of_payment"] = r["value"].get("mode")
-    if r["value"].get("field_executive_name"):
-        session["field_executive_name"] = r["value"].get("field_executive_name")
-    if r["value"].get("field_executive_contact"):
-        session["field_executive_contact"] = r["value"].get("field_executive_contact")
-    return QuestionResult(True)
-
+    
+    print(f"DEBUG: LLM classified '{user_input}' as: {value}, action: {action}")
+    
+    # Store LLM's decision
+    session["llm_action"] = action
+    session["llm_response_text"] = response_text
+    
+    # Handle based on classification
+    if value == "ROLE_CLARIFICATION":
+        session["needs_role_clarification"] = True
+        if response_text:
+            session["role_clarification_response"] = response_text
+        return QuestionResult(True, value="ROLE_CLARIFICATION", extra={"action": action, "response_text": response_text})
+    
+    if value == "REFUSE" or action == "CLOSING":
+        session["call_should_end"] = True
+        if response_text:
+            session["closing_message"] = response_text
+        return QuestionResult(True, value="REFUSE", extra={"action": action, "response_text": response_text})
+    
+    if value == "OFF_TOPIC":
+        session["needs_clarification"] = True
+        if response_text:
+            session["clarification_response"] = response_text
+        return QuestionResult(True, value="OFF_TOPIC", extra={"action": action, "response_text": response_text})
+    
+    if value == "UNCLEAR":
+        if response_text:
+            session["needs_clarification"] = True
+            session["clarification_response"] = response_text
+        return QuestionResult(True, value="UNCLEAR", extra={"action": action, "response_text": response_text})
+    
+    # Valid payment mode
+    valid_modes = ["online_lan", "online_field_executive", "cash", "branch", "outlet", "nach"]
+    if value in valid_modes:
+        session["mode_of_payment"] = value
+        return QuestionResult(True, value="ANSWERED", extra={"action": action})
+    
+    return QuestionResult(False)

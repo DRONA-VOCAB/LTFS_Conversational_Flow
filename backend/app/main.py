@@ -47,12 +47,13 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from routes import session_router
+from config.settings import API_TITLE, API_DESCRIPTION, API_VERSION
 
 # Create FastAPI app
 app = FastAPI(
-    title="L and T Finance Customer Survey API",
-    description="API for managing customer survey sessions",
-    version="1.0.0",
+    title=API_TITLE,
+    description=API_DESCRIPTION,
+    version=API_VERSION,
 )
 
 # Add CORS middleware

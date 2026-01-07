@@ -3,13 +3,14 @@
 from app.flow.flow_manager import get_question_text, process_answer
 from app.sessions.session_schema import create_session
 from app.sessions.session_store import save_session, get_session
+from app.config.settings import COMPANY_NAME_FORMAL
 import sys
 import json
 
 
 def main():
     print("=" * 60)
-    print("L and T Finance Customer Survey Bot")
+    print(f"{COMPANY_NAME_FORMAL} Customer Survey Bot")
     print("=" * 60)
     print()
 
