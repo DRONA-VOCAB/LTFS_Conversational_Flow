@@ -1,3 +1,87 @@
+# from questions.base import QuestionResult
+# from llm.gemini_client import call_gemini
+
+
+# def get_text():
+#     return "वस्तव में कितना भुगतान किया गया था? कृपया राशि बताइए ताकि हम उसे दर्ज कर सकें."
+
+
+# PROMPT = """
+# You are an intelligent conversational AI assistant for L&T Finance conducting a customer survey call.
+
+# The agent just asked:
+# "वास्तव में कितना भुगतान किया गया था? कृपया राशि बताइए ताकि हम उसे दर्ज कर सकें।"
+
+# You receive the caller's reply (in Hindi, Hinglish, or English), which may describe an amount in words or digits.
+
+# Your task is to:
+# 1. Understand the caller's intent completely
+# 2. Extract payment amount OR handle out-of-bound questions
+# 3. Decide what action to take next
+# 4. Generate an appropriate response if needed
+
+# MAIN TASK - Extract amount:
+# - Extract payment amount as digits only (no commas, no currency symbols)
+# - Examples: "पचास हजार" → "50000", "25 हज़ार" → "25000", "10k" → "10000"
+# - Ignore currency words like रुपये / rupees / rs / ₹
+
+# OUT-OF-BOUND HANDLING:
+# If the caller asks questions NOT related to payment amount (e.g., "कौन हो आप?", "क्यों कॉल कर रहे हो?",
+# asks about date, mode, etc.), classify as:
+# - "ROLE_CLARIFICATION" → asking about who you are, why calling, etc. (cooperative)
+# - "OFF_TOPIC" → asking about something else - redirect politely
+
+# CLASSIFICATION CATEGORIES:
+
+# 1. "ANSWERED" → caller clearly provided payment amount
+#    Action: NEXT (proceed to summary)
+#    Response: null
+
+# 2. "ROLE_CLARIFICATION" → caller asks about who you are, why calling, etc.
+#    Action: CLARIFY (provide explanation, then repeat question)
+#    Response: Generate friendly Hindi explanation of your role, then repeat the amount question
+
+# 3. "REFUSE" → caller explicitly refuses to participate
+#    Action: CLOSING (end call gracefully)
+#    Response: Generate polite closing message in Hindi
+
+# 4. "OFF_TOPIC" → caller asks about something else (date, mode, etc.)
+#    Action: CLARIFY (acknowledge and redirect)
+#    Response: Generate polite Hindi response acknowledging their question, explaining you'll get to that,
+#    and asking the amount question again
+
+# 5. "UNCLEAR" → reply is too ambiguous or unrelated
+#    Action: REPEAT (ask question again)
+#    Response: Generate polite request to repeat the answer in Hindi
+
+# Return ONLY this JSON (no extra text):
+# {
+#   "value": "numeric_amount_as_string or null",
+#   "classification": "ANSWERED" | "ROLE_CLARIFICATION" | "REFUSE" | "OFF_TOPIC" | "UNCLEAR",
+#   "is_clear": true | false,
+#   "action": "NEXT" | "CLARIFY" | "REPEAT" | "CLOSING",
+#   "response_text": "string or null"
+# }
+
+# CRITICAL GUIDELINES:
+# - If caller provides amount → ANSWERED, action=NEXT, response_text=null
+# - Amount should be digits only (e.g., "50000" not "50,000" or "₹50000")
+# - If caller asks about role → ROLE_CLARIFICATION, action=CLARIFY, generate response
+# - If caller refuses → REFUSE, action=CLOSING, generate closing message
+# - If caller asks off-topic → OFF_TOPIC, action=CLARIFY, redirect politely
+# - If unclear → UNCLEAR, action=REPEAT, generate clarification request
+# - All response_text should be in natural, conversational Hindi (Devanagari script)
+# """
+
+
+# def handle(user_input, session):
+#     r = call_gemini(PROMPT + user_input)
+#     if not r["is_clear"]:
+#         return QuestionResult(False)
+#     session["amount"] = r["value"]
+#     return QuestionResult(True)
+
+
 from questions.base import QuestionResult
 from llm.gemini_client import call_gemini
 
@@ -7,116 +91,90 @@ def get_text():
 
 
 PROMPT = """
-        You are an intelligent assistant.
+You are an intelligent conversational AI assistant for L&T Finance conducting a customer survey call.
 
-        Question asked to the user:
-        "वास्तव में कितना भुगतान किया गया था? कृपया राशि बताइए ताकि हम उसे दर्ज कर सकें।"
+The agent just asked:
+"वास्तव में कितना भुगतान किया गया था? कृपया राशि बताइए ताकि हम उसे दर्ज कर सकें।"
 
-        Your task is to extract the PAYMENT AMOUNT from the user's response and return it
-        as a NUMERIC STRING (digits only).
+You receive the caller's reply (in Hindi, Hinglish, or English), which may describe an amount in words or digits.
 
-        ========================
-        AMOUNT EXTRACTION RULES
-        ========================
+Your task is to:
+1. Understand the caller's intent completely
+2. Extract payment amount OR handle out-of-bound questions
+3. Decide what action to take next
+4. Generate an appropriate response if needed
 
-        - Extract the amount as numbers only (no commas, no currency symbols).
-        - Amount may be expressed as:
-        - Spoken numbers in Hindi or Hinglish
-        - Numeric values (e.g., 5000, 50,000)
-        - Words like हजार, लाख, रुपये, पैसा
-        - Ignore words like "रुपये", "₹", "rs", "rupees".
+MAIN TASK - Extract amount:
+- Extract payment amount as digits only (no commas, no currency symbols)
+- Examples: "पचास हजार" → "50000", "25 हज़ार" → "25000", "10k" → "10000"
+- Ignore currency words like रुपये / rupees / rs / ₹
 
-        - Common mappings:
-        - हजार / hazaar → ×1,000
-        - लाख / lakh → ×100,000
+OUT-OF-BOUND HANDLING:
+If the caller asks questions NOT related to payment amount (e.g., "कौन हो आप?", "क्यों कॉल कर रहे हो?", 
+asks about date, mode, etc.), classify as:
+- "ROLE_CLARIFICATION" → asking about who you are, why calling, etc. (cooperative)
+- "OFF_TOPIC" → asking about something else - redirect politely
 
-        ========================
-        EXAMPLES (DEVANAGARI FIRST)
-        ========================
+CLASSIFICATION CATEGORIES:
 
-        "पचास हजार रुपये"
-        → value: "50000"
+1. "ANSWERED" → caller clearly provided payment amount
+   Action: NEXT (proceed to summary)
+   Response: null
 
-        "एक लाख रुपये"
-        → value: "100000"
+2. "ROLE_CLARIFICATION" → caller asks about who you are, why calling, etc.
+   Action: CLARIFY (provide explanation, then repeat question)
+   Response: Generate friendly Hindi explanation with acknowledgment + explanation + repeat question
 
-        "दस हजार"
-        → value: "10000"
+3. "REFUSE" → caller explicitly refuses to participate
+   Action: CLOSING (end call gracefully)
+   Response: Generate polite closing message in Hindi
 
-        "बीस हज़ार पाँच सौ"
-        → value: "20500"
+4. "OFF_TOPIC" → caller asks about something else (date, mode, etc.)
+   Action: CLARIFY (acknowledge and redirect)
+   Response: Generate polite Hindi response with acknowledgment + redirect + repeat question
 
-        "₹ 15,000"
-        → value: "15000"
+5. "UNCLEAR" → reply is too ambiguous or unrelated
+   Action: REPEAT (ask question again with acknowledgment)
+   Response: Generate acknowledgment of what they said + polite request for amount
+   Example responses:
+   - "जी, मैं समझा... लेकिन राशि स्पष्ट नहीं हुई। कृपया बताइए कितना payment किया था?"
+   - "अच्छा जी... तो exact amount क्या थी? कितने रुपये का भुगतान किया था?"
+   - "हाँ जी... लेकिन मुझे amount confirm करनी है। कितनी रकम payment की थी आपने?"
 
-        "पंद्रह सौ"
-        → value: "1500"
+Return ONLY this JSON (no extra text):
+{
+  "value": "numeric_amount_as_string or null",
+  "classification": "ANSWERED" | "ROLE_CLARIFICATION" | "REFUSE" | "OFF_TOPIC" | "UNCLEAR",
+  "is_clear": true | false,
+  "action": "NEXT" | "CLARIFY" | "REPEAT" | "CLOSING",
+  "response_text": "string or null"
+}
 
-
-        Roman examples:
-        "pachas hazaar rupaye"
-        → value: "50000"
-
-        "ek lakh rupees"
-        → value: "100000"
-
-        "dus hazaar"
-        → value: "10000"
-
-        "bees hazaar paanch sau"
-        → value: "20500"
-
-        "15000"
-        → value: "15000"
-
-        "rs 2500"
-        → value: "2500"
-
-
-        ========================
-        UNCLEAR CASES
-        ========================
-
-        If the response:
-        - Does not mention an amount
-        - Mentions a range ("10–15 हजार")
-        - Uses vague terms ("थोड़ा सा", "जितना बन पड़ा")
-        - Is unrelated or unclear
-
-        Examples:
-        "याद नहीं",
-        "पता नहीं",
-        "ठीक से याद नहीं है"
-
-        → value = null
-        → is_clear = false
-
-        ========================
-        IMPORTANT INSTRUCTIONS
-        ========================
-
-        - Return ONLY the numeric amount as a string
-        - Do NOT guess or assume
-        - If amount is clearly extracted → is_clear = true
-        - If unclear or missing → is_clear = false
-        - Do NOT explain your reasoning
-        - Do NOT add extra fields
-        - Return ONLY valid JSON (no markdown, no text outside JSON)
-
-        ========================
-        OUTPUT FORMAT (STRICT)
-        ========================
-
-        {
-        "value": "numeric_amount_as_string",
-        "is_clear": true/false
-        }
+CRITICAL GUIDELINES:
+- If caller provides amount → ANSWERED, action=NEXT, response_text=null
+- Strictly ALWAYS return the response_text Devanagari script.
+- Amount should be digits only (e.g., "50000" not "50,000" or "₹50000")
+- ALWAYS include conversational acknowledgments in response_text (जी, अच्छा, हाँ जी, बिल्कुल, etc.)
+- For UNCLEAR: acknowledge that you heard them, then politely ask for the amount again
+- Make responses sound natural and interactive, not robotic
+- Vary the acknowledgment phrases to avoid repetition
+- If caller asks about role → ROLE_CLARIFICATION, action=CLARIFY, generate response
+- If caller refuses → REFUSE, action=CLOSING, generate closing message
+- If caller asks off-topic → OFF_TOPIC, action=CLARIFY, redirect politely
+- All response_text should be in natural, conversational Hindi (Devanagari script)
 """
 
 
 def handle(user_input, session):
-    r = call_gemini(PROMPT + user_input)
+    r = call_gemini(PROMPT + "\n\nUser said: " + user_input)
+
     if not r["is_clear"]:
-        return QuestionResult(False)
+        return QuestionResult(False, response_text=r.get("response_text"))
+
     session["amount"] = r["value"]
-    return QuestionResult(True)
+
+    # Return response_text for clarifications
+    response_text = r.get("response_text")
+    return QuestionResult(
+        True, value=r["value"], extra={"response_text": response_text}
+    )

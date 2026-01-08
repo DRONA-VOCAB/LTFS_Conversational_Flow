@@ -25,7 +25,7 @@ export const useVoiceWebSocket = () => {
 
   const setupPCMPlayer = useCallback(async () => {
     pcmPlayerRef.current?.stop();
-    pcmPlayerRef.current = new PCMPlayer(24000); // TTS outputs at 24kHz
+    pcmPlayerRef.current = new PCMPlayer(16000); // TTS outputs at 24kHz
     await pcmPlayerRef.current.init();
     return true;
   }, []);
