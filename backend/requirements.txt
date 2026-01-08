@@ -1,0 +1,12 @@
+python-dotenv 
+google-generativeai
+fastapi
+uvicorn[standard]
+websockets
+httpx
+torch
+torchaudio
+packaging
+psycopg2-binary
+aiohttp==3.8.4
+numpy
