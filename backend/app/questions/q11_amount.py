@@ -91,6 +91,7 @@ def handle(user_input, session):
 
     # Return response_text for clarifications
     response_text = r.get("response_text")
+    action = r.get("action")
     return QuestionResult(
-        True, value=r["value"], extra={"response_text": response_text}
+        True, value=r["value"], extra={"response_text": response_text, "action": action}
     )

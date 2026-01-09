@@ -132,5 +132,5 @@ def handle(user_input, session):
         )
 
     return QuestionResult(
-        True, value=r["value"], extra={"response_text": r.get("response_text")}
+        True, value=r["value"], extra={"response_text": r.get("response_text"), "action": r.get("action")}
     )

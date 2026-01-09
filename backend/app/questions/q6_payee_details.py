@@ -3,13 +3,14 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "कृपया बताइए, इस अकाउंट का भुगतान किसने किया है? क्या मैं भुगतानकर्ता का नाम और संपर्क नंबर नोट कर सकती हूँ?"
+    return "कृपया बताइए, क्या मैं भुगतानकर्ता का नाम और संपर्क नंबर नोट कर सकती हूँ?"
+
 
 PROMPT = """
 You are an intelligent conversational AI assistant for L&T Finance conducting a customer survey call.
 
 The agent just asked:
-"कृपया बताइए, इस अकाउंट का भुगतान किसने किया है? क्या मैं भुगतानकर्ता का नाम और संपर्क नंबर नोट कर सकती हूँ?"
+"कृपया बताइए, क्या मैं भुगतानकर्ता का नाम और संपर्क नंबर नोट कर सकती हूँ?"
 
 You receive the caller's reply (in Hindi, Hinglish, or English).
 
@@ -84,5 +85,8 @@ def handle(user_input, session):
         return QuestionResult(False)
     session["payee_name"] = r["value"].get("payee_name")
     session["payee_contact"] = r["value"].get("payee_contact")
-    return QuestionResult(True)
-
+    return QuestionResult(
+        True,
+        value=r["value"],
+        extra={"response_text": r.get("response_text"), "action": r.get("action")},
+    )

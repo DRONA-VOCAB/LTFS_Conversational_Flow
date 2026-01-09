@@ -86,5 +86,5 @@ def handle(user_input, session):
         session["field_executive_name"] = r["value"].get("field_executive_name")
     if r["value"].get("field_executive_contact"):
         session["field_executive_contact"] = r["value"].get("field_executive_contact")
-    return QuestionResult(True)
+    return QuestionResult(True, value=r["value"], extra={"response_text": r.get("response_text"), "action": r.get("action")})
 

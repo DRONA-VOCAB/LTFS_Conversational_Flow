@@ -72,36 +72,45 @@ def generate_human_summary(session: dict) -> str:
     }
 
     # FIX 3: Improved prompt with clear structure for payee, executive, reason, date
-    prompt = f"""You are a customer service representative having a natural conversation with a customer. 
-Generate a simple, conversational summary in Hindi (Devanagari script) based on the following conversation data:
+    prompt = f"""
+        आप एक कस्टमर सर्विस प्रतिनिधि हैं और ग्राहक से फ़ोन पर स्वाभाविक बातचीत कर रहे हैं।
+        नीचे दिए गए वार्तालाप डेटा के आधार पर हिंदी (केवल देवनागरी लिपि में) एक सरल, बोलचाल की पुष्टि-वाली पंक्ति तैयार करें।
 
-{json.dumps(summary_data, indent=2, ensure_ascii=False)}
+        {json.dumps(summary_data, indent=2, ensure_ascii=False)}
 
-IMPORTANT INSTRUCTIONS:
-1. Create a natural summary as if you're confirming details with the customer on a phone call
-2. Use natural Hindi/Hinglish - the way people actually speak
-3. Focus on the PAYMENT details in this specific order:
-   a) WHO paid (payee) OR if customer paid themselves
-   b) AMOUNT (राशि)
-   c) WHY they paid (reason - EMI, settlement, etc.)
-   d) WHEN they paid (date)
-   e) HOW they paid (payment mode - online, cash, etc.)
-   f) TO WHOM they paid (if field_executive_name exists, mention the executive)
+        महत्वपूर्ण निर्देश:
+        1. उत्तर ऐसा हो जैसे आप कॉल पर ग्राहक से विवरण की पुष्टि कर रहे हों।
+        2. भाषा स्वाभाविक हिंदी / आम बोलचाल वाली हो, लेकिन रोमन लिपि का प्रयोग बिल्कुल न करें।
+        3. पूरा उत्तर केवल देवनागरी लिपि में हो; कोई भी अंग्रेज़ी या रोमन शब्द न हों।
+        4. भुगतान से जुड़ी जानकारी हमेशा इसी क्रम में रखें:
+        (क) किसने भुगतान किया (यदि ग्राहक ने स्वयं किया हो तो वही दर्शाएँ)
+        (ख) राशि
+        (ग) भुगतान का कारण (जैसे ईएमआई, सेटलमेंट, फोरक्लोज़र आदि)
+        (घ) भुगतान की तारीख
+        (ङ) भुगतान का माध्यम (ऑनलाइन, नकद, शाखा, एनएसीएच आदि — देवनागरी में)
+        (च) किसे भुगतान किया गया (यदि फ़ील्ड एग्ज़ीक्यूटिव का नाम उपलब्ध हो तो)
 
-STRUCTURE EXAMPLES:
-- If customer paid themselves: "आपने [amount] रुपये का भुगतान [reason] के लिए [date] को किया था और यह [payment_mode] माध्यम से किया है।"
-- If someone else paid: "[payee] ने [amount] रुपये का भुगतान [reason] के लिए [date] को किया था और यह [payment_mode] माध्यम से किया है।"
-- If executive involved: "आपने [amount] रुपये [executive_name] को [reason] के लिए [date] को दिए थे और यह [payment_mode] से किया था।"
+        वाक्य संरचना के उदाहरण:
+        - यदि ग्राहक ने स्वयं भुगतान किया हो:
+        "आपने [राशि] रुपये का भुगतान [कारण] के लिए [तारीख] को किया था और यह [भुगतान माध्यम] से किया गया था।"
 
-4. After stating the details, ASK for confirmation: "क्या यह जानकारी सही है?"
-5. Keep it conversational, not formal or robotic
-6. Do NOT include greetings, bullet points, or "summary" labels
-7. Write in Devanagari script, not roman
+        - यदि किसी अन्य व्यक्ति ने भुगतान किया हो:
+        "[भुगतानकर्ता] ने [राशि] रुपये का भुगतान [कारण] के लिए [तारीख] को किया था और यह [भुगतान माध्यम] से किया गया था।"
 
-Example output format:
-"आपने 5000 रुपये का भुगतान अपनी ईएमआई के लिए 15 दिसंबर को किया था और यह ऑनलाइन माध्यम से किया है। क्या यह जानकारी सही है?"
+        - यदि फ़ील्ड एग्ज़ीक्यूटिव को भुगतान किया गया हो:
+        "आपने [राशि] रुपये [एक्ज़ीक्यूटिव का नाम] को [कारण] के लिए [तारीख] को दिए थे और यह [भुगतान माध्यम] से किया गया था।"
 
-Generate the summary:"""
+        5. विवरण बताने के बाद अंत में यह प्रश्न अवश्य पूछें:
+        "क्या यह जानकारी सही है?"
+
+        6. अभिवादन, बुलेट पॉइंट, शीर्षक या “सारांश” जैसे शब्द न जोड़ें।
+        7. विराम-चिह्नों का सही प्रयोग करें—अल्पविराम, पूर्णविराम और प्रश्नवाचक चिन्ह।
+
+        उदाहरण आउटपुट:
+        "आपने 5000 रुपये का भुगतान अपनी ईएमआई के लिए 15 दिसंबर को किया था और यह ऑनलाइन माध्यम से किया गया था। क्या यह जानकारी सही है?"
+
+        अब उपरोक्त निर्देशों के अनुसार उत्तर तैयार करें।
+    """
 
     try:
         logger.info("=" * 80)

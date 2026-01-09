@@ -3,7 +3,7 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "यह भुगतान किसने किया था? आपने खुद या किसी और ने?"
+    return "कृपया बताइए—यह भुगतान किसने किया था… आपने खुद… परिवार के किसी सदस्य ने… आपके किसी मित्र ने… या फिर किसी और ने?"
 
 
 PROMPT = """
@@ -77,4 +77,4 @@ def handle(user_input, session):
     if not r["is_clear"]:
         return QuestionResult(False)
     session["payee"] = r["value"]
-    return QuestionResult(True)
+    return QuestionResult(True, value=r["value"], extra={"response_text": r.get("response_text"), "action": r.get("action")})

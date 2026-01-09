@@ -39,6 +39,9 @@ async def get_customers():
         raise HTTPException(status_code=500, detail=f"Error fetching customers: {str(e)}")
 
 
+from config.database import get_all_customers, get_customer_by_name
+from utils.session_data_storage import save_db_data, save_session_data
+
 @router.post("", response_model=CreateSessionResponse)
 async def create_session_endpoint(request: CreateSessionRequest):
     """Create a new survey session"""
@@ -50,9 +53,28 @@ async def create_session_endpoint(request: CreateSessionRequest):
         customer_name_english = request.customer_name.strip() or "Customer"
         customer_name_hindi = transliterate_to_devanagari(customer_name_english)
         
+        # Fetch ALL customer data from database (ONLY the selected customer)
+        customer_data = get_customer_by_name(customer_name_english)
+        
+        # Save DB data to file
+        if customer_data:
+            save_db_data(session_id, customer_data)
+        
         # Use Hindi name for TTS, store both
         session = create_session(session_id, customer_name_hindi)
         session["customer_name_english"] = customer_name_english  # Store original
+
+        if customer_data and customer_data.get("product"):
+            product = customer_data.get("product", "").upper()
+            if product == "PL":
+                session["product_type"] = "पर्सनल लोन"
+            else:
+                session["product_type"] = "पर्सनल लोन"
+                # session["product_type"] = "टू-व्हीलर लोन" update when added two wheeler flow
+        else:
+            # Default to two wheeler if not found
+            session["product_type"] = "टपर्सनल लोन"
+            
         save_session(session)
 
         # Get first question
@@ -85,6 +107,9 @@ async def submit_answer(session_id: str, request: SubmitAnswerRequest):
         # Process answer
         result = process_answer(session, request.answer.strip())
         save_session(session)
+
+        if result in ["END", "CLOSING"]:
+            save_session_data(session_id, session)
 
         if result == "END":
             return SubmitAnswerResponse(
@@ -171,6 +196,9 @@ async def confirm_summary(session_id: str, request: ConfirmRequest):
 
         # Generate closing statement
         closing_statement = get_closing_statement(session)
+        
+        # Save session data to file when session completes
+        save_session_data(session_id, session)
 
         return ConfirmResponse(
             closing_statement=closing_statement, session_id=session_id

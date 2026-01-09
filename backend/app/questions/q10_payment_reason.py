@@ -3,14 +3,14 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "भुगतान किस कारण से किया गया था?"
+    return "कृपया बताइए—यह भुगतान किस कारण से किया गया था… ईएमआई के लिए… ईएमआई के साथ शुल्क के लिए… सेटलमेंट के लिए… फोरक्लोज़र के लिए… केवल शुल्क के लिए… लोन रद्दीकरण के लिए… या फिर अग्रिम ईएमआई के रूप में?"
 
 
 PROMPT = """
 You are an intelligent conversational AI assistant for L&T Finance conducting a customer survey call.
 
 The agent just asked:
-"भुगतान किस कारण से किया गया था?"
+"कृपया बताइए, यह भुगतान किस कारण से किया गया था—क्या ईएमआई के लिए, ईएमआई के साथ शुल्क के लिए, सेटलमेंट के लिए, फोरक्लोज़र के लिए, केवल शुल्क के लिए, लोन रद्दीकरण के लिए, या अग्रिम ईएमआई के रूप में किया गया था?"
 
 You receive the caller's reply (in Hindi, Hinglish, or English).
 
@@ -77,4 +77,8 @@ def handle(user_input, session):
     if not r["is_clear"]:
         return QuestionResult(False)
     session["reason"] = r["value"]
-    return QuestionResult(True)
+    return QuestionResult(
+        True,
+        value=r["value"],
+        extra={"response_text": r.get("response_text"), "action": r.get("action")},
+    )

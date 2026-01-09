@@ -3,7 +3,7 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "यह कॉल आपके पर्सनल लोन या टू-व्हीलर लोन के भुगतान अनुभव को समझने के लिए है। क्या आपने एल एंड टी फ़ाइनेंस से लोन लिया है?"
+    return "यह कॉल आपके {{product_type}} के भुगतान अनुभव को समझने के लिए है। क्या आपने एल एंड टी फ़ाइनेंस से लोन लिया है?"
 
 
 PROMPT = """
@@ -41,7 +41,7 @@ CLASSIFICATION CATEGORIES:
 2. "NO" → caller says they don't have a loan or wrong number
    Examples: "नहीं", "गलत नंबर", "मैंने लोन नहीं लिया", "no", "wrong number"
    Action: CLOSING (end call - no loan means survey doesn't apply)
-   Response: Generate APOLOGY message in Hindi: "जी, माफ़ कीजिए गलत नंबर पर कॉल हो गई। धन्यवाद आपके समय के लिए। आपका दिन शुभ हो!"
+   Response: Generate APOLOGY message in Hindi: "जी, माफ़ कीजिए, लगता है हमने गलत नंबर पर कॉल कर लिया है। आपके समय के लिए धन्यवाद। आपका दिन शुभ हो।"
    IMPORTANT: Must include apology, NOT "thank you for confirming callback time"
 
 3. "ROLE_CLARIFICATION" → caller asks about who you are, why calling, etc.
@@ -103,6 +103,7 @@ def handle(user_input, session):
 
     # Return response_text for clarifications
     response_text = r.get("response_text")
+    action = r.get("action")
     return QuestionResult(
-        True, value=r["value"], extra={"response_text": response_text}
+        True, value=r["value"], extra={"response_text": response_text, "action": action}
     )

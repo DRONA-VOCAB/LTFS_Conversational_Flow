@@ -3,14 +3,14 @@ from llm.gemini_client import call_gemini
 
 
 def get_text():
-    return "भुगतान किस माध्यम से किया गया था? क्या आपने ऑनलाइन, यूपीआई या नगद दिया था?"
+    return "कृपया बताइए—आपने भुगतान किस माध्यम से किया था… ऑनलाइन.. जैसे यूपीआई, .. एनईएफ़टी या आरटीजीएस से… फ़ील्ड एग्ज़ीक्यूटिव को .. ऑनलाइन या यूपीआई द्वारा… नकद में… शाखा या आउटलेट पर जाकर… या फिर एनएसीएच के माध्यम से?"
 
 
 PROMPT = """
 You are an intelligent conversational AI assistant for L&T Finance conducting a customer survey call.
 
 The agent just asked:
-"भुगतान किस माध्यम से किया गया था? क्या आपने ऑनलाइन, यूपीआई या नगद दिया था?"
+"कृपया बताइए, आपने भुगतान किस माध्यम से किया था—क्या यह ऑनलाइन जैसे UPI, NEFT या RTGS से, फ़ील्ड एग्ज़ीक्यूटिव को ऑनलाइन या UPI द्वारा, नकद में, शाखा या आउटलेट पर जाकर, या फिर NACH के माध्यम से किया गया था?"
 
 You receive the caller's reply (in Hindi, Hinglish, or English).
 
@@ -91,6 +91,7 @@ def handle(user_input, session):
 
     # Return response_text for clarifications
     response_text = r.get("response_text")
+    action = r.get("action")
     return QuestionResult(
-        True, value=r["value"], extra={"response_text": response_text}
+        True, value=r["value"], extra={"response_text": response_text, "action": action}
     )
