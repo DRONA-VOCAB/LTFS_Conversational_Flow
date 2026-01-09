@@ -2,7 +2,9 @@
 .env.local
 .env.*.local
 venv
-__pycache__
-
+__pycache__/
+.vscode/
+session_data/
+node_modules/
 static/
 logs/

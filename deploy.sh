@@ -63,6 +63,6 @@ nohup uvicorn main:app \
     > "$LOG_FILE" 2>&1 &
 
 echo "✅ Application running with HTTPS"
-echo "🌐 URL: https://<your-domain>:8000"
+echo "🌐 URL: https://server6.vo-cab.dev:8000/"
 echo "📄 Logs: $LOG_FILE"
 echo "🆔 PID: $!"
