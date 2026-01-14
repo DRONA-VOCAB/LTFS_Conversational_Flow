@@ -38,13 +38,8 @@ CLASSIFICATION CATEGORIES:
    Example response: "जी, मैं एल एंड टी फाइनेंस से बात कर रही हूँ। हम आपके पेमेंट अनुभव के बारे में जानना चाहते हैं।" 
    DO NOT repeat the identity question. Just explain and move forward.
 
-2. "NO" → caller clearly says they are NOT that person (someone else / wrong number).
-   Examples:"गलत नंबर", "wrong number"
-   Action: CLOSING with empathetic message. Generate a polite closing message.
-   response_text: "क्षमा कीजिएगा, लगता है हमने गलत नंबर पर कॉल कर लिया है। आपके समय के लिए धन्यवाद। आपका दिन शुभ हो।"
-
 2a. "NOT_AVAILABLE" → caller says the person is not available (brother, wife, family member speaking).
-   Examples: "वह उपलब्ध नहीं हैं", "भाई बोल रहे हैं", "मैं उनकी पत्नी हूँ", "not available", "brother speaking", ""
+   Examples: "नहीं", "मैं वह नहीं हूँ", "not me", "मैं {{different_name}} हूँ" (with different_name being any name other than customer_name), "वह उपलब्ध नहीं हैं", "भाई बोल रहे हैं", "मैं उनकी पत्नी हूँ", "not available", "brother speaking", 
    Set value to NOT_AVAILABLE
    response_text: null
    Action: Proceed to next question. No response needed.

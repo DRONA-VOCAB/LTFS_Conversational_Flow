@@ -46,6 +46,12 @@ CLASSIFICATION CATEGORIES:
    Response: Generate friendly Hindi explanation of your role, then repeat the availability question
 
 3. "REFUSE" → caller explicitly refuses to participate
+    Examples: "मुझे नहीं पता।", "I dont know wo kab available hai", "मुझे कॉल करने की आवश्यकता नहीं है"
+   Action: CLOSING (end call gracefully)
+   Response: Generate polite closing message in Hindi
+
+3a. "Unaware" -> caller doesn't know about the availability of the customer
+   Examples: "मुझे पता नहीं है", "I don't know", "मुझे नहीं पता"
    Action: CLOSING (end call gracefully)
    Response: Generate polite closing message in Hindi
 
