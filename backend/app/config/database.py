@@ -31,20 +31,30 @@ def get_all_customers() -> List[Dict]:
         raise
 
 
-def get_customer_by_name(customer_name: str) -> Optional[Dict[str, str]]:
-    """Get a customer by name"""
+def get_customer_by_name(customer_name: str) -> Optional[Dict]:
+    """Get a customer by name with all fields - fetches ONLY the selected customer"""
     try:
         conn = get_db_connection()
         cursor = conn.cursor(cursor_factory=RealDictCursor)
         
-        cursor.execute('SELECT id, customer_name, contact_number FROM customer_data WHERE customer_name = %s LIMIT 1;', (customer_name,))
+        # Fetch ALL columns for ONLY the selected customer
+        cursor.execute('SELECT * FROM customer_data WHERE customer_name = %s LIMIT 1;', (customer_name,))
         customer = cursor.fetchone()
         
         cursor.close()
         conn.close()
         
-        return dict(customer) if customer else None
+        if customer:
+            # Convert to dictionary and handle date/numeric types
+            customer_dict = dict(customer)
+            # Convert dates to strings for JSON serialization
+            for key, value in customer_dict.items():
+                if hasattr(value, 'isoformat'):  # Date/datetime objects
+                    customer_dict[key] = value.isoformat()
+                elif hasattr(value, '__float__') and not isinstance(value, (int, float)):  # Decimal/Numeric
+                    customer_dict[key] = float(value)
+            return customer_dict
+        return None
     except Exception as e:
         print(f"Error fetching customer by name: {e}")
         return None
-

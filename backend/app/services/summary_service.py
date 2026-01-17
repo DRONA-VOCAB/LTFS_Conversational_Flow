@@ -30,14 +30,45 @@ def transliterate_to_devanagari(name: str) -> str:
 
 def generate_human_summary(session: dict) -> str:
     """Generate a human-readable summary from session data using LLM"""
-    # Filter out internal fields
-    summary_data = {
-        k: v
-        for k, v in session.items()
-        if v is not None
-        and k
-        not in ["session_id", "current_question", "retry_count", "call_should_end"]
-    }
+    # Use conversational fields if available, otherwise fall back to legacy fields
+    summary_data = {}
+    
+    # Map conversational fields to summary data
+    if session.get("identity_confirmed"):
+        summary_data["identity_confirmed"] = session.get("identity_confirmed")
+    elif session.get("identify_confirmation"):
+        summary_data["identity_confirmed"] = session.get("identify_confirmation")
+    
+    if session.get("loan_taken"):
+        summary_data["loan_taken"] = session.get("loan_taken")
+    
+    if session.get("last_month_payment"):
+        summary_data["last_month_payment"] = session.get("last_month_payment")
+    elif session.get("last_month_emi_payment"):
+        summary_data["last_month_payment"] = session.get("last_month_emi_payment")
+    
+    if session.get("payee"):
+        summary_data["payee"] = session.get("payee")
+    
+    if session.get("payment_date"):
+        summary_data["payment_date"] = session.get("payment_date")
+    elif session.get("pay_date"):
+        summary_data["payment_date"] = session.get("pay_date")
+    
+    if session.get("payment_mode"):
+        summary_data["payment_mode"] = session.get("payment_mode")
+    elif session.get("mode_of_payment"):
+        summary_data["payment_mode"] = session.get("mode_of_payment")
+    
+    if session.get("payment_reason"):
+        summary_data["payment_reason"] = session.get("payment_reason")
+    elif session.get("reason"):
+        summary_data["payment_reason"] = session.get("reason")
+    
+    if session.get("payment_amount"):
+        summary_data["payment_amount"] = session.get("payment_amount")
+    elif session.get("amount"):
+        summary_data["payment_amount"] = session.get("amount")
 
     # Create a prompt for generating human-readable summary
     prompt = f"""You are a customer service representative having a natural conversation with a customer. 
@@ -77,14 +108,15 @@ def generate_fallback_summary(data: dict) -> str:
     """Generate a basic conversational summary if LLM fails"""
     summary_parts = []
 
-    # Build natural conversational summary
-    if data.get("amount") and data.get("mode_of_payment"):
-        amount = data.get("amount")
-        mode = data.get("mode_of_payment")
+    # Build natural conversational summary using new field names
+    amount = data.get("payment_amount") or data.get("amount")
+    mode = data.get("payment_mode") or data.get("mode_of_payment")
+    
+    if amount and mode:
         # Convert mode to readable format
         mode_map = {
-            "online": "online",
             "online_lan": "online",
+            "online": "online",
             "online_field_executive": "online field executive",
             "cash": "cash",
             "branch": "branch",
@@ -95,13 +127,14 @@ def generate_fallback_summary(data: dict) -> str:
         summary_parts.append(
             f" ₹{amount} ka payment kiya tha aur ye payment {mode_text} madhyam se kiya hai."
         )
-    elif data.get("amount"):
-        summary_parts.append(f" ₹{data.get('amount')} ka payment kiya tha")
-    elif data.get("last_month_emi_payment") == "YES":
+    elif amount:
+        summary_parts.append(f" ₹{amount} ka payment kiya tha")
+    elif data.get("last_month_payment") == "YES" or data.get("last_month_emi_payment") == "YES":
         summary_parts.append("pichle mahine EMI payment Hua tha.")
 
-    if data.get("pay_date"):
-        summary_parts.append(f"payment {data.get('pay_date')} date ko ki gai thi.")
+    pay_date = data.get("payment_date") or data.get("pay_date")
+    if pay_date:
+        summary_parts.append(f"payment {pay_date} date ko ki gai thi.")
 
     if not summary_parts:
         # Fallback if no key data
@@ -214,27 +247,43 @@ def get_edit_prompt() -> str:
 
 def get_closing_statement(session: dict) -> str:
     """Generate closing statement based on session data"""
+    call_end_reason = session.get("call_end_reason")
+    
     if session.get("call_should_end"):
-        # Check if it's a wrong number case (loan_taken is NO)
-        if session.get("loan_taken") == "NO":
-            return "धन्यवाद आपके समय के लिए।\nआपका दिन शुभ हो!"
-        # Check if alternate number was provided
-        elif session.get("user_contact"):
-            return (
-                "धन्यवाद आपके समय के लिए।\n"
-                "हम आपके द्वारा बताए गए समय पर उनसे संपर्क करेंगे।\n"
-                "आपका दिन शुभ हो!"
-            )
-        # Otherwise, it's availability case without alternate number
+        # Check specific end reasons from conversational flow
+        if call_end_reason == "no_loan" or session.get("loan_taken") == "NO":
+            return "धन्यवाद आपके समय के लिए। आपका दिन शुभ हो!"
+        elif call_end_reason == "wrong_person" or session.get("identity_confirmed") == "NO":
+            if session.get("user_contact"):
+                return (
+                    "धन्यवाद आपके समय के लिए।\n"
+                    "हम आपके द्वारा बताए गए समय पर उनसे संपर्क करेंगे।\n"
+                    "आपका दिन शुभ हो!"
+                )
+            else:
+                return (
+                    "धन्यवाद आपके समय के लिए।\n"
+                    "हम आपके द्वारा बताए गए समय पर ग्राहक से संपर्क करेंगे।\n"
+                    "आपका दिन शुभ हो!"
+                )
+        # Check legacy fields for backward compatibility
+        elif session.get("identify_confirmation") == "NO":
+            if session.get("user_contact"):
+                return (
+                    "धन्यवाद आपके समय के लिए।\n"
+                    "हम आपके द्वारा बताए गए समय पर उनसे संपर्क करेंगे।\n"
+                    "आपका दिन शुभ हो!"
+                )
+            else:
+                return (
+                    "धन्यवाद आपके समय के लिए।\n"
+                    "हम आपके द्वारा बताए गए समय पर ग्राहक से संपर्क करेंगे।\n"
+                    "आपका दिन शुभ हो!"
+                )
         else:
-            return (
-                "धन्यवाद आपके समय के लिए।\n"
-                "हम आपके द्वारा बताए गए समय पर ग्राहक से संपर्क करेंगे।\n"
-                "आपका दिन शुभ हो!"
-            )
+            return "धन्यवाद आपके समय के लिए। आपका दिन शुभ हो!"
     else:
         return (
-            "धन्यवाद आपके समय के लिए।\n"
-            "आपकी फीडबैक हमारे लिए बहुत महत्वपूर्ण है।\n"
-            "आपका दिन शुभ हो!"
+            "आपके मूल्यवान फ़ीडबैक और समय देने के लिए धन्यवाद।\n"
+            "आपका दिन शुभ हो।"
         )

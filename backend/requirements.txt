@@ -8,5 +8,7 @@ torch
 torchaudio
 packaging
 psycopg2-binary
+asyncpg
+sqlalchemy[asyncio]
 aiohttp==3.8.4
 numpy
