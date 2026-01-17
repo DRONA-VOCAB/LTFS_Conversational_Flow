@@ -68,8 +68,16 @@ def extract_json_from_text(text: str) -> str:
 def call_gemini(prompt: str) -> dict:
     response = None
     try:
-        # Add explicit instruction to return JSON only
-        enhanced_prompt = prompt + "\n\nIMPORTANT: Return ONLY the JSON object. Do not include any text before or after the JSON. Start your response with { and end with }."
+        # Add system-level instructions for date handling and JSON output
+        system_instruction = """
+SYSTEM INSTRUCTIONS:
+- Current year is 2025
+- When processing dates, ALWAYS use 2025 as the year unless explicitly told otherwise
+- NEVER use years like 2024, 2023, or any year before 2025
+- Return ONLY valid JSON - no markdown, no explanations, no text outside JSON
+"""
+        
+        enhanced_prompt = system_instruction + "\n\n" + prompt + "\n\nIMPORTANT: Return ONLY the JSON object. Do not include any text before or after the JSON. Start your response with { and end with }."
         
         # Use generation config to encourage structured output
         generation_config = {

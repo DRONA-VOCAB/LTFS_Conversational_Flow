@@ -7,7 +7,7 @@ def get_text():
 
 
 PROMPT = """
-        You are an intelligent assistant.
+        You are an intelligent assistant. The current year is 2025.
 
         Question asked to the user:
         "आपने पेमेंट किस तारीख को किया था?"
@@ -26,9 +26,10 @@ PROMPT = """
         - Relative phrases (convert if clear)
 
         - Month names may be in Hindi, English, or Hinglish.
-        - Take the YEAR as either **2025 or 2026** only.
-        - If the year is not explicitly mentioned, infer the most reasonable year
-            based on context (default to 2025 unless clearly future → 2026).
+        - IMPORTANT: The YEAR must be either **2025 or 2026** only.
+        - If the year is not explicitly mentioned, use 2025 as the default year.
+        - Only use 2026 if the user clearly indicates a future date.
+        - NEVER use years like 2024, 2023, or any year before 2025.
 
         ========================
         EXAMPLES (DEVANAGARI FIRST)
@@ -41,7 +42,7 @@ PROMPT = """
         → value: "03/12/2025"
 
         "15 जनवरी को किया था"
-        → value: "15/01/2026"
+        → value: "15/01/2025" (default to 2025)
 
         "कल किया था" (if clearly refers to a known previous date in context)
         → extract date accordingly, else UNCLEAR
@@ -58,7 +59,7 @@ PROMPT = """
         → value: "03/12/2025"
 
         "15 jan ko kiya tha"
-        → value: "15/01/2026"
+        → value: "15/01/2025"
 
         "05/12/2025"
         → value: "05/12/2025"
@@ -90,6 +91,8 @@ PROMPT = """
         ========================
 
         - Return date strictly in **dd/mm/yyyy** format
+        - ALWAYS use 2025 as the year unless explicitly told otherwise
+        - Do NOT use 2024, 2023, or any year before 2025
         - Do NOT guess if date cannot be reasonably inferred
         - If date is clearly extracted → is_clear = true
         - If date is missing or unclear → is_clear = false
