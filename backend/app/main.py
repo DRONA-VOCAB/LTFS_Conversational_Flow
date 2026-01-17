@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from routes import session_router
-from core.websocket_handler import websocket_audio_endpoint
+from .routes import session_router
+from .core.websocket_handler import websocket_audio_endpoint
 
 # Create FastAPI app
 app = FastAPI(

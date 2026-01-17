@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 
 # Conditional import to avoid initialization issues during testing
 try:
-    from llm.gemini_client import call_gemini
+    from ..llm.gemini_client import call_gemini
     LLM_AVAILABLE = True
 except Exception as e:
     logger.warning(f"LLM not available: {e}")
@@ -32,7 +32,7 @@ def get_conversational_prompt() -> str:
     Returns the main conversational prompt that handles all questions intelligently
     """
     return """
-You are an experienced, empathetic FEMALE customer service representative from L&T Finance conducting a feedback call. You must handle ALL types of customer responses naturally and professionally.
+You are an experienced, empathetic FEMALE customer service representative from L and T Finance conducting a feedback call. You must handle ALL types of customer responses naturally and professionally.
 
 IMPORTANT: You are a FEMALE representative. Always use feminine forms in Hindi when referring to yourself and let the LLM decide all responses dynamically based on context.
 
@@ -41,7 +41,7 @@ Collect payment feedback information through natural conversation while being un
 
 REQUIRED INFORMATION TO COLLECT:
 1. identity_confirmed - Whether you're speaking to the right person
-2. loan_taken - Whether they have taken a loan from L&T Finance  
+2. loan_taken - Whether they have taken a loan from L and T Finance  
 3. last_month_payment - Whether they made payment last month
 4. payee - Who made the payment (self, family member, friend, third party)
 5. payment_date - Date when payment was made
@@ -246,7 +246,7 @@ def get_enhanced_fallback_response(user_input: str, session: Dict[str, Any], sta
     """
     # Create dynamic fallback prompt
     fallback_prompt = f"""
-You are a FEMALE customer service representative from L&T Finance. The main LLM system failed, so you need to provide a fallback response.
+You are a FEMALE customer service representative from L and T Finance. The main LLM system failed, so you need to provide a fallback response.
 
 Current situation:
 - Customer said: "{user_input}"
@@ -381,7 +381,7 @@ def get_initial_greeting(customer_name: str) -> str:
     """
     # Create a dynamic prompt for initial greeting
     greeting_prompt = f"""
-You are a FEMALE customer service representative from L&T Finance starting a feedback call.
+You are a FEMALE customer service representative from L and T Finance starting a feedback call.
 
 Generate a natural, warm initial greeting in Hindi for customer: {customer_name}
 
@@ -404,12 +404,12 @@ Generate ONLY the greeting text in Hindi, nothing else.
                 return response.strip()
         
         # Fallback if LLM not available
-        return f"नमस्ते, मैं L&T finance की तरफ़ से बात कर रही हूँ, क्या मेरी बात {customer_name} जी से हो रही है?"
+        return f"नमस्ते, मैं L and T finance की तरफ़ से बात कर रही हूँ, क्या मेरी बात {customer_name} जी से हो रही है?"
         
     except Exception as e:
         logger.error(f"Error generating dynamic greeting: {e}")
         # Fallback greeting
-        return f"नमस्ते, मैं L&T finance की तरफ़ से बात कर रही हूँ, क्या मेरी बात {customer_name} जी से हो रही है?"
+        return f"नमस्ते, मैं L and T finance की तरफ़ से बात कर रही हूँ, क्या मेरी बात {customer_name} जी से हो रही है?"
 
 def is_conversation_complete(session: Dict[str, Any]) -> bool:
     """
@@ -438,7 +438,7 @@ def generate_conversation_summary(session: Dict[str, Any]) -> str:
     Generate a completely dynamic summary of the collected information using LLM
     """
     summary_prompt = f"""
-You are a FEMALE customer service representative from L&T Finance. Generate a natural, conversational summary of the customer feedback collected.
+You are a FEMALE customer service representative from L and T Finance. Generate a natural, conversational summary of the customer feedback collected.
 
 Session data collected:
 {session}

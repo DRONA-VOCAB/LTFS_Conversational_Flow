@@ -1,7 +1,7 @@
 import { useRef, useState, useCallback } from "react";
 import { PCMPlayer } from "../utils/audioProcessing";
 import { WS_URL } from "../config/settings";
-import { SAMPLE_RATE, FRAME_SAMPLES } from "../utils/constants";
+import { SAMPLE_RATE, FRAME_SAMPLES, TTS_SAMPLE_RATE } from "../utils/constants";
 
 export const useVoiceWebSocket = () => {
   const wsRef = useRef(null);
@@ -25,7 +25,7 @@ export const useVoiceWebSocket = () => {
 
   const setupPCMPlayer = useCallback(async () => {
     pcmPlayerRef.current?.stop();
-    pcmPlayerRef.current = new PCMPlayer(24000); // TTS outputs at 24kHz
+    pcmPlayerRef.current = new PCMPlayer(TTS_SAMPLE_RATE); // Use configurable TTS sample rate
     await pcmPlayerRef.current.init();
     return true;
   }, []);

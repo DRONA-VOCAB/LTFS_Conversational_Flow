@@ -4,10 +4,10 @@ import wave
 
 import aiohttp
 
-from config.settings import ASR_API_URL
-from queues.asr_queue import asr_queue
-from queues.llm_queue import llm_queue
-from utils.latency_tracker import record_event
+from ..config.settings import ASR_API_URL
+from ..queues.asr_queue import asr_queue
+from ..queues.llm_queue import llm_queue
+from ..utils.latency_tracker import record_event
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)

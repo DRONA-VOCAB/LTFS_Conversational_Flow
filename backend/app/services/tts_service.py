@@ -3,10 +3,10 @@ import time
 import aiohttp
 from dotenv import load_dotenv
 
-from config.settings import TTS_API_URL
-from queues.tts_queue import tts_queue
-from services.playback_state import get_playback_state
-from utils.latency_tracker import record_and_report, record_event, latency_data
+from ..config.settings import TTS_API_URL
+from ..queues.tts_queue import tts_queue
+from .playback_state import get_playback_state
+from ..utils.latency_tracker import record_and_report, record_event, latency_data
 
 load_dotenv()
 

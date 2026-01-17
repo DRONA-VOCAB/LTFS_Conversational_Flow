@@ -1,6 +1,6 @@
 """Service for generating summaries and closing statements"""
 
-from llm.gemini_client import model
+from ..llm.gemini_client import model
 import logging
 
 logger = logging.getLogger(__name__)
@@ -148,8 +148,8 @@ def generate_fallback_summary(data: dict) -> str:
 def is_survey_completed(session: dict) -> bool:
     """Check if survey is completed without modifying the session"""
     # Lazy import to avoid circular dependency
-    from flow.flow_manager import get_next_question_index
-    from flow.question_order import QUESTIONS
+    from ..flow.flow_manager import get_next_question_index
+    from ..flow.question_order import QUESTIONS
 
     next_idx = get_next_question_index(session)
     return next_idx >= len(QUESTIONS) or session.get("call_should_end", False)

@@ -1,5 +1,5 @@
 # Schemas package
-from schemas.session_schemas import (
+from .session_schemas import (
     CreateSessionRequest,
     CreateSessionResponse,
     SubmitAnswerRequest,
