@@ -8,17 +8,17 @@ import logging
 from typing import Dict, Optional
 from fastapi import WebSocket, WebSocketDisconnect
 
-from .router import router
-from .middleware import MiddlewarePipeline, MiddlewareContext
-from .session_manager import session_manager
-from ..services.vad_silero import process_frame, cleanup_connection
-from ..services.asr_service import transcribe_audio
-from ..services.tts_service import synthesize_stream
-from ..queues.asr_queue import asr_queue
-from ..queues.tts_queue import tts_queue
-from ..utils.latency_tracker import record_event, cleanup_tracking
-from ..sessions.session_store import get_session, save_session
-from ..flow.flow_manager import (
+from core.router import router
+from core.middleware import MiddlewarePipeline, MiddlewareContext
+from core.session_manager import session_manager
+from  services.vad_silero import process_frame, cleanup_connection
+from  services.asr_service import transcribe_audio
+from  services.tts_service import synthesize_stream
+from  queues.asr_queue import asr_queue
+from  queues.tts_queue import tts_queue
+from  utils.latency_tracker import record_event, cleanup_tracking
+from  sessions.session_store import get_session, save_session
+from  flow.flow_manager import (
     get_question_text,
     process_answer,
     get_summary_text,
@@ -186,8 +186,8 @@ async def process_asr_queue(websocket_id: str):
                     # Create session with name
                     logger.info(f"Creating session with name: {transcription}")
                     try:
-                        from ..sessions.session_schema import create_session
-                        from ..sessions.session_store import (
+                        from  sessions.session_schema import create_session
+                        from  sessions.session_store import (
                             save_session as save_session_store,
                         )
                         import uuid
@@ -231,8 +231,8 @@ async def process_asr_queue(websocket_id: str):
 
                     if result == "CONTINUE_CONVERSATION":
                         # Continue conversational flow
-                        logger.info("💬 Continuing conversation...")
-                        from ..flow.flow_manager import get_conversation_response_text
+                        logger.info("💬 Continuing conversation .")
+                        from  flow.flow_manager import get_conversation_response_text
                         response_text = get_conversation_response_text(session)
                         save_session(session)
                         await send_tts(websocket_id, response_text)

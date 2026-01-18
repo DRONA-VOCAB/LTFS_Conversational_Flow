@@ -5,7 +5,7 @@ from typing import Dict, Any
 import uuid
 from datetime import datetime
 
-from ..schemas.session_schemas import (
+from schemas.session_schemas import (
     CreateSessionRequest,
     CreateSessionResponse,
     SubmitAnswerRequest,
@@ -15,11 +15,11 @@ from ..schemas.session_schemas import (
     ConfirmResponse,
     CustomersListResponse,
 )
-from ..config.database import get_all_customers
-from ..sessions.session_schema import create_session
-from ..sessions.session_store import save_session, get_session
-from ..flow.flow_manager import get_question_text, process_answer
-from ..services.summary_service import (
+from  config.database import get_all_customers
+from  sessions.session_schema import create_session
+from  sessions.session_store import save_session, get_session
+from  flow.flow_manager import get_question_text, process_answer
+from  services.summary_service import (
     generate_human_summary,
     get_closing_statement,
     is_survey_completed,

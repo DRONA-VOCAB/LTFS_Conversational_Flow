@@ -3,8 +3,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from .routes import session_router
-from .core.websocket_handler import websocket_audio_endpoint
+from routes import session_router
+from core.websocket_handler import websocket_audio_endpoint
 
 # Create FastAPI app
 app = FastAPI(
@@ -29,25 +29,15 @@ app.include_router(session_router)
 app.websocket("/ws/audio")(websocket_audio_endpoint)
 
 
-@app.get("/")
-async def root():
-    """Root endpoint"""
-    return {
-        "message": "L and T Finance Customer Survey API",
-        "version": "1.0.0",
-        "docs": "/docs",
-        "endpoints": {
-            "POST /sessions": "Create a new survey session",
-            "POST /sessions/{session_id}/answer": "Submit an answer",
-            "GET /sessions/{session_id}/summary": "Get human-readable summary",
-            "POST /sessions/{session_id}/confirm": "Confirm summary and get closing statement",
-            "GET /sessions/{session_id}": "Get session information",
-            "WS /ws/audio": "WebSocket endpoint for bidirectional audio streaming",
-        },
-    }
+from fastapi.staticfiles import StaticFiles
+app.mount(
+    "/", 
+    StaticFiles(directory="static", html=True),
+    name="frontend"
+)
 
 
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

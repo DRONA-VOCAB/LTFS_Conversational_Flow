@@ -84,10 +84,10 @@ MAX_RETRIES=3
 ```bash
 python -m app.main
 # OR
-uvicorn app.main:app --host 0.0.0.0 --port 8000
+uvicorn app.main:app --host 0.0.0.0 --port 8001
 ```
 
-The backend will be available at `http://localhost:8000`
+The backend will be available at `http://localhost:8001`
 
 ## Frontend Setup (React + Tailwind)
 
@@ -107,10 +107,10 @@ npm install
    Create a `.env` file in the `frontend` directory:
 
 ```
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8001
 ```
 
-(If not set, it defaults to `http://localhost:8000`)
+(If not set, it defaults to `http://localhost:8001`)
 
 4. **Start the development server:**
 

@@ -6,11 +6,18 @@ Handles intelligent conversation flow with dynamic question skipping
 import logging
 from typing import Dict, Any, Optional
 
+import logging
+
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"
+)
+
 logger = logging.getLogger(__name__)
 
 # Conditional import to avoid initialization issues during testing
 try:
-    from ..llm.gemini_client import call_gemini
+    from  llm.gemini_client import call_gemini
     LLM_AVAILABLE = True
 except Exception as e:
     logger.warning(f"LLM not available: {e}")
@@ -135,6 +142,10 @@ def process_conversational_response(user_input: str, session: Dict[str, Any], cu
     Process user input using conversational AI approach with enhanced response handling
     """
     # Build context from current session
+    logger.info("===== New Conversational Turn =====")
+    logger.info("Customer Name: %s", customer_name)
+    logger.info("User Input: %s", user_input)
+    logger.info("Session (before): %s", session)
     current_data = {
         "identity_confirmed": session.get("identity_confirmed"),
         "loan_taken": session.get("loan_taken"),
@@ -149,6 +160,9 @@ def process_conversational_response(user_input: str, session: Dict[str, Any], cu
     # Determine conversation stage and what we're currently asking about
     conversation_stage = get_conversation_stage(session)
     missing_info = get_missing_information(session)
+    logger.info("Conversation Stage: %s", conversation_stage)
+    logger.info("Missing Information: %s", missing_info)
+
     
     # Build the full prompt with enhanced context
     full_prompt = f"""
@@ -184,16 +198,26 @@ Based on the customer's response and current context, provide your response:
     try:
         # Call LLM with enhanced prompt
         response = call_gemini(full_prompt)
+        logger.info("LLM Raw Response: %s", response)
+
         
         if response and isinstance(response, dict):
             # Update session with extracted data
             extracted_data = response.get("extracted_data", {})
+            logger.info("Extracted Data from LLM: %s", response.get("extracted_data"))
+            logger.info("Next Action from LLM: %s", response.get("next_action"))
+            logger.info("Call End Reason from LLM: %s", response.get("call_end_reason"))
+
             for key, value in extracted_data.items():
                 if value is not None and value != "null":
                     session[key] = value
-            
+
+            logger.info("Session (after): %s", session)
+
             # Store conversation notes for debugging/improvement
             session["last_conversation_notes"] = response.get("conversation_notes", "")
+            
+
             
             return {
                 "bot_response": response.get("bot_response", "कृपया दोबारा बताइए।"),
@@ -204,6 +228,8 @@ Based on the customer's response and current context, provide your response:
             }
         else:
             # Enhanced fallback response based on conversation stage
+            logger.warning("Invalid LLM response, triggering enhanced fallback")
+
             return get_enhanced_fallback_response(user_input, session, conversation_stage)
             
     except Exception as e:
@@ -252,6 +278,11 @@ def get_enhanced_fallback_response(user_input: str, session: Dict[str, Any], sta
     Provide completely dynamic fallback responses when LLM fails - no hardcoded responses
     """
     # Create dynamic fallback prompt
+    logger.warning("Entering enhanced fallback response")
+    logger.info("Fallback User Input: %s", user_input)
+    logger.info("Fallback Stage: %s", stage)
+    logger.info("Fallback Session: %s", session)
+
     fallback_prompt = f"""
 You are a FEMALE customer service representative from L and T Finance. The main LLM system failed, so you need to provide a fallback response.
 
@@ -444,6 +475,9 @@ def generate_conversation_summary(session: Dict[str, Any]) -> str:
     """
     Generate a completely dynamic summary of the collected information using LLM
     """
+    logger.info("Generating conversation summary")
+    logger.info("SSession Data for Summary: %s", session)
+
     summary_prompt = f"""
 You are a FEMALE customer service representative from L and T Finance. Generate a natural, conversational summary of the customer feedback collected.
 
@@ -464,12 +498,16 @@ Generate ONLY the summary text in Hindi, nothing else.
     try:
         if LLM_AVAILABLE:
             response = call_gemini(summary_prompt)
+            logger.info("Generated Summary: %s", response)
+
             if isinstance(response, dict) and 'bot_response' in response:
                 return response['bot_response']
             elif isinstance(response, str):
                 return response.strip()
         
         # Fallback summary generation
+        logger.warning("Summary LLM failed, using fallback summary")
+
         return generate_fallback_summary_dynamic(session)
         
     except Exception as e:

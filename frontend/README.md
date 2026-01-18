@@ -10,10 +10,10 @@ React frontend for the L and T Finance Customer Survey chatbot.
 npm install
 ```
 
-2. Create a `.env` file (optional, defaults to localhost:8000):
+2. Create a `.env` file (optional, defaults to localhost:8001):
 
 ```
-VITE_API_URL=http://localhost:8000
+VITE_API_URL=http://localhost:8001
 ```
 
 3. Start the development server:
