@@ -1,8 +1,8 @@
 """CLI version of the survey bot"""
 
-from app.flow.flow_manager import get_question_text, process_answer
-from app.sessions.session_schema import create_session
-from app.sessions.session_store import save_session, get_session
+from .flow.flow_manager import get_question_text, process_answer
+from .sessions.session_schema import create_session
+from .sessions.session_store import save_session, get_session
 import sys
 import json
 
@@ -88,7 +88,7 @@ def main():
             print()
         elif result == "COMPLETED":
             print("=" * 60)
-            from app.services.summary_service import get_closing_statement
+            from .services.summary_service import get_closing_statement
             closing = get_closing_statement(session)
             print(closing)
             print("=" * 60)

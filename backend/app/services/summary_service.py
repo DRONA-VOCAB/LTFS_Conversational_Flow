@@ -1,6 +1,6 @@
 """Service for generating summaries and closing statements"""
 
-from llm.gemini_client import model
+from  llm.gemini_client import model
 import logging
 import json
 
@@ -214,8 +214,8 @@ def generate_fallback_summary(data: dict) -> str:
 def is_survey_completed(session: dict) -> bool:
     """Check if survey is completed without modifying the session"""
     # Lazy import to avoid circular dependency
-    from flow.flow_manager import get_next_question_index
-    from flow.question_order import QUESTIONS
+    from  flow.flow_manager import get_next_question_index
+    from  flow.question_order import QUESTIONS
 
     next_idx = get_next_question_index(session)
     return next_idx >= len(QUESTIONS) or session.get("call_should_end", False)
@@ -366,6 +366,8 @@ def get_edit_prompt() -> str:
 
 def get_closing_statement(session: dict) -> str:
     """Generate closing statement based on session data"""
+    call_end_reason = session.get("call_end_reason")
+    
     if session.get("call_should_end"):
         # Check if it's a wrong number case (loan_taken is NO)
         if session.get("loan_taken") == "NO":
@@ -385,7 +387,6 @@ def get_closing_statement(session: dict) -> str:
             )
     else:
         return (
-            "धन्यवाद आपके समय के लिए।\n"
-            "आपकी फीडबैक हमारे लिए बहुत महत्वपूर्ण है।\n"
-            "आपका दिन शुभ हो!"
+            "आपके मूल्यवान फ़ीडबैक और समय देने के लिए धन्यवाद।\n"
+            "आपका दिन शुभ हो।"
         )

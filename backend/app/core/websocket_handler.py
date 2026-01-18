@@ -193,8 +193,8 @@ async def process_asr_queue(websocket_id: str):
                     # Create session with name
                     logger.info(f"Creating session with name: {transcription}")
                     try:
-                        from sessions.session_schema import create_session
-                        from sessions.session_store import (
+                        from  sessions.session_schema import create_session
+                        from  sessions.session_store import (
                             save_session as save_session_store,
                         )
                         import uuid
@@ -236,7 +236,15 @@ async def process_asr_queue(websocket_id: str):
                     logger.info(f"📤 Answer result: {result}")
                     save_session(session)
 
-                    if result == "SUMMARY":
+                    if result == "CONTINUE_CONVERSATION":
+                        # Continue conversational flow
+                        logger.info("💬 Continuing conversation .")
+                        from  flow.flow_manager import get_conversation_response_text
+                        response_text = get_conversation_response_text(session)
+                        save_session(session)
+                        await send_tts(websocket_id, response_text)
+
+                    elif result == "SUMMARY":
                         # All questions done, read summary (confirmation is embedded)
                         logger.info("📝 Generating and reading summary...")
                         summary_text = get_summary_text(session)

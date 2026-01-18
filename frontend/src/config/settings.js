@@ -6,7 +6,7 @@
 // Backend API Base URL
 // Can be overridden by environment variable VITE_API_URL
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8000";
+  import.meta.env.VITE_API_URL || "http://localhost:8001";
 
 // WebSocket URL (derived from API_BASE_URL)
 export const WS_URL = API_BASE_URL.replace(/^http/, "ws") + "/ws/audio";

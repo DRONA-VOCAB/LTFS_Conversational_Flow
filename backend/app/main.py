@@ -27,7 +27,7 @@ app.include_router(session_router)
 
 app.websocket("/ws/audio")(websocket_audio_endpoint)
 
-# Mount frontend static files
+
 from fastapi.staticfiles import StaticFiles
 app.mount(
     "/", 
@@ -39,4 +39,4 @@ app.mount(
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(app, host="0.0.0.0", port=8001)

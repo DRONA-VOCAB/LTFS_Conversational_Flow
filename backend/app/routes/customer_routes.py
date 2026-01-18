@@ -46,7 +46,7 @@ async def get_customers(
         
         # Provide more helpful error messages
         if "getaddrinfo failed" in error_msg or "11001" in error_msg or "could not translate host name" in error_msg.lower() or "name or service not known" in error_msg.lower():
-            from config.settings import settings
+            from  config.settings import settings
             db_url = settings.database_url or "Not set"
             # Mask password in error message
             if "@" in db_url:

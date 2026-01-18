@@ -1,12 +1,18 @@
 import logging
 from flow.question_order import QUESTIONS
-from config.settings import MAX_RETRIES
-from services.summary_service import (
+from  config.settings import MAX_RETRIES
+from  services.summary_service import (
     generate_human_summary,
     get_closing_statement,
     detect_confirmation,
     detect_field_to_edit,
     get_edit_prompt,
+)
+from  services.conversational_flow import (
+    process_conversational_response,
+    get_initial_greeting,
+    is_conversation_complete,
+    generate_conversation_summary
 )
 import importlib
 
@@ -14,6 +20,7 @@ logger = logging.getLogger(__name__)
 
 # Flow phases
 PHASE_QUESTIONS = "questions"
+PHASE_CONVERSATION = "conversation"  # New conversational phase
 PHASE_SUMMARY = "summary"  # Summary includes confirmation question
 PHASE_EDIT = "edit"  # User wants to edit a field
 PHASE_CLOSING = "closing"
@@ -52,38 +59,39 @@ def get_next_question_index(session):
 
 
 def get_question_text(session):
-    """Get the text for the current question"""
-    # Check if we're in closing phase
-    if session.get("phase") == PHASE_CLOSING:
-        return None
+    """Get the text for the current question - now uses conversational approach"""
+    phase = session.get("phase", PHASE_CONVERSATION)
+    
+    # Use conversational approach instead of individual questions
+    if phase == PHASE_CONVERSATION or not session.get("conversation_started"):
+        # Start with initial greeting
+        customer_name = session.get("customer_name", "")
+        session["conversation_started"] = True
+        session["phase"] = PHASE_CONVERSATION
+        return get_initial_greeting(customer_name)
+    
+    # Fallback to old approach if needed (shouldn't happen in new system)
+    if phase == PHASE_QUESTIONS:
+        # Skip optional questions that don't meet conditions
+        next_idx = get_next_question_index(session)
+        if next_idx >= len(QUESTIONS):
+            return None
 
-    # Check if there's an acknowledgment text to speak first
-    ack_text = session.pop("acknowledgment_text", None)
-    if ack_text:
-        # Return acknowledgment instead of question
-        # The question will be asked in the next call
-        return ack_text
+        # Update current_question to the next valid question
+        session["current_question"] = next_idx
+        q_name = QUESTIONS[next_idx]
 
-    # Skip optional questions that don't meet conditions
-    next_idx = get_next_question_index(session)
-    if next_idx >= len(QUESTIONS):
-        return None
-
-    # Update current_question to the next valid question
-    session["current_question"] = next_idx
-    q_name = QUESTIONS[next_idx]
-
-    # Import the question module
-    module = importlib.import_module(f"questions.{q_name}")
-    text = module.get_text()
-    text = text.replace("{{customer_name}}", session.get("customer_name", ""))
-    text = text.replace("{{product_type}}", session.get("product_type", "पर्सनल लोन"))
-    return text
+        # Import the question module
+        module = importlib.import_module(f"questions.{q_name}")
+        text = module.get_text()
+        return text.replace("{{customer_name}}", session["customer_name"])
+    
+    return None
 
 
 def process_answer(session, user_input):
-    """Process the user's answer to the current question"""
-    phase = session.get("phase", PHASE_QUESTIONS)
+    """Process the user's answer - now uses conversational approach"""
+    phase = session.get("phase", PHASE_CONVERSATION)
 
     # Handle summary phase (confirmation is embedded in summary)
     if phase == PHASE_SUMMARY:
@@ -93,82 +101,36 @@ def process_answer(session, user_input):
     if phase == PHASE_EDIT:
         return handle_edit_response(session, user_input)
 
-    # Handle questions phase
-    current_idx = session["current_question"]
-    q_name = QUESTIONS[current_idx]
-    logger.info("=" * 80)
-    logger.info(
-        f"📄 Processing answer for Question {current_idx + 1}/{len(QUESTIONS)}: {q_name}"
-    )
-    logger.info(f"User input: '{user_input}'")
-    logger.info("-" * 80)
+    # Handle conversational phase (new approach)
+    if phase == PHASE_CONVERSATION:
+        return handle_conversational_response(session, user_input)
 
-    # Import the question module
-    module = importlib.import_module(f"questions.{q_name}")
-    result = module.handle(user_input, session)
+    # Handle old questions phase (fallback)
+    if phase == PHASE_QUESTIONS:
+        current_idx = session["current_question"]
+        q_name = QUESTIONS[current_idx]
+        logger.info(f"🔄 Processing answer for {q_name}: '{user_input}'")
 
-    logger.info(f"📊 QUESTIONS HANDLER RESULT FOR {q_name}:")
-    logger.info(f"  - is_clear: {result.is_clear}")
-    logger.info(f"  - value: {getattr(result, 'value', None)}")
-    logger.info(f"  - extra: {getattr(result, 'extra', {})}")
-    logger.info(f"  - response_text: {getattr(result, 'response_text', None)}")
-    logger.info("=" * 80)
+        # Import the question module
+        module = importlib.import_module(f"questions.{q_name}")
+        result = module.handle(user_input, session)
+        logger.info(
+            f"📊 Result from {q_name}: is_clear={result.is_clear}, value={getattr(result, 'value', None)}"
+        )
 
-    # Check if action is CLOSING from LLM response
-    action = None
+        if not result.is_clear:
+            session["retry_count"] += 1
+            if session["retry_count"] > MAX_RETRIES:
+                return "END"
+            return "REPEAT"
 
-    if hasattr(result, "extra") and result.extra:
-        action = result.extra.get("action")
+        session["retry_count"] = 0
 
-    print("ACTIONSSSS: ", action)
-
-    if action == "CLOSING":
-        session["phase"] = PHASE_CLOSING
-        session["call_should_end"] = True
-
-        # Store the closing message to be spoken
-        response_text = result.extra.get("response_text")
-        if response_text:
-            session["closing_message"] = response_text
-            logger.info(f"🛑 LLM returned action=CLOSING with message: {response_text}")
-        else:
-            logger.info("🛑 LLM returned action=CLOSING - ending call")
-
-        return "CLOSING"
-
-    if not result.is_clear:
-        session["retry_count"] += 1
-        if session["retry_count"] > MAX_RETRIES:
+        # If alternate number was captured or wrong number, go to closing
+        if session.get("call_should_end"):
             session["phase"] = PHASE_CLOSING
-            session["call_should_end"] = True
-            return "END"
+            return "CLOSING"
 
-        # Store the acknowledgment/clarification response to be spoken
-        response_text = getattr(result, "response_text", None)
-        if response_text:
-            # Store in session so get_question_text() will return it
-            session["acknowledgment_text"] = response_text
-            logger.info(f"💬 Stored acknowledgment text: {response_text}")
-
-        # Don't increment current_question when is_clear=False
-        return "REPEAT"
-
-    session["retry_count"] = 0
-
-    # Check if there's a response_text from the handler (for clarifications even when is_clear=True)
-    response_text = None
-    action = None
-    if hasattr(result, "extra") and result.extra:
-        response_text = result.extra.get("response_text")
-        action = result.extra.get("action")
-
-    elif hasattr(result, "response_text"):
-        response_text = result.response_text
-
-    # Special handling: If action is NEXT and there's response_text (e.g., YES_WITH_QUESTION),
-    # concatenate the response with the next question and speak both together
-    if action == "NEXT" and response_text:
-        # Move to next question first
         session["current_question"] += 1
 
         # Find next question (skipping optional ones)
@@ -177,79 +139,49 @@ def process_answer(session, user_input):
         if next_idx >= len(QUESTIONS):
             # All questions done, move to summary phase
             session["phase"] = PHASE_SUMMARY
-            response_text = response_text.replace(
-                "{{customer_name}}", session.get("customer_name", "")
-            )
-            response_text = response_text.replace(
-                "{{product_type}}", session.get("product_type", "पर्सनल लोन")
-            )
-            # Just speak the response, no next question
-            session["acknowledgment_text"] = response_text
-            logger.info(
-                f"💬 Stored acknowledgment text (NEXT with response, no more questions): {response_text}"
-            )
             return "SUMMARY"
 
-        # Get the next question text
         session["current_question"] = next_idx
-        q_name = QUESTIONS[next_idx]
-        module = importlib.import_module(f"questions.{q_name}")
-        next_question_text = module.get_text()
-
-        response_text = response_text.replace(
-            "{{customer_name}}", session.get("customer_name", "")
-        )
-        response_text = response_text.replace(
-            "{{product_type}}", session.get("product_type", "टू-व्हीलर लोन")
-        )
-
-        next_question_text = next_question_text.replace(
-            "{{customer_name}}", session.get("customer_name", "")
-        )
-        next_question_text = next_question_text.replace(
-            "{{product_type}}", session.get("product_type", "टू-व्हीलर लोन")
-        )
-
-        # Concatenate response_text with next question
-        combined_text = response_text + " " + next_question_text
-        session["acknowledgment_text"] = combined_text
-        logger.info(
-            f"💬 Stored combined text (response + next question): {combined_text}"
-        )
-
-        # Move to the question after this one, so after speaking the combined text,
-        # the next call to get_question_text will get the question after next_idx
-        session["current_question"] = next_idx
-
         return "NEXT"
 
-    # Regular handling: If there's response_text but action is not NEXT, repeat the question
-    if response_text:
-        session["acknowledgment_text"] = response_text
-        logger.info(f"💬 Stored acknowledgment text (clear): {response_text}")
-        # When we have a response_text (like ROLE_CLARIFICATION),
-        # we should NOT move to next question yet. Return REPEAT to speak the
-        # acknowledgment and then ask the SAME question again
+    return "REPEAT"
+
+
+def handle_conversational_response(session, user_input):
+    """Handle user response in conversational mode"""
+    logger.info(f"🔄 Processing conversational response: '{user_input}'")
+    
+    customer_name = session.get("customer_name", "")
+    
+    try:
+        # Process the response using conversational AI
+        result = process_conversational_response(user_input, session, customer_name)
+        
+        # Store the bot's response for TTS
+        session["last_bot_response"] = result.get("bot_response", "")
+        
+        # Handle different next actions
+        next_action = result.get("next_action", "continue")
+        call_end_reason = result.get("call_end_reason")
+        
+        if next_action == "end_call":
+            session["phase"] = PHASE_CLOSING
+            session["call_should_end"] = True
+            session["call_end_reason"] = call_end_reason
+            return "CLOSING"
+        elif next_action == "summary":
+            session["phase"] = PHASE_SUMMARY
+            return "SUMMARY"
+        else:
+            # Continue conversation
+            return "CONTINUE_CONVERSATION"
+            
+    except Exception as e:
+        logger.error(f"Error in conversational response: {e}")
+        session["retry_count"] = session.get("retry_count", 0) + 1
+        if session["retry_count"] > MAX_RETRIES:
+            return "END"
         return "REPEAT"
-
-    # If call should end flag is set, go to closing
-    if session.get("call_should_end"):
-        session["phase"] = PHASE_CLOSING
-        return "CLOSING"
-
-    # Now move to next question only if no response_text was set
-    session["current_question"] += 1
-
-    # Find next question (skipping optional ones)
-    next_idx = get_next_question_index(session)
-
-    if next_idx >= len(QUESTIONS):
-        # All questions done, move to summary phase
-        session["phase"] = PHASE_SUMMARY
-        return "SUMMARY"
-
-    session["current_question"] = next_idx
-    return "NEXT"
 
 
 def handle_summary_response(session, user_input):
@@ -353,9 +285,21 @@ def handle_edit_response(session, user_input):
 
 def get_summary_text(session):
     """Get the summary text for TTS (confirmation is included in summary)"""
+    # Use conversational summary if available
+    if session.get("phase") == PHASE_SUMMARY:
+        summary = generate_conversation_summary(session)
+        session["generated_summary"] = summary
+        return summary
+    
+    # Fallback to old summary generation
     summary = generate_human_summary(session)
     session["generated_summary"] = summary
     return summary
+
+
+def get_conversation_response_text(session):
+    """Get the bot's response text for conversational mode"""
+    return session.get("last_bot_response", "कृपया दोबारा बताइए।")
 
 
 def get_edit_prompt_text():

@@ -1,5 +1,5 @@
-from questions.base import QuestionResult
-from llm.gemini_client import call_gemini
+from  base import QuestionResult
+from  llm.gemini_client import call_gemini
 
 
 def get_text():

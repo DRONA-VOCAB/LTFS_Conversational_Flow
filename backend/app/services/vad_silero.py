@@ -4,10 +4,10 @@ import logging
 import numpy as np
 import torch
 
-from queues.asr_queue import asr_queue
-from queues.tts_queue import tts_queue
+from  queues.asr_queue import asr_queue
+from  queues.tts_queue import tts_queue
 from services.playback_state import get_playback_state
-from utils.latency_tracker import start_tracking, record_event
+from  utils.latency_tracker import start_tracking, record_event
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
