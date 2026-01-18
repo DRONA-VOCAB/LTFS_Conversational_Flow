@@ -57,7 +57,7 @@ echo "Starting FastAPI server with HTTPS..."
 
 nohup uvicorn main:app \
     --host 0.0.0.0 \
-    --port 8000 \
+    --port 8001 \
     --ssl-certfile "$SSL_CERT_FILE" \
     --ssl-keyfile "$SSL_KEY_FILE" \
     > "$LOG_FILE" 2>&1 &
