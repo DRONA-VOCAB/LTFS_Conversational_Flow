@@ -23,8 +23,8 @@ app.include_router(session_router)
 app.websocket("/ws/audio")(websocket_audio_endpoint)
 
 # -------- PATHS (ABSOLUTE) --------
-BASE_DIR = Path(__file__).resolve().parent      # backend/
-STATIC_DIR = BASE_DIR / "static"
+BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
+STATIC_DIR = BASE_DIR / "app/static"
 AUDIO_DIR = BASE_DIR / "audio_files"
 ASR_AUDIO_DIR = AUDIO_DIR / "asr_audios"
 TTS_AUDIO_DIR = AUDIO_DIR / "tts_audios"
@@ -40,4 +40,5 @@ app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
+
     uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
