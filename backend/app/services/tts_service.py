@@ -56,7 +56,12 @@ async def tts_service_consumer():
 
     async with aiohttp.ClientSession() as session:
         while True:
-            websocket, text, utterance_id = await tts_queue.get()
+            item = await tts_queue.get()
+            if len(item) == 4:
+                websocket, text, utterance_id, audio_base = item
+            else:
+                websocket, text, utterance_id = item
+                audio_base = None
 
             try:
                 logger.info(f"🗣️ Received text for TTS: {text}")

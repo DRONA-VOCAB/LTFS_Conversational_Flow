@@ -12,3 +12,6 @@ asyncpg
 sqlalchemy[asyncio]
 aiohttp==3.8.4
 numpy
+gspread
+google-auth
+google-auth-oauthlib

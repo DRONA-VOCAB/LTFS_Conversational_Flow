@@ -8,3 +8,5 @@ session_data/
 node_modules/
 static/
 logs/
+google_sheet_creds.json
+audio_files/

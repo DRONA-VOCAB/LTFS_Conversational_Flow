@@ -6,6 +6,7 @@ import json
 import asyncio
 import logging
 import time
+from pathlib import Path
 from typing import Dict, Optional
 from fastapi import WebSocket, WebSocketDisconnect
 
@@ -13,8 +14,10 @@ from core.router import router
 from core.middleware import MiddlewarePipeline, MiddlewareContext
 from core.session_manager import session_manager
 from services.vad_silero import process_frame, cleanup_connection
-from services.asr_service import transcribe_audio
+from config.settings import PUBLIC_BASE_URL
+from services.asr_service import pcm16_to_wav, transcribe_audio
 from services.tts_service import synthesize_stream
+from services.google_sheet_logger import log_interaction
 from queues.asr_queue import asr_queue
 from queues.tts_queue import tts_queue
 from utils.latency_tracker import record_event, cleanup_tracking
@@ -38,6 +41,76 @@ connection_states: Dict[str, Dict] = {}
 middleware_pipeline = MiddlewarePipeline()
 
 USER_INPUT_TIMEOUT = 60  # 1 minute
+AUDIO_ROOT = Path(__file__).resolve().parents[2] / "audio_files"
+ASR_AUDIO_DIR = AUDIO_ROOT / "asr_audios"
+TTS_AUDIO_DIR = AUDIO_ROOT / "tts_audios"
+ASR_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def _sanitize_session_id(session_id: str) -> str:
+    return (session_id or "session").replace(" ", "_")
+
+
+def _next_turn_base(state: Dict, session_id: str) -> str:
+    counter = state.get("turn_counter", 0) + 1
+    state["turn_counter"] = counter
+    return f"{_sanitize_session_id(session_id)}_turn{counter:03d}"
+
+
+def _prepare_audio_bytes(raw_bytes: bytes) -> bytes:
+    """Ensure bytes are WAV formatted."""
+    if raw_bytes[:4] == b"RIFF":
+        return raw_bytes
+    return pcm16_to_wav(raw_bytes)
+
+
+def _write_bytes(path: Path, data: bytes) -> None:
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_bytes(data)
+
+
+def _build_audio_url(folder: str, filename: str) -> str:
+    base = PUBLIC_BASE_URL.rstrip("/")
+    return f"{base}/{folder}/{filename}"
+
+
+def _save_audio_non_blocking(path: Path, data: bytes) -> None:
+    asyncio.create_task(asyncio.to_thread(_write_bytes, path, data))
+
+
+async def _log_interaction_if_ready(
+    websocket_id: str, llm_response: str, tts_audio_url: Optional[str]
+) -> None:
+    """Send interaction details to Google Sheets without blocking the pipeline."""
+    state = connection_states.get(websocket_id)
+    if not state:
+        return
+
+    asr_url = state.get("last_asr_audio_url")
+    transcription = state.get("last_transcription")
+    base_name = state.get("current_turn_base")
+
+    if not (asr_url and transcription and tts_audio_url):
+        return
+
+    if base_name and state.get("last_logged_base") == base_name:
+        return
+
+    session_id = state.get("session_id") or f"ws_{websocket_id}"
+
+    payload = {
+        "session_id": session_id,
+        "asr_audio_url": asr_url,
+        "transcription": transcription,
+        "llm_response": llm_response,
+        "tts_audio_url": tts_audio_url,
+    }
+
+    if base_name:
+        state["last_logged_base"] = base_name
+
+    asyncio.create_task(log_interaction(payload))
 
 
 async def get_websocket_id(websocket: WebSocket) -> str:
@@ -143,11 +216,18 @@ async def handle_ping(event: dict, websocket: WebSocket, **kwargs):
     await websocket.send_json({"type": "pong"})
 
 
-async def send_tts(websocket_id: str, text: str):
-    """Send text to TTS queue for synthesis"""
+async def send_tts(websocket_id: str, text: str, audio_base: Optional[str] = None):
+    """Send text to TTS queue for synthesis and downstream logging."""
     websocket = active_connections.get(websocket_id)
+    state = connection_states.get(websocket_id, {})
+
     if websocket:
-        await tts_queue.put((websocket, text, None))
+        session_id = state.get("session_id") or websocket_id
+        base_name = audio_base or state.get("current_turn_base") or _next_turn_base(
+            state, session_id
+        )
+        state["current_turn_base"] = base_name
+        await tts_queue.put((websocket, text, None, base_name))
     else:
         logger.error(f"❌ WebSocket not found: {websocket_id}")
 
@@ -185,6 +265,9 @@ async def process_asr_queue(websocket_id: str):
             if utterance_id:
                 record_event(utterance_id, "ASR_COMPLETE")
 
+            turn_base = None
+            session_created = False
+
             if transcription:
                 state["last_user_input_time"] = time.time()
                 logger.info(f"⏰ Updated last_user_input_time for {websocket_id}")
@@ -204,6 +287,7 @@ async def process_asr_queue(websocket_id: str):
                         session = create_session(session_id, transcription.strip())
                         save_session_store(session)
                         state["session_id"] = session_id
+                        session_created = True
 
                         websocket = active_connections.get(websocket_id)
                         if websocket:
@@ -219,14 +303,48 @@ async def process_asr_queue(websocket_id: str):
                         save_session_store(session)
 
                         if question_text:
-                            await send_tts(websocket_id, question_text)
+                            turn_base = _next_turn_base(state, session_id)
+                            state["current_turn_base"] = turn_base
+                            await send_tts(
+                                websocket_id, question_text, audio_base=turn_base
+                            )
                     except Exception as e:
                         logger.error(f"Error creating session: {e}")
+                    if session_created:
+                        # Save the initial ASR audio for this session
+                        turn_base = turn_base or _next_turn_base(
+                            state, state.get("session_id") or websocket_id
+                        )
+                        asr_file = f"{turn_base}.wav"
+                        audio_bytes_wav = _prepare_audio_bytes(audio_bytes)
+                        _save_audio_non_blocking(
+                            ASR_AUDIO_DIR / asr_file,
+                            audio_bytes_wav,
+                        )
+                        state["last_asr_audio_url"] = _build_audio_url(
+                            "asr_audios", asr_file
+                        )
+                        state["last_transcription"] = transcription
                     continue
+
+                # Save ASR audio for existing session
+                if state.get("session_id"):
+                    turn_base = _next_turn_base(
+                        state, state.get("session_id") or websocket_id
+                    )
+                    state["current_turn_base"] = turn_base
+                    asr_file = f"{turn_base}.wav"
+                    audio_bytes_wav = _prepare_audio_bytes(audio_bytes)
+                    _save_audio_non_blocking(ASR_AUDIO_DIR / asr_file, audio_bytes_wav)
+                    state["last_asr_audio_url"] = _build_audio_url(
+                        "asr_audios", asr_file
+                    )
+                    state["last_transcription"] = transcription
 
                 # Process answer
                 session_id = state["session_id"]
                 session = get_session(session_id)
+                response_audio_base = state.get("current_turn_base")
 
                 if session:
                     logger.info(
@@ -242,14 +360,18 @@ async def process_asr_queue(websocket_id: str):
                         from  flow.flow_manager import get_conversation_response_text
                         response_text = get_conversation_response_text(session)
                         save_session(session)
-                        await send_tts(websocket_id, response_text)
+                        await send_tts(
+                            websocket_id, response_text, audio_base=response_audio_base
+                        )
 
                     elif result == "SUMMARY":
                         # All questions done, read summary (confirmation is embedded)
                         logger.info("📝 Generating and reading summary...")
                         summary_text = get_summary_text(session)
                         save_session(session)
-                        await send_tts(websocket_id, summary_text)
+                        await send_tts(
+                            websocket_id, summary_text, audio_base=response_audio_base
+                        )
                         # Mic will be enabled after TTS, user responds to confirmation
 
                     elif result == "CLOSING":
@@ -257,7 +379,9 @@ async def process_asr_queue(websocket_id: str):
                         ack_text = session.get("acknowledgment_text")
                         if ack_text:
                             logger.info(f"💬 Speaking acknowledgment: {ack_text}")
-                            await send_tts(websocket_id, ack_text)
+                            await send_tts(
+                                websocket_id, ack_text, audio_base=response_audio_base
+                            )
                             # Clear it so closing message can be spoken
                             session.pop("acknowledgment_text", None)
                             save_session(session)
@@ -267,14 +391,20 @@ async def process_asr_queue(websocket_id: str):
                         closing_text = get_closing_text(session)
                         save_session(session)
                         save_session_data(session_id, session)
-                        await send_tts(websocket_id, closing_text)
+                        await send_tts(
+                            websocket_id, closing_text, audio_base=response_audio_base
+                        )
                         state["pending_end"] = True
                         state["timeout_monitoring"] = False
 
                     elif result == "ASK_EDIT":
                         # User said no to confirmation, ask what to edit
                         logger.info("✏️ User wants to edit, asking which field...")
-                        await send_tts(websocket_id, get_edit_prompt_text())
+                        await send_tts(
+                            websocket_id,
+                            get_edit_prompt_text(),
+                            audio_base=response_audio_base,
+                        )
 
                     elif result == "REPEAT_EDIT":
                         # Could not detect which field, ask again
@@ -282,6 +412,7 @@ async def process_asr_queue(websocket_id: str):
                         await send_tts(
                             websocket_id,
                             "माफ़ कीजिए, मुझे समझ नहीं आया। कृपया बताइए कौन सी जानकारी बदलनी है?",
+                            audio_base=response_audio_base,
                         )
 
                     elif result == "REPEAT_SUMMARY":
@@ -290,7 +421,9 @@ async def process_asr_queue(websocket_id: str):
                         summary_text = session.get(
                             "generated_summary"
                         ) or get_summary_text(session)
-                        await send_tts(websocket_id, summary_text)
+                        await send_tts(
+                            websocket_id, summary_text, audio_base=response_audio_base
+                        )
 
                     elif result == "END":
                         # Max retries exceeded, say closing and end
@@ -298,7 +431,9 @@ async def process_asr_queue(websocket_id: str):
                         closing_text = get_closing_text(session)
                         save_session(session)
                         save_session_data(session_id, session)
-                        await send_tts(websocket_id, closing_text)
+                        await send_tts(
+                            websocket_id, closing_text, audio_base=response_audio_base
+                        )
                         state["pending_end"] = True
                         state["timeout_monitoring"] = False
 
@@ -310,7 +445,11 @@ async def process_asr_queue(websocket_id: str):
                         )
 
                         if question_text:
-                            await send_tts(websocket_id, question_text)
+                            await send_tts(
+                                websocket_id,
+                                question_text,
+                                audio_base=response_audio_base,
+                            )
                         else:
                             # No more questions, move to summary
                             logger.info("📝 No more questions, generating summary...")
@@ -362,7 +501,12 @@ async def process_tts_queue(websocket_id: str):
             except asyncio.TimeoutError:
                 continue
 
-            websocket, text, utterance_id = item
+            # Support both legacy 3-tuple and new 4-tuple with audio base name
+            if len(item) == 4:
+                websocket, text, utterance_id, audio_base = item
+            else:
+                websocket, text, utterance_id = item
+                audio_base = None
 
             if websocket != active_connections.get(websocket_id):
                 await tts_queue.put(item)
@@ -377,18 +521,41 @@ async def process_tts_queue(websocket_id: str):
                 state["tts_playing"] = True
                 state["mic_enabled"] = False
 
+            if state and audio_base is None:
+                audio_base = state.get("current_turn_base")
+            if state and audio_base is None:
+                audio_base = _next_turn_base(
+                    state, state.get("session_id") or websocket_id
+                )
+                state["current_turn_base"] = audio_base
+
             logger.info(f"🗣️ TTS playing: {text[:50]}...")
             # Send bot_message so frontend can display the question
             await websocket.send_json({"type": "bot_message", "text": text})
             await websocket.send_json({"type": "tts_start", "text": text})
 
             chunk_count = 0
+            audio_buffer = bytearray()
             async for audio_chunk in synthesize_stream(text):
-                await websocket.send_bytes(audio_chunk)
-                chunk_count += 1
+                if audio_chunk:
+                    audio_buffer.extend(audio_chunk)
+                    await websocket.send_bytes(audio_chunk)
+                    chunk_count += 1
 
             await websocket.send_json({"type": "tts_end", "chunks_sent": chunk_count})
             logger.info(f"✅ TTS complete: {chunk_count} chunks sent")
+
+            tts_audio_url = None
+            if audio_buffer:
+                base_name = audio_base or _sanitize_session_id(
+                    (state or {}).get("session_id") or websocket_id
+                )
+                file_name = f"{base_name}.wav"
+                audio_bytes = _prepare_audio_bytes(bytes(audio_buffer))
+                _save_audio_non_blocking(TTS_AUDIO_DIR / file_name, audio_bytes)
+                tts_audio_url = _build_audio_url("tts_audios", file_name)
+                if state:
+                    state["last_tts_audio_url"] = tts_audio_url
 
             if state:
                 state["tts_playing"] = False
@@ -399,6 +566,8 @@ async def process_tts_queue(websocket_id: str):
             if utterance_id:
                 record_event(utterance_id, "TTS_COMPLETE")
                 cleanup_tracking(utterance_id)
+
+            await _log_interaction_if_ready(websocket_id, text, tts_audio_url)
 
         except asyncio.CancelledError:
             break
