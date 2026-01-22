@@ -167,6 +167,9 @@ export class PCMPlayer {
     this.scheduledTime = 0;
     this.isPlaying = false;
     this.activeNodes = [];
+    this.chunkQueue = [];
+    this.isProcessingQueue = false;
+    this.minBufferTime = 0.1; // 100ms buffer to smooth playback
   }
 
   async init() {
@@ -188,10 +191,35 @@ export class PCMPlayer {
     this.gainNode.gain.setValueAtTime(1.0, this.audioContext.currentTime);
     this.gainNode.connect(this.audioContext.destination);
 
-    this.scheduledTime = this.audioContext.currentTime;
+    // Initialize scheduledTime with a small buffer to prevent gaps
+    this.scheduledTime = this.audioContext.currentTime + this.minBufferTime;
     this.isPlaying = true;
+    this.chunkQueue = [];
+    this.isProcessingQueue = false;
 
     console.log(`✅ PCM Player ready: ${this.audioContext.state}`);
+  }
+
+  async processQueue() {
+    if (this.isProcessingQueue || !this.isPlaying) {
+      return;
+    }
+
+    this.isProcessingQueue = true;
+
+    try {
+      while (this.chunkQueue.length > 0 && this.isPlaying) {
+        const chunkData = this.chunkQueue.shift();
+        this.playChunkInternal(chunkData);
+        
+        // Small delay to prevent blocking and allow other chunks to queue
+        if (this.chunkQueue.length > 0) {
+          await new Promise(resolve => setTimeout(resolve, 0));
+        }
+      }
+    } finally {
+      this.isProcessingQueue = false;
+    }
   }
 
   playChunk(pcmData) {
@@ -200,23 +228,38 @@ export class PCMPlayer {
       return;
     }
 
+    // Add to queue for smoother playback
+    this.chunkQueue.push(pcmData);
+    
+    // Process queue asynchronously (don't await to avoid blocking)
+    if (!this.isProcessingQueue) {
+      this.processQueue().catch(err => {
+        console.error("Error processing audio queue:", err);
+      });
+    }
+  }
+
+  playChunkInternal(pcmData) {
+    if (!this.audioContext || !this.isPlaying) {
+      return;
+    }
+
     try {
       // Convert ArrayBuffer to Int16Array
       const int16Array = new Int16Array(pcmData);
+      if (int16Array.length === 0) {
+        return;
+      }
+
       const float32Array = new Float32Array(int16Array.length);
 
-      // Convert Int16 PCM to Float32
+      // Convert Int16 PCM to Float32 with proper normalization
       for (let i = 0; i < int16Array.length; i++) {
-        float32Array[i] = int16Array[i] / 32768.0;
+        // Normalize to [-1, 1] range
+        float32Array[i] = Math.max(-1, Math.min(1, int16Array[i] / 32768.0));
       }
 
-      // Check for silence
-      const maxAmplitude = Math.max(...float32Array.map(Math.abs));
-      if (maxAmplitude === 0) {
-        console.warn("⚠️ Received silent chunk");
-      }
-
-      // Create audio buffer
+      // Create audio buffer with correct sample rate
       const audioBuffer = this.audioContext.createBuffer(
         1,
         float32Array.length,
@@ -230,22 +273,40 @@ export class PCMPlayer {
       source.buffer = audioBuffer;
       source.connect(this.gainNode);
 
-      const startTime = Math.max(
-        this.scheduledTime,
-        this.audioContext.currentTime
-      );
-      source.start(startTime);
+      // Ensure we schedule ahead of current time to prevent gaps
+      const now = this.audioContext.currentTime;
+      let startTime = Math.max(this.scheduledTime, now + 0.01); // Small lookahead
+      
+      // If scheduledTime is too far in the past, reset it
+      if (this.scheduledTime < now - 0.1) {
+        startTime = now + this.minBufferTime;
+        this.scheduledTime = startTime;
+      }
 
+      source.start(startTime);
       this.scheduledTime = startTime + audioBuffer.duration;
       this.activeNodes.push(source);
 
-      console.log(
-        `▶️ PCM chunk played (${
-          float32Array.length
-        } samples, ${maxAmplitude.toFixed(4)} max amplitude)`
-      );
+      // Clean up finished nodes periodically
+      this.cleanupFinishedNodes();
     } catch (error) {
       console.error("❌ Error playing PCM chunk:", error);
+    }
+  }
+
+  cleanupFinishedNodes() {
+    // Keep only recent nodes, remove old ones
+    if (this.activeNodes.length > 50) {
+      const toRemove = this.activeNodes.splice(0, 25);
+      toRemove.forEach((node) => {
+        try {
+          if (node.buffer) {
+            node.disconnect();
+          }
+        } catch (e) {
+          // Node may already be disconnected
+        }
+      });
     }
   }
 
@@ -253,8 +314,10 @@ export class PCMPlayer {
     console.log("🛑 Flushing PCM Player (not destroying)");
 
     this.isPlaying = false;
+    this.chunkQueue = [];
+    this.isProcessingQueue = false;
 
-    if (this.gainNode) {
+    if (this.gainNode && this.audioContext) {
       const now = this.audioContext.currentTime;
       this.gainNode.gain.cancelScheduledValues(now);
       this.gainNode.gain.setValueAtTime(0.0, now);
@@ -268,7 +331,9 @@ export class PCMPlayer {
     });
 
     this.activeNodes = [];
-    this.scheduledTime = this.audioContext.currentTime;
+    if (this.audioContext) {
+      this.scheduledTime = this.audioContext.currentTime;
+    }
   }
 
   destroy() {

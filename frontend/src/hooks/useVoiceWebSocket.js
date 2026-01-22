@@ -120,48 +120,108 @@ export const useVoiceWebSocket = () => {
     try {
       message = JSON.parse(event.data);
       console.log("✅ Parsed message:", message);
-    } catch {
-      console.warn("❌ Non-JSON message:", event.data);
+    } catch (error) {
+      console.warn("❌ Non-JSON message:", event.data, error);
       return;
     }
 
     // Handle both 'type' (backend) and 'event' (legacy) message formats
     const msgType = message.type || message.event;
+    
+    // Log message type for debugging
+    if (msgType === "transcription" || msgType === "asr_final" || msgType === "asr_partial") {
+      console.log("🔍 ASR message detected:", msgType, message);
+    }
 
     // 📝 Backend transcription (from ASR)
     if (msgType === "transcription") {
       const transcription = message.text || "";
+      
+      if (!transcription || transcription.trim() === "") {
+        console.warn("⚠️ Received empty transcription, skipping");
+        return;
+      }
+
+      console.log("📝 Processing transcription:", transcription);
+      
+      // Update current transcript immediately
       setCurrentTranscript(transcription);
 
-      setTranscripts((prev) => [
-        ...prev,
-        {
+      // Add to transcripts list, avoiding duplicates
+      setTranscripts((prev) => {
+        // Check if this transcription already exists (avoid duplicates)
+        const existingIndex = prev.findIndex(
+          (t) => t.asrText === transcription && !t.chatbotResponse
+        );
+        
+        if (existingIndex >= 0) {
+          // Update existing transcript with latencies if provided
+          const updated = [...prev];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            latencies: message.latencies || updated[existingIndex].latencies,
+          };
+          console.log("📝 Updated existing transcript");
+          return updated;
+        }
+
+        // Add new transcript
+        const newTranscript = {
           id: Date.now(),
           asrText: transcription,
           chatbotResponse: "",
           latencies: message.latencies || {},
           timestamp: new Date().toLocaleTimeString(),
-        },
-      ]);
-      setLatestLatency(message.latencies);
+        };
+        console.log("📝 Added new transcript:", newTranscript);
+        return [...prev, newTranscript];
+      });
+      
+      if (message.latencies) {
+        setLatestLatency(message.latencies);
+      }
     }
 
     // 📝 ASR events (legacy format)
     if (msgType === "asr_partial" || msgType === "asr_final") {
-      setCurrentTranscript(message.text || "");
+      const text = message.text || "";
+      setCurrentTranscript(text);
 
-      if (msgType === "asr_final") {
-        setTranscripts((prev) => [
-          ...prev,
-          {
-            id: Date.now(),
-            asrText: message.text,
-            chatbotResponse: "",
-            latencies: message.latencies || {},
-            timestamp: new Date().toLocaleTimeString(),
-          },
-        ]);
-        setLatestLatency(message.latencies);
+      if (msgType === "asr_final" && text && text.trim() !== "") {
+        console.log("📝 Processing ASR final:", text);
+        
+        setTranscripts((prev) => {
+          // Check if this transcription already exists
+          const existingIndex = prev.findIndex(
+            (t) => t.asrText === text && !t.chatbotResponse
+          );
+          
+          if (existingIndex >= 0) {
+            // Update existing transcript
+            const updated = [...prev];
+            updated[existingIndex] = {
+              ...updated[existingIndex],
+              latencies: message.latencies || updated[existingIndex].latencies,
+            };
+            return updated;
+          }
+
+          // Add new transcript
+          return [
+            ...prev,
+            {
+              id: Date.now(),
+              asrText: text,
+              chatbotResponse: "",
+              latencies: message.latencies || {},
+              timestamp: new Date().toLocaleTimeString(),
+            },
+          ];
+        });
+        
+        if (message.latencies) {
+          setLatestLatency(message.latencies);
+        }
       }
     }
 

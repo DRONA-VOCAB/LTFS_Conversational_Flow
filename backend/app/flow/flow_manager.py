@@ -1,18 +1,18 @@
 import logging
 from flow.question_order import QUESTIONS
-from  config.settings import MAX_RETRIES
-from  services.summary_service import (
+from config.settings import MAX_RETRIES
+from services.summary_service import (
     generate_human_summary,
     get_closing_statement,
     detect_confirmation,
     detect_field_to_edit,
     get_edit_prompt,
 )
-from  services.conversational_flow import (
+from services.conversational_flow import (
     process_conversational_response,
     get_initial_greeting,
     is_conversation_complete,
-    generate_conversation_summary
+    generate_conversation_summary,
 )
 import importlib
 
@@ -61,7 +61,7 @@ def get_next_question_index(session):
 def get_question_text(session):
     """Get the text for the current question - now uses conversational approach"""
     phase = session.get("phase", PHASE_CONVERSATION)
-    
+
     # Use conversational approach instead of individual questions
     if phase == PHASE_CONVERSATION or not session.get("conversation_started"):
         # Start with initial greeting
@@ -69,7 +69,7 @@ def get_question_text(session):
         session["conversation_started"] = True
         session["phase"] = PHASE_CONVERSATION
         return get_initial_greeting(customer_name)
-    
+
     # Fallback to old approach if needed (shouldn't happen in new system)
     if phase == PHASE_QUESTIONS:
         # Skip optional questions that don't meet conditions
@@ -85,23 +85,20 @@ def get_question_text(session):
         module = importlib.import_module(f"questions.{q_name}")
         text = module.get_text()
         return text.replace("{{customer_name}}", session["customer_name"])
-    
+
     return None
 
 
 def process_answer(session, user_input):
-    """Process the user's answer - now uses conversational approach"""
+    """Process the user's answer - now uses conversational approach with integrated summary and editing"""
     phase = session.get("phase", PHASE_CONVERSATION)
 
-    # Handle summary phase (confirmation is embedded in summary)
-    if phase == PHASE_SUMMARY:
-        return handle_summary_response(session, user_input)
+    # Summary and editing are now handled in the conversational prompt
+    # Only handle closing phase separately
+    if phase == PHASE_CLOSING:
+        return "CLOSING"
 
-    # Handle edit phase
-    if phase == PHASE_EDIT:
-        return handle_edit_response(session, user_input)
-
-    # Handle conversational phase (new approach)
+    # Handle conversational phase (includes summary and editing)
     if phase == PHASE_CONVERSATION:
         return handle_conversational_response(session, user_input)
 
@@ -148,34 +145,54 @@ def process_answer(session, user_input):
 
 
 def handle_conversational_response(session, user_input):
-    """Handle user response in conversational mode"""
+    """Handle user response in conversational mode - now includes summary and editing"""
     logger.info(f"🔄 Processing conversational response: '{user_input}'")
-    
+
     customer_name = session.get("customer_name", "")
-    
+
     try:
-        # Process the response using conversational AI
+        # Process the response using conversational AI (includes summary and editing)
         result = process_conversational_response(user_input, session, customer_name)
-        
+
         # Store the bot's response for TTS
         session["last_bot_response"] = result.get("bot_response", "")
-        
+
+        # Check if summary was provided in this response
+        if result.get("provide_summary", False):
+            logger.info("📝 Summary provided in conversational response")
+            # Summary is already in bot_response, just continue to wait for confirmation
+
         # Handle different next actions
         next_action = result.get("next_action", "continue")
         call_end_reason = result.get("call_end_reason")
-        
+
+        # Check if user confirmed summary (after summary was provided)
+        if session.get("generated_summary") and not session.get("summary_confirmed"):
+            # Check if this is a confirmation response
+            from services.summary_service import detect_confirmation
+
+            confirmation = detect_confirmation(user_input)
+
+            if confirmation == "YES":
+                session["summary_confirmed"] = True
+                session["phase"] = PHASE_CLOSING
+                logger.info("✅ User confirmed summary - moving to closing")
+                return "CLOSING"
+            elif confirmation == "NO":
+                # User wants to edit - this will be handled in next turn by LLM
+                logger.info("❌ User wants to edit - will be handled in next response")
+                # Clear the summary so LLM knows to handle correction
+                session["generated_summary"] = None
+
         if next_action == "end_call":
             session["phase"] = PHASE_CLOSING
             session["call_should_end"] = True
             session["call_end_reason"] = call_end_reason
             return "CLOSING"
-        elif next_action == "summary":
-            session["phase"] = PHASE_SUMMARY
-            return "SUMMARY"
         else:
-            # Continue conversation
+            # Continue conversation (summary and editing are handled in the prompt)
             return "CONTINUE_CONVERSATION"
-            
+
     except Exception as e:
         logger.error(f"Error in conversational response: {e}")
         session["retry_count"] = session.get("retry_count", 0) + 1
@@ -290,7 +307,7 @@ def get_summary_text(session):
         summary = generate_conversation_summary(session)
         session["generated_summary"] = summary
         return summary
-    
+
     # Fallback to old summary generation
     summary = generate_human_summary(session)
     session["generated_summary"] = summary

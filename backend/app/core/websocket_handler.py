@@ -27,7 +27,6 @@ from flow.flow_manager import (
     get_question_text,
     process_answer,
     get_summary_text,
-    get_edit_prompt_text,
     get_closing_text,
 )
 
@@ -364,16 +363,6 @@ async def process_asr_queue(websocket_id: str):
                             websocket_id, response_text, audio_base=response_audio_base
                         )
 
-                    elif result == "SUMMARY":
-                        # All questions done, read summary (confirmation is embedded)
-                        logger.info("📝 Generating and reading summary...")
-                        summary_text = get_summary_text(session)
-                        save_session(session)
-                        await send_tts(
-                            websocket_id, summary_text, audio_base=response_audio_base
-                        )
-                        # Mic will be enabled after TTS, user responds to confirmation
-
                     elif result == "CLOSING":
                         # Check if there's an acknowledgment text (e.g., edit confirmation) to speak first
                         ack_text = session.get("acknowledgment_text")
@@ -397,33 +386,6 @@ async def process_asr_queue(websocket_id: str):
                         state["pending_end"] = True
                         state["timeout_monitoring"] = False
 
-                    elif result == "ASK_EDIT":
-                        # User said no to confirmation, ask what to edit
-                        logger.info("✏️ User wants to edit, asking which field...")
-                        await send_tts(
-                            websocket_id,
-                            get_edit_prompt_text(),
-                            audio_base=response_audio_base,
-                        )
-
-                    elif result == "REPEAT_EDIT":
-                        # Could not detect which field, ask again
-                        logger.info("🔄 Could not detect field, asking again...")
-                        await send_tts(
-                            websocket_id,
-                            "माफ़ कीजिए, मुझे समझ नहीं आया। कृपया बताइए कौन सी जानकारी बदलनी है?",
-                            audio_base=response_audio_base,
-                        )
-
-                    elif result == "REPEAT_SUMMARY":
-                        # Unclear confirmation, repeat summary
-                        logger.info("🔄 Unclear confirmation, repeating summary...")
-                        summary_text = session.get(
-                            "generated_summary"
-                        ) or get_summary_text(session)
-                        await send_tts(
-                            websocket_id, summary_text, audio_base=response_audio_base
-                        )
 
                     elif result == "END":
                         # Max retries exceeded, say closing and end

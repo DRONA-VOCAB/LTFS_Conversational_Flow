@@ -290,27 +290,51 @@ const Chatbot = () => {
 
   // Update messages when transcripts change from WebSocket
   useEffect(() => {
-    if (transcripts && transcripts.length > 0) {
-      const latestTranscript = transcripts[transcripts.length - 1]
-      if (latestTranscript.asrText) {
-        // Add user transcript as user message
-        const existingUserMsg = messages.find(
-          m => m.type === 'user' && m.text === latestTranscript.asrText
-        )
-        if (!existingUserMsg) {
-          addMessage('user', latestTranscript.asrText)
-        }
-      }
-      if (latestTranscript.chatbotResponse) {
-        // Add bot response as bot message
-        const existingBotMsg = messages.find(
-          m => m.type === 'bot' && m.text === latestTranscript.chatbotResponse
-        )
-        if (!existingBotMsg) {
-          addMessage('bot', latestTranscript.chatbotResponse)
-        }
-      }
+    if (!transcripts || transcripts.length === 0) {
+      return;
     }
+
+    // Process all transcripts to ensure none are missed
+    setMessages((prevMessages) => {
+      const updatedMessages = [...prevMessages];
+      let hasChanges = false;
+
+      transcripts.forEach((transcript) => {
+        // Process user transcript (ASR)
+        if (transcript.asrText && transcript.asrText.trim() !== "") {
+          const existingUserMsg = updatedMessages.find(
+            (m) => m.type === "user" && m.text === transcript.asrText
+          );
+          if (!existingUserMsg) {
+            updatedMessages.push({
+              type: "user",
+              text: transcript.asrText,
+              timestamp: new Date(transcript.timestamp || Date.now()),
+            });
+            hasChanges = true;
+            console.log("✅ Added user message from transcript:", transcript.asrText);
+          }
+        }
+
+        // Process bot response
+        if (transcript.chatbotResponse && transcript.chatbotResponse.trim() !== "") {
+          const existingBotMsg = updatedMessages.find(
+            (m) => m.type === "bot" && m.text === transcript.chatbotResponse
+          );
+          if (!existingBotMsg) {
+            updatedMessages.push({
+              type: "bot",
+              text: transcript.chatbotResponse,
+              timestamp: new Date(transcript.timestamp || Date.now()),
+            });
+            hasChanges = true;
+            console.log("✅ Added bot message from transcript:", transcript.chatbotResponse);
+          }
+        }
+      });
+
+      return hasChanges ? updatedMessages : prevMessages;
+    });
   }, [transcripts])
 
   // Clear loading state when call starts
