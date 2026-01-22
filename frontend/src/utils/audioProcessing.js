@@ -1,4 +1,4 @@
-import { SAMPLE_RATE } from "./constants";
+import { SAMPLE_RATE, TTS_SAMPLE_RATE } from "./constants";
 
 // =====================================================================
 //                    TTS FRONTEND FOR PCM STREAMING (FIXED)
@@ -52,7 +52,7 @@ export const streamTTSAudio = async (
     console.log("🎵 Initializing PCM audio context...");
 
     audioContext = new (window.AudioContext || window.webkitAudioContext)({
-      sampleRate: 16000,
+      sampleRate: TTS_SAMPLE_RATE,
     });
 
     if (audioContext.state === "suspended") {
@@ -161,7 +161,7 @@ export const streamTTSAudio = async (
 // =====================================================================
 
 export class PCMPlayer {
-  constructor(sampleRate = 16000) {
+  constructor(sampleRate = 24000) {
     this.sampleRate = sampleRate;
     this.audioContext = null;
     this.scheduledTime = 0;

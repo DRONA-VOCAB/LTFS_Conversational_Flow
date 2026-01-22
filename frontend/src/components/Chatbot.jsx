@@ -306,10 +306,28 @@ const Chatbot = () => {
             (m) => m.type === "user" && m.text === transcript.asrText
           );
           if (!existingUserMsg) {
+            // Handle timestamp - it might be a string from toLocaleTimeString() or a Date
+            let timestamp;
+            if (transcript.timestamp) {
+              if (typeof transcript.timestamp === 'string') {
+                // If it's already a time string, use current date with that time, or just use current date
+                timestamp = new Date();
+              } else {
+                timestamp = new Date(transcript.timestamp);
+              }
+            } else {
+              timestamp = new Date();
+            }
+
+            // Validate the date
+            if (isNaN(timestamp.getTime())) {
+              timestamp = new Date();
+            }
+
             updatedMessages.push({
               type: "user",
               text: transcript.asrText,
-              timestamp: new Date(transcript.timestamp || Date.now()),
+              timestamp: timestamp,
             });
             hasChanges = true;
             console.log("✅ Added user message from transcript:", transcript.asrText);
@@ -322,10 +340,28 @@ const Chatbot = () => {
             (m) => m.type === "bot" && m.text === transcript.chatbotResponse
           );
           if (!existingBotMsg) {
+            // Handle timestamp - it might be a string from toLocaleTimeString() or a Date
+            let timestamp;
+            if (transcript.timestamp) {
+              if (typeof transcript.timestamp === 'string') {
+                // If it's already a time string, use current date with that time, or just use current date
+                timestamp = new Date();
+              } else {
+                timestamp = new Date(transcript.timestamp);
+              }
+            } else {
+              timestamp = new Date();
+            }
+
+            // Validate the date
+            if (isNaN(timestamp.getTime())) {
+              timestamp = new Date();
+            }
+
             updatedMessages.push({
               type: "bot",
               text: transcript.chatbotResponse,
-              timestamp: new Date(transcript.timestamp || Date.now()),
+              timestamp: timestamp,
             });
             hasChanges = true;
             console.log("✅ Added bot message from transcript:", transcript.chatbotResponse);
@@ -386,7 +422,9 @@ const Chatbot = () => {
                   className={`text-xs mt-1 block ${message.type === 'user' ? 'text-blue-100' : 'text-gray-500'
                     }`}
                 >
-                  {message.timestamp.toLocaleTimeString()}
+                  {message.timestamp && !isNaN(message.timestamp.getTime())
+                    ? message.timestamp.toLocaleTimeString()
+                    : new Date().toLocaleTimeString()}
                 </span>
               </div>
             </div>

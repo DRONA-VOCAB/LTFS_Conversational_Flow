@@ -171,7 +171,7 @@ export const useVoiceWebSocket = () => {
           asrText: transcription,
           chatbotResponse: "",
           latencies: message.latencies || {},
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date(),
         };
         console.log("📝 Added new transcript:", newTranscript);
         return [...prev, newTranscript];
@@ -214,7 +214,7 @@ export const useVoiceWebSocket = () => {
               asrText: text,
               chatbotResponse: "",
               latencies: message.latencies || {},
-              timestamp: new Date().toLocaleTimeString(),
+              timestamp: new Date(),
             },
           ];
         });
@@ -236,7 +236,7 @@ export const useVoiceWebSocket = () => {
           asrText: message.text,
           chatbotResponse: "",
           latencies: {},
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date(),
           agentType: message.agent_type,
         },
       ]);
@@ -290,7 +290,7 @@ export const useVoiceWebSocket = () => {
           asrText: message.asr_response || "",
           chatbotResponse: message.chatbot_response || "",
           latencies: message.latencies || {},
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date(),
         },
       ]);
       setLatestLatency(message.latencies);
@@ -306,7 +306,7 @@ export const useVoiceWebSocket = () => {
           asrText: "",
           chatbotResponse: message.text || "",
           latencies: {},
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date(),
         },
       ]);
     }
@@ -396,7 +396,7 @@ export const useVoiceWebSocket = () => {
           asrText: "",
           chatbotResponse: `Error: ${message.message}`,
           latencies: {},
-          timestamp: new Date().toLocaleTimeString(),
+          timestamp: new Date(),
         },
       ]);
     }
