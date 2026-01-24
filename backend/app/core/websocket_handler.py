@@ -584,18 +584,18 @@ async def monitor_timeout(websocket_id: str):
     state = connection_states.get(websocket_id)
     if not state:
         return
-    
+
     while websocket_id in active_connections and state.get("timeout_monitoring", True):
         try:
             await asyncio.sleep(5)  # Check every 5 seconds
-            
+
             if websocket_id not in active_connections:
                 break
-                
+
             state = connection_states.get(websocket_id)
             if not state or not state.get("timeout_monitoring", True):
                 break
-            
+
             # Only monitor if we have a session and mic is enabled (waiting for user input)
             if state.get("session_id") and state.get("mic_enabled") and not state.get("tts_playing"):
                 last_input_time = state.get("last_user_input_time")
@@ -603,11 +603,11 @@ async def monitor_timeout(websocket_id: str):
                     elapsed = time.time() - last_input_time
                     if elapsed >= USER_INPUT_TIMEOUT:
                         logger.warning(f"⏰ Timeout: No user input for {elapsed:.1f} seconds, closing call for {websocket_id}")
-                        
+
                         # Disable timeout monitoring and mic
                         state["timeout_monitoring"] = False
                         state["mic_enabled"] = False
-                        
+
                         # Get session and trigger closing
                         session_id = state.get("session_id")
                         if session_id:
@@ -617,12 +617,12 @@ async def monitor_timeout(websocket_id: str):
                                 session["phase"] = "closing"
                                 session["call_should_end"] = True
                                 save_session(session)
-                                
+
                                 # Get closing statement (this is what will be spoken)
                                 closing_text = get_closing_text(session)
                                 save_session(session)
                                 save_session_data(session_id, session)
-                                
+
                                 websocket = active_connections.get(websocket_id)
                                 if websocket:
                                     # Send closing statement via TTS
@@ -630,15 +630,15 @@ async def monitor_timeout(websocket_id: str):
                                     # Set pending_end so websocket closes after TTS finishes
                                     state["pending_end"] = True
                                     logger.info(f"📢 Playing closing statement due to timeout: {closing_text[:50]}...")
-                                    
+
                         break
-                        
+
         except asyncio.CancelledError:
             break
         except Exception as e:
             logger.error(f"Error in timeout monitor for {websocket_id}: {e}")
 
-            
+
 async def websocket_audio_endpoint(websocket: WebSocket):
     """Main WebSocket endpoint using core architecture"""
     logger.info("🔌 WebSocket connection attempt received")
@@ -742,6 +742,7 @@ async def websocket_audio_endpoint(websocket: WebSocket):
                     state = connection_states[websocket_id]
 
                     if state["mic_enabled"] and not state["processing_asr"]:
+                        # for web ui stream_sid is websocket_id, but smartflo stream_sid is given by smartflo api
                         await process_frame(
                             websocket, audio_frame, stream_sid=websocket_id
                         )

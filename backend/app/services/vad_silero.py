@@ -4,6 +4,7 @@ import logging
 import numpy as np
 import torch
 
+import smartflo.integration
 from  queues.asr_queue import asr_queue
 from  queues.tts_queue import tts_queue
 from services.playback_state import get_playback_state
@@ -110,10 +111,15 @@ async def process_vad_chunk(websocket, frame_bytes: bytes, stream_sid: str):
     state.speech_buffer.extend(frame_bytes)
 
     if is_speech:
-        get_playback_state(websocket).cancel()
-        await websocket.send_json(
-            {"event": "barge_in", "confidence": state.speech_prob}
-        )
+        if smartflo.integration.is_smartflo_connection(websocket):
+            get_playback_state(websocket).cancel()
+            from smartflo.websocket_server import smartflo_server
+            await smartflo_server.send_clear_event(websocket, stream_sid)
+        else:
+            get_playback_state(websocket).cancel()
+            await websocket.send_json(
+                {"event": "barge_in", "confidence": state.speech_prob}
+            )
         state.trailing_silence.clear()
         return
 

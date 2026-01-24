@@ -5,6 +5,9 @@ from fastapi.staticfiles import StaticFiles
 from core.websocket_handler import websocket_audio_endpoint
 from routes import session_router
 
+# Smartflo integration
+from smartflo.websocket_server import smartflo_server
+
 app = FastAPI(
     title="L and T Finance Customer Survey API",
     version="1.0.0",
@@ -21,6 +24,7 @@ app.add_middleware(
 # routers
 app.include_router(session_router)
 app.websocket("/ws/audio")(websocket_audio_endpoint)
+app.websocket("/vendor-stream")(smartflo_server.handle_socket)
 
 # -------- PATHS (ABSOLUTE) --------
 BASE_DIR = Path(__file__).resolve().parent.parent  # backend/
