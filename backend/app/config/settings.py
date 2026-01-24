@@ -1,28 +1,29 @@
 import os
 from dotenv import load_dotenv
-# from pathlib import Path
+from pathlib import Path
 
-# # Load environment variables from the correct location
-# # Try multiple locations to find the .env file
-# env_paths = [
-#     Path(__file__).parent.parent.parent / ".env",  # backend/.env
-#     Path(__file__).parent.parent / ".env",  # backend/app/.env
-#     Path(__file__).parent / ".env",  # backend/app/config/.env
-#     ".env",  # current directory
-# ]
+# Load environment variables from the correct location
+# Try multiple locations to find the .env file
+env_paths = [
+    Path(__file__).parent.parent.parent / ".env",  # backend/.env
+    Path(__file__).parent.parent / ".env",  # backend/app/.env
+    Path(__file__).parent / ".env",  # backend/app/config/.env
+    ".env",  # current directory
+]
 
-# env_loaded = False
-# for env_path in env_paths:
-#     if env_path.exists():
-#         load_dotenv(env_path)
-#         env_loaded = True
-#         print(f"[INFO] Loaded environment from: {env_path}")
-#         break
+env_loaded = False
+for env_path in env_paths:
+    env_path_obj = Path(env_path) if isinstance(env_path, str) else env_path
+    if env_path_obj.exists():
+        load_dotenv(env_path_obj)
+        env_loaded = True
+        print(f"[INFO] Loaded environment from: {env_path_obj}")
+        break
 
-# if not env_loaded:
-#     print(
-#         f"[WARNING] No .env file found in any of these locations: {[str(p) for p in env_paths]}"
-#     )
+if not env_loaded:
+    print(
+        f"[WARNING] No .env file found in any of these locations: {[str(p) for p in env_paths]}"
+    )
 
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")

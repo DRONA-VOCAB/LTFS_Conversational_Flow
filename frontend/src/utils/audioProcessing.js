@@ -8,7 +8,7 @@ export const convertFloat32ToInt16 = (float32Array) => {
   const int16 = new Int16Array(float32Array.length);
   for (let i = 0; i < float32Array.length; i++) {
     let s = Math.max(-1, Math.min(1, float32Array[i]));
-    int16[i] = s < 0 ? s * 0x8000 : s * 0x7fff;
+    int16[i] = s < 0 ? s * 0x8001 : s * 0x7fff;
   }
   return int16;
 };

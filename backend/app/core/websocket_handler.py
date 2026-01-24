@@ -749,6 +749,16 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             except WebSocketDisconnect:
                 logger.info(f"❌ WebSocket disconnected: {websocket_id}")
                 break
+            except RuntimeError as e:
+                # Handle case where receive() is called after disconnect message
+                if "disconnect" in str(e).lower():
+                    logger.info(f"❌ WebSocket disconnected (RuntimeError): {websocket_id}")
+                    break
+                else:
+                    logger.error(f"Error in WebSocket loop: {e}")
+                    import traceback
+                    traceback.print_exc()
+                    break
             except Exception as e:
                 logger.error(f"Error in WebSocket loop: {e}")
                 import traceback

@@ -74,8 +74,9 @@ pip install -r requirements.txt
    Create a `.env` file in the project root:
 
 ```
-GEMINI_MODEL=your-model-name
-GEMINI_API_KEY=your-api-key
+GPT_OSS_MODEL=openai/gpt-oss-20b
+GPT_OSS_API_KEY=local
+GPT_OSS_API_BASE=http://192.168.30.132:8001/v1
 MAX_RETRIES=3
 ```
 

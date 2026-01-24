@@ -3,6 +3,7 @@
 from  llm.gemini_client import model
 import logging
 import json
+import re
 
 logger = logging.getLogger(__name__)
 
@@ -29,6 +30,10 @@ def transliterate_to_devanagari(name: str) -> str:
 
         if response and response.text:
             result = response.text.strip()
+            # Strip special tokens that GPT-OSS models sometimes include
+            result = re.sub(r'<\|[^|]+\|>', '', result)  # Remove <|token|> patterns
+            result = re.sub(r'<return>', '', result, flags=re.IGNORECASE)
+            result = result.strip()
             logger.info("📥 LLM CALL (transliterate_to_devanagari) - Raw Response:")
             logger.info(response.text)
             logger.info("-" * 80)
@@ -123,6 +128,10 @@ def generate_human_summary(session: dict) -> str:
 
         if response and response.text:
             result = response.text.strip()
+            # Strip special tokens that GPT-OSS models sometimes include
+            result = re.sub(r'<\|[^|]+\|>', '', result)  # Remove <|token|> patterns
+            result = re.sub(r'<return>', '', result, flags=re.IGNORECASE)
+            result = result.strip()
             logger.info("📥 LLM CALL (generate_human_summary) - Raw Response:")
             logger.info(response.text)
             logger.info("-" * 80)

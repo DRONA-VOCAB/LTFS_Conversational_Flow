@@ -1,0 +1,270 @@
+[
+  {
+    "call_id": "CALL_001",
+    "scenario": "Happy Path - Customer confirms identity, loan, and payment details",
+    "customer_name": "राज कुमार",
+    "total_turns": 8,
+    "turns": [
+      {
+        "turn": 1,
+        "bot_question": "नमस्ते राज कुमार जी, मैं एल एंड टी फाइनेंस की तरफ से बात कर रही हूँ। क्या मेरी बात राज कुमार जी से हो रही है?",
+        "user_response": "हाँ जी, मैं राज बोल रहा हूँ",
+        "bot_response": "धन्यवाद, राज जी, मैं आपका पहचान कर चुकी हूँ",
+        "latency": 6.086794376373291,
+        "extracted_data": {
+          "identity_confirmed": "YES"
+        },
+        "expected_extraction": {
+          "identity_confirmed": "YES"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 2,
+        "bot_question": "धन्यवाद, राज जी, मैं आपका पहचान कर चुकी हूँ",
+        "user_response": "हाँ, मैंने लोन लिया है",
+        "bot_response": "धन्यवाद, राज जी, मैं समझ गई। आपने लोन लिया है",
+        "latency": 4.550834894180298,
+        "extracted_data": {
+          "loan_taken": "YES"
+        },
+        "expected_extraction": {
+          "loan_taken": "YES"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 3,
+        "bot_question": "धन्यवाद, राज जी, मैं समझ गई। आपने लोन लिया है",
+        "user_response": "जी हाँ, पिछले महीने पेमेंट किया था",
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट किया था",
+        "latency": 4.399706125259399,
+        "extracted_data": {
+          "last_month_payment": "YES"
+        },
+        "expected_extraction": {
+          "last_month_payment": "YES"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 4,
+        "bot_question": "जी समझ गई, पिछले महीने पेमेंट किया था",
+        "user_response": "मैंने खुद पेमेंट किया था",
+        "bot_response": "जी समझ गई, कौन ने पेमेंट किया था?",
+        "latency": 4.207896709442139,
+        "extracted_data": {
+          "payee": "self"
+        },
+        "expected_extraction": {
+          "payee": "self"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 5,
+        "bot_question": "जी समझ गई, कौन ने पेमेंट किया था?",
+        "user_response": "15 तारीख को पेमेंट किया था",
+        "bot_response": "जी समझ गई, 15 तारीख को किस पेमेंट मोड से किया गया था?",
+        "latency": 5.076220750808716,
+        "extracted_data": {
+          "payment_date": "15/01/2026"
+        },
+        "expected_extraction": {
+          "payment_date": "15/01/2026"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 6,
+        "bot_question": "जी समझ गई, 15 तारीख को किस पेमेंट मोड से किया गया था?",
+        "user_response": "UPI से पेमेंट किया था",
+        "bot_response": "जी समझ गई, UPI से किस रूप का पेमेंट किया गया था?",
+        "latency": 4.671482563018799,
+        "extracted_data": {
+          "payment_mode": "online_lan"
+        },
+        "expected_extraction": {
+          "payment_mode": "online_lan"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 7,
+        "bot_question": "जी समझ गई, UPI से किस रूप का पेमेंट किया गया था?",
+        "user_response": "EMI के लिए पेमेंट किया था",
+        "bot_response": "जी समझ गई, EMI के लिए दिए थे",
+        "latency": 4.0397772789001465,
+        "extracted_data": {
+          "payment_reason": "emi"
+        },
+        "expected_extraction": {
+          "payment_reason": "emi"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 8,
+        "bot_question": "जी समझ गई, EMI के लिए दिए थे",
+        "user_response": "5000 रुपये दिए थे",
+        "bot_response": "जी समझ गई, 5000 रुपये दिए थे",
+        "latency": 4.181671142578125,
+        "extracted_data": {
+          "payment_amount": "5000"
+        },
+        "expected_extraction": {
+          "payment_amount": "5000"
+        },
+        "extraction_correct": true
+      }
+    ],
+    "total_latency": 37.21438384056091,
+    "avg_latency": 4.651797980070114,
+    "success_rate": 100.0,
+    "extractions_correct": 8,
+    "extractions_total": 8
+  },
+  {
+    "call_id": "CALL_002",
+    "scenario": "Relative answering - Brother provides details on behalf of customer",
+    "customer_name": "आकाश शर्मा",
+    "total_turns": 9,
+    "turns": [
+      {
+        "turn": 1,
+        "bot_question": "नमस्ते आकाश शर्मा जी, मैं एल एंड टी फाइनेंस की तरफ से बात कर रही हूँ। क्या मेरी बात आकाश शर्मा जी से हो रही है?",
+        "user_response": "नहीं, मैं उनका भाई बोल रहा हूँ",
+        "bot_response": "जी समझ गई, आप कौन हैं?",
+        "latency": 4.09515118598938,
+        "extracted_data": {
+          "speaker_name": "भाई"
+        },
+        "expected_extraction": {
+          "identity_confirmed": "NOT_AVAILABLE"
+        },
+        "extraction_correct": false
+      },
+      {
+        "turn": 2,
+        "bot_question": "जी समझ गई, आप कौन हैं?",
+        "user_response": "मेरा नाम विक्रम है, मैं उनका छोटा भाई हूँ",
+        "bot_response": "ठीक है, मैं समझ गई",
+        "latency": 4.931507110595703,
+        "extracted_data": {
+          "identity_confirmed": "NOT_AVAILABLE",
+          "speaker_name": "विक्रम",
+          "speaker_relation": "भाई"
+        },
+        "expected_extraction": {
+          "speaker_name": "विक्रम",
+          "speaker_relation": "भाई"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 3,
+        "bot_question": "ठीक है, मैं समझ गई",
+        "user_response": "हाँ, उन्होंने लोन लिया है",
+        "bot_response": "धन्यवाद, आकाश शर्मा जी, मैं समझ गई कि आपने लोन लिया है",
+        "latency": 5.030843734741211,
+        "extracted_data": {
+          "loan_taken": "YES"
+        },
+        "expected_extraction": {
+          "loan_taken": "YES"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 4,
+        "bot_question": "धन्यवाद, आकाश शर्मा जी, मैं समझ गई कि आपने लोन लिया है",
+        "user_response": "हाँ, पिछले महीने पेमेंट हुआ था",
+        "bot_response": "जी समझ गई, आपने पिछले महीने पेमेंट किया है",
+        "latency": 4.766207218170166,
+        "extracted_data": {
+          "last_month_payment": "YES"
+        },
+        "expected_extraction": {
+          "last_month_payment": "YES"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 5,
+        "bot_question": "जी समझ गई, आपने पिछले महीने पेमेंट किया है",
+        "user_response": "मैंने खुद उनकी तरफ से पेमेंट किया था",
+        "bot_response": "जी समझ गई, आपने खुद उनकी तरफ से पेमेंट किया था",
+        "latency": 4.722681283950806,
+        "extracted_data": {
+          "payee": "self"
+        },
+        "expected_extraction": {
+          "payee": "relative"
+        },
+        "extraction_correct": false
+      },
+      {
+        "turn": 6,
+        "bot_question": "जी समझ गई, आपने खुद उनकी तरफ से पेमेंट किया था",
+        "user_response": "20 जनवरी को पेमेंट किया था",
+        "bot_response": "जी समझ गई, आपने 20 जनवरी को पेमेंट किया था",
+        "latency": 4.901426553726196,
+        "extracted_data": {
+          "payment_date": "20/01/2026"
+        },
+        "expected_extraction": {
+          "payment_date": "20/01/2026"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 7,
+        "bot_question": "जी समझ गई, आपने 20 जनवरी को पेमेंट किया था",
+        "user_response": "ऑनलाइन NEFT से किया था",
+        "bot_response": "जी समझ गई, आपने ऑनलाइन EMI के लिए दिए थे",
+        "latency": 5.431372404098511,
+        "extracted_data": {
+          "payment_mode": "online_lan",
+          "payment_reason": "emi"
+        },
+        "expected_extraction": {
+          "payment_mode": "online_lan"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 8,
+        "bot_question": "जी समझ गई, आपने ऑनलाइन EMI के लिए दिए थे",
+        "user_response": "EMI और charges दोनों के लिए",
+        "bot_response": "जी समझ गई, आपने EMI और charges दोनों के लिए दिए थे",
+        "latency": 4.786694526672363,
+        "extracted_data": {
+          "payment_reason": "emi_charges"
+        },
+        "expected_extraction": {
+          "payment_reason": "emi_charges"
+        },
+        "extraction_correct": true
+      },
+      {
+        "turn": 9,
+        "bot_question": "जी समझ गई, आपने EMI और charges दोनों के लिए दिए थे",
+        "user_response": "12000 रुपये थे",
+        "bot_response": "जी समझ गई, आपने 12000 रुपये दिए थे",
+        "latency": 4.522718906402588,
+        "extracted_data": {
+          "payment_amount": "12000"
+        },
+        "expected_extraction": {
+          "payment_amount": "12000"
+        },
+        "extraction_correct": true
+      }
+    ],
+    "total_latency": 43.188602924346924,
+    "avg_latency": 4.798733658260769,
+    "success_rate": 77.77777777777779,
+    "extractions_correct": 7,
+    "extractions_total": 9
+  }
+]

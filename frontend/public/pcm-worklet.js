@@ -24,7 +24,7 @@ class PCMWorkletProcessor extends AudioWorkletProcessor {
         const int16Array = new Int16Array(this.frameSamples);
         for (let i = 0; i < this.frameSamples; i++) {
           const s = Math.max(-1, Math.min(1, frame[i]));
-          int16Array[i] = s < 0 ? s * 0x8000 : s * 0x7FFF;
+          int16Array[i] = s < 0 ? s * 0x8001 : s * 0x7FFF;
         }
         
         // Send to main thread

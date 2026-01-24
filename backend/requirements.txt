@@ -1,5 +1,4 @@
 python-dotenv 
-google-generativeai
 fastapi
 uvicorn[standard]
 websockets
@@ -10,8 +9,16 @@ packaging
 psycopg2-binary
 asyncpg
 sqlalchemy[asyncio]
-aiohttp==3.8.4
+aiohttp>=3.9.0
 numpy
 gspread
 google-auth
 google-auth-oauthlib
+huggingface_hub
+transformers
+accelerate
+safetensors
+bitsandbytes
+scipy
+protobuf
+sentencepiece

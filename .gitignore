@@ -2,6 +2,7 @@
 .env.local
 .env.*.local
 venv
+.venv/
 __pycache__/
 .vscode/
 session_data/
@@ -10,3 +11,6 @@ static/
 logs/
 google_sheet_creds.json
 audio_files/
+certs/
+*.lock*
+.~lock.*

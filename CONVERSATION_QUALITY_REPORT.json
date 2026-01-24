@@ -1,0 +1,686 @@
+{
+  "bot_responses": {
+    "issues": [
+      {
+        "call_id": "CALL_012",
+        "turn": "4",
+        "issue": "EMPTY_BOT_RESPONSE",
+        "user_said": "मैं... खुद"
+      },
+      {
+        "call_id": "CALL_012",
+        "turn": "5",
+        "issue": "EMPTY_BOT_RESPONSE",
+        "user_said": "तारीख... 5... नहीं 6"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "2",
+        "issue": "EMPTY_BOT_RESPONSE",
+        "user_said": "मेरा नाम प्रिया है"
+      }
+    ],
+    "good_responses": [
+      {
+        "call_id": "CALL_001",
+        "turn": "1",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, राज जी, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "2",
+        "word_count": 11,
+        "bot_response": "धन्यवाद, राज जी, मैं समझ गई कि आपने लोन लिया है"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "3",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट किया था"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "4",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, किस तारीख को पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "6",
+        "word_count": 12,
+        "bot_response": "जी समझ गई, UPI से किस रूप का पेमेंट किया गया था?"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "7",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, EMI के लिए दिए थे"
+      },
+      {
+        "call_id": "CALL_001",
+        "turn": "8",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, 5000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "1",
+        "word_count": 5,
+        "bot_response": "ठीक है, मैं समझ गई"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "2",
+        "word_count": 5,
+        "bot_response": "धन्यवाद, आपका नाम विक्रम है"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "3",
+        "word_count": 5,
+        "bot_response": "धन्यवाद, आपने लोन लिया है"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "4",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट किया गया था"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "5",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, किस लोग ने पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "6",
+        "word_count": 11,
+        "bot_response": "जी समझ गई, 20 जनवरी को किस तरह पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "8",
+        "word_count": 12,
+        "bot_response": "जी समझ गई, आपने EMI और charges दोनों के लिए दिए थे"
+      },
+      {
+        "call_id": "CALL_002",
+        "turn": "9",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने 5000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_003",
+        "turn": "1",
+        "word_count": 8,
+        "bot_response": "गलत नंबर है, यहाँ कोई प्रिया नहीं है"
+      },
+      {
+        "call_id": "CALL_004",
+        "turn": "1",
+        "word_count": 11,
+        "bot_response": "धन्यवाद, अमित बोल रहा है, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_005",
+        "turn": "1",
+        "word_count": 3,
+        "bot_response": "धन्यवाद, सुनीता जी"
+      },
+      {
+        "call_id": "CALL_005",
+        "turn": "2",
+        "word_count": 11,
+        "bot_response": "धन्यवाद, सुनीता जी, मैं समझ गई कि आपने लोन लिया है"
+      },
+      {
+        "call_id": "CALL_005",
+        "turn": "3",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट नहीं किया"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "1",
+        "word_count": 10,
+        "bot_response": "धन्यवाद, रमेश कुमार जी, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "2",
+        "word_count": 12,
+        "bot_response": "धन्यवाद, रमेश कुमार जी, मैं समझ गई कि आप लोन लिया है"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "3",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट किया गया था?"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "4",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, कौन ने पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "5",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, किस तारीख को दिया था?"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "6",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, कैश में दिया था"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "7",
+        "word_count": 7,
+        "bot_response": "समझ गई, third_party ने पेमेंट किया था"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "8",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, EMI के लिए दिया था"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "9",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, 8000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "1",
+        "word_count": 3,
+        "bot_response": "धन्यवाद, नीलम जी"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "2",
+        "word_count": 11,
+        "bot_response": "धन्यवाद, नीलम जी, मैं समझ गई कि आप लोन लिया है"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "3",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट किया गया था?"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "4",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, कौन ने पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "5",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, 25 तारीख को किया था"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "6",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, ब्रांच में किया गया था"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "7",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, फोरक्लोज़र के लिए दिए गए थे"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "8",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, 50000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "1",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, अर्जुन जी, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "2",
+        "word_count": 10,
+        "bot_response": "धन्यवाद, अर्जुन जी, मैं समझ गई कि आपको लोन है"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "3",
+        "word_count": 11,
+        "bot_response": "जी समझ गई, आपने पिछले महीने हो गया पेमेंट किया है"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "4",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, आपने ऑटो डेबिट से पेमेंट किया है"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "6",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, आपने EMI के लिए दिया था"
+      },
+      {
+        "call_id": "CALL_008",
+        "turn": "7",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, कितने रुपये 6500 के साथ दिए थे?"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "1",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, पूजा जी, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "2",
+        "word_count": 11,
+        "bot_response": "धन्यवाद, पूजा जी, मैं समझ गई कि आप लोन लिया है"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "3",
+        "word_count": 12,
+        "bot_response": "जी समझ गई। कितने रुपये दिए थे अपने अपने माह के लिए?"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "4",
+        "word_count": 9,
+        "bot_response": "जी समझ गई। किस तारीख को पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "5",
+        "word_count": 7,
+        "bot_response": "जी समझ गई। 18 तारीख को था"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "6",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, फोन से UPI किया गया था"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "7",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, EMI और charges भी थे"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "8",
+        "word_count": 6,
+        "bot_response": "जी समझ गई, 15500 रुपये थे"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "1",
+        "word_count": 4,
+        "bot_response": "धन्यवाद, विकास रेड्डी जी"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "2",
+        "word_count": 12,
+        "bot_response": "धन्यवाद, विकास रेड्डी जी, मैं समझ गई कि आप लोन लिया है"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "3",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने पेमेंट किया है क्या?"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "4",
+        "word_count": 9,
+        "bot_response": "जी अच्छा, आपने पिछले महीने पेमेंट कर दिया था"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "6",
+        "word_count": 11,
+        "bot_response": "जी समझ गई, आपने RTGS से 14 तारीख को दिया था"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "7",
+        "word_count": 12,
+        "bot_response": "जी समझ गई, आपने 14 तारीख को सेटलमेंट के लिए दिया था"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "8",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने 35000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "1",
+        "word_count": 10,
+        "bot_response": "धन्यवाद, अनिता जी, आप किस बारे में है यह कॉल?"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "2",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, मैं आपकी पहचान की पुष्टि कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "3",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, आपने अपने पेमेंट को कहा था"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "4",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने खुद ने दिया था"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "5",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने 22 को दिया था"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "6",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, आपने ऑनलाइन EMI के लिए दिए थे"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "7",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, कितने रुपये दिए थे?"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "8",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, 7000 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_012",
+        "turn": "3",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, पिछले माह का पेमेंट किया गया था?"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "1",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, राहुल जी, मैं आपका पहचान कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "2",
+        "word_count": 10,
+        "bot_response": "धन्यवाद, राहुल जी, मैं समझ गई कि आपको लोन है"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "3",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, आपने पेमेंट किया है"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "4",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, कौन ने दिया था?"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "5",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, कौन ने दिया था?"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "6",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, 8 तारीख को कितने रुपये दिए थे?"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "7",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, उसने online के साथ पेमेंट किया था"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "8",
+        "word_count": 10,
+        "bot_response": "जी समझ गई, आपने EMI के लिए पेमेंट किया था"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "9",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, आपने 4500 रुपये दिए थे"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "1",
+        "word_count": 9,
+        "bot_response": "धन्यवाद, मैं आपकी पहचान की पुष्टि कर चुकी हूँ"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "3",
+        "word_count": 12,
+        "bot_response": "धन्यवाद, संजय जी, मैं समझ गई कि आपने होम लोन लिया है"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "4",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, पिछले महीने पेमेंट हुआ था"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "5",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, कौन ने पेमेंट किया था?"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "6",
+        "word_count": 8,
+        "bot_response": "जी समझ गई, किस तारीख को दिया था?"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "7",
+        "word_count": 9,
+        "bot_response": "जी समझ गई, किस तरीके से दिया गया था?"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "8",
+        "word_count": 11,
+        "bot_response": "जी समझ गई, किस लोग ने EMI के लिए दिया था?"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "9",
+        "word_count": 7,
+        "bot_response": "जी समझ गई, कितने रुपये दिए थे?"
+      }
+    ],
+    "total_responses": 98,
+    "issue_rate": 3.061224489795918
+  },
+  "data_extraction": {
+    "extraction_issues": [],
+    "extraction_success": [
+      {
+        "call_id": "CALL_001",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      },
+      {
+        "call_id": "CALL_006",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      },
+      {
+        "call_id": "CALL_007",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      },
+      {
+        "call_id": "CALL_010",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      },
+      {
+        "call_id": "CALL_011",
+        "turn": "4",
+        "field": "payee",
+        "extracted": "self"
+      }
+    ],
+    "total_extractions": 6
+  },
+  "conversation_flow": {
+    "flow_issues": [
+      {
+        "call_id": "CALL_001",
+        "turn": "5",
+        "issue": "REPETITIVE_QUESTION",
+        "question": "payment_date",
+        "bot_response": "जी समझ गई, 15 तारीख को किस पेमेंट मोड से किया गया था?"
+      },
+      {
+        "call_id": "CALL_009",
+        "turn": "5",
+        "issue": "REPETITIVE_QUESTION",
+        "question": "payment_date",
+        "bot_response": "जी समझ गई। 18 तारीख को था"
+      },
+      {
+        "call_id": "CALL_013",
+        "turn": "5",
+        "issue": "REPETITIVE_QUESTION",
+        "question": "payee",
+        "bot_response": "जी समझ गई, कौन ने दिया था?"
+      }
+    ],
+    "good_flows": [
+      {
+        "call_id": "CALL_001",
+        "turns": 8,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_005",
+        "turns": 3,
+        "completed_fields": 0
+      },
+      {
+        "call_id": "CALL_006",
+        "turns": 9,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_007",
+        "turns": 8,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_008",
+        "turns": 7,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_009",
+        "turns": 8,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_010",
+        "turns": 8,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_011",
+        "turns": 8,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_013",
+        "turns": 9,
+        "completed_fields": 3
+      },
+      {
+        "call_id": "CALL_014",
+        "turns": 9,
+        "completed_fields": 3
+      }
+    ],
+    "total_calls": 15
+  },
+  "llm_understanding": {
+    "understanding_issues": [
+      {
+        "call_id": "CALL_012",
+        "turn": "4",
+        "issue": "COMPLETE_FAILURE",
+        "user_said": "मैं... खुद",
+        "severity": "CRITICAL"
+      },
+      {
+        "call_id": "CALL_012",
+        "turn": "5",
+        "issue": "COMPLETE_FAILURE",
+        "user_said": "तारीख... 5... नहीं 6",
+        "severity": "CRITICAL"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "1",
+        "issue": "NEGATIVE_MISUNDERSTOOD_AS_POSITIVE",
+        "user_said": "नहीं, मैं उनकी पत्नी हूँ",
+        "bot_said": "धन्यवाद, मैं आपकी पहचान की पुष्टि कर चुकी हूँ",
+        "severity": "HIGH"
+      },
+      {
+        "call_id": "CALL_014",
+        "turn": "2",
+        "issue": "COMPLETE_FAILURE",
+        "user_said": "मेरा नाम प्रिया है",
+        "severity": "CRITICAL"
+      }
+    ],
+    "total_turns": 98
+  }
+}
