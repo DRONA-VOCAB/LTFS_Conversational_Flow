@@ -11,6 +11,7 @@ from fastapi import WebSocket, WebSocketDisconnect
 
 from .core.middleware import MiddlewarePipeline
 from .core.router import router
+from .handlers.connect_handler import handle_connect
 from .handlers.dtmf_handler import handle_dtmf
 from .handlers.mark_handler import handle_mark
 from .handlers.media_handler import handle_media
@@ -33,6 +34,7 @@ class SmartfloWebSocketServer:
     
     def _setup_routes(self):
         """Register all event handlers with the router"""
+        router.register("connected", handle_connect)
         router.register("start", handle_start)
         router.register("media", handle_media)
         router.register("stop", handle_stop)
