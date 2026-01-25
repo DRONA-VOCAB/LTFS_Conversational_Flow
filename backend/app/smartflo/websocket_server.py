@@ -4,20 +4,19 @@ Handles the vendor side of the WebSocket connection.
 """
 
 import json
-import asyncio
 import logging
 from typing import Optional
+
 from fastapi import WebSocket, WebSocketDisconnect
 
-from .core.router import router
 from .core.middleware import MiddlewarePipeline
-from .core.session_manager import session_manager
-from .schemas.outgoing import EventBuilder, ConnectedEvent
-from .handlers.start_handler import handle_start
-from .handlers.media_handler import handle_media
-from .handlers.stop_handler import handle_stop
+from .core.router import router
 from .handlers.dtmf_handler import handle_dtmf
 from .handlers.mark_handler import handle_mark
+from .handlers.media_handler import handle_media
+from .handlers.start_handler import handle_start
+from .handlers.stop_handler import handle_stop
+from .schemas.outgoing import EventBuilder
 
 logger = logging.getLogger(__name__)
 
