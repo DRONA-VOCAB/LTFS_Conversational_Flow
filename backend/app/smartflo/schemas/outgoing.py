@@ -14,13 +14,6 @@ class BaseOutgoingEvent(BaseModel):
     streamSid: Optional[str] = Field(None, description="Stream session identifier")
 
 
-class ConnectedEvent(BaseOutgoingEvent):
-    """Event sent immediately after WebSocket connection is established"""
-    event: Literal["connected"] = "connected"
-    protocol: str = Field(default="Call", description="Protocol type")
-    version: str = Field(default="1.0.0", description="Protocol version")
-
-
 class VendorMediaData(BaseModel):
     """Vendor media payload data structure"""
     payload: str = Field(..., description="Base64 encoded μ-law audio data")

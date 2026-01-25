@@ -3,15 +3,15 @@ Pydantic schemas for Smartflo events
 """
 
 from .incoming import (
+    ConnectedEvent,
     StartEvent,
     MediaEvent,
     StopEvent,
     DTMFEvent,
     MarkEvent,
-    parse_incoming_event,
+    parse_incoming_event, ConnectedEvent,
 )
 from .outgoing import (
-    ConnectedEvent,
     VendorMediaEvent,
     ClearEvent,
     VendorMarkEvent,

@@ -162,9 +162,6 @@ class SmartfloWebSocketServer:
         logger.info(f"WebSocket connection accepted from {websocket.client}")
         
         try:
-            # Send connected event immediately
-            await self.send_connected_event(websocket)
-            
             # Main message loop
             while True:
                 try:

@@ -10,8 +10,8 @@ from pydantic import BaseModel, Field, validator
 class MediaData(BaseModel):
     """Media payload data structure"""
     payload: str = Field(..., description="Base64 encoded μ-law audio data")
-    chunk: str = Field(..., description="Chunk identifier")
-    timestamp: str = Field(..., description="Timestamp of the media")
+    chunk: int = Field(..., description="Chunk identifier")
+    timestamp: int = Field(..., description="Timestamp of the media")
 
 
 class StartData(BaseModel):
@@ -50,7 +50,7 @@ class MarkData(BaseModel):
 class BaseIncomingEvent(BaseModel):
     """Base model for all incoming events"""
     event: str = Field(..., description="Event type")
-    sequenceNumber: str = Field(..., description="Sequence number for ordering")
+    sequenceNumber: int = Field(..., description="Sequence number for ordering")
     streamSid: str = Field(..., description="Stream session identifier")
 
 
@@ -84,8 +84,12 @@ class MarkEvent(BaseIncomingEvent):
     mark: MarkData = Field(..., description="Mark event specific data")
 
 
+class ConnectedEvent(BaseModel):
+    event: Literal["connected"] = "connected"
+
+
 # Factory function for parsing incoming events
-def parse_incoming_event(raw_json: dict) -> Union[StartEvent, MediaEvent, StopEvent, DTMFEvent, MarkEvent]:
+def parse_incoming_event(raw_json: dict) -> Union[ConnectedEvent,StartEvent, MediaEvent, StopEvent, DTMFEvent, MarkEvent]:
     """
     Factory function to parse raw JSON into appropriate Pydantic event model.
     
@@ -99,8 +103,9 @@ def parse_incoming_event(raw_json: dict) -> Union[StartEvent, MediaEvent, StopEv
         ValueError: If event type is unknown or validation fails
     """
     event_type = raw_json.get("event")
-
-    if event_type == "start":
+    if event_type == "connected":
+        return ConnectedEvent(**raw_json)
+    elif event_type == "start":
         return StartEvent(**raw_json)
     elif event_type == "media":
         return MediaEvent(**raw_json)
