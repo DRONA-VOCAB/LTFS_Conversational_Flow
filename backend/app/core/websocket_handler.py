@@ -2,27 +2,17 @@
 WebSocket handler using core architecture (router, middleware, session_manager)
 """
 
-import json
 import asyncio
 import logging
 import time
 from pathlib import Path
 from typing import Dict, Optional
+
 from fastapi import WebSocket, WebSocketDisconnect
 
-from core.router import router
-from core.middleware import MiddlewarePipeline, MiddlewareContext
-from core.session_manager import session_manager
-from services.vad_silero import process_frame, cleanup_connection
 from config.settings import PUBLIC_BASE_URL
-from services.asr_service import pcm16_to_wav, transcribe_audio
-from services.tts_service import synthesize_stream
-from services.google_sheet_logger import log_interaction
-from queues.asr_queue import asr_queue
-from queues.tts_queue import tts_queue
-from utils.latency_tracker import record_event, cleanup_tracking
-from utils.session_data_storage import save_session_data
-from sessions.session_store import get_session, save_session
+from core.middleware import MiddlewarePipeline
+from core.router import router
 from flow.flow_manager import (
     get_question_text,
     process_answer,
@@ -30,6 +20,15 @@ from flow.flow_manager import (
     get_edit_prompt_text,
     get_closing_text,
 )
+from queues.asr_queue import asr_queue
+from queues.tts_queue import tts_queue
+from services.asr_service import pcm16_to_wav, transcribe_audio
+from services.google_sheet_logger import log_interaction
+from services.tts_service import synthesize_stream
+from services.vad_silero import process_frame, cleanup_connection
+from sessions.session_store import get_session, save_session
+from utils.latency_tracker import record_event, cleanup_tracking
+from utils.session_data_storage import save_session_data
 
 logger = logging.getLogger(__name__)
 
@@ -47,6 +46,8 @@ TTS_AUDIO_DIR = AUDIO_ROOT / "tts_audios"
 ASR_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 
+# 20 ms @ 16 kHz PCM16 = 320 samples = 640 bytes
+PCM_FRAME_SIZE = 640
 
 def _sanitize_session_id(session_id: str) -> str:
     return (session_id or "session").replace(" ", "_")
@@ -529,6 +530,16 @@ async def process_tts_queue(websocket_id: str):
                 )
                 state["current_turn_base"] = audio_base
 
+                # ---- Detect Smartflo connection ----
+            is_smartflo = False
+            try:
+                from smartflo.integration import is_smartflo_connection
+                is_smartflo = is_smartflo_connection(websocket)
+                logger.info(f"Connection type: {'Smartflo' if is_smartflo else 'Web UI'}")
+            except ImportError:
+                logger.debug("Smartflo integration not available")
+
+
             logger.info(f"🗣️ TTS playing: {text[:50]}...")
             # Send bot_message so frontend can display the question
             await websocket.send_json({"type": "bot_message", "text": text})
@@ -536,13 +547,28 @@ async def process_tts_queue(websocket_id: str):
 
             chunk_count = 0
             audio_buffer = bytearray()
+            pcm_buffer = bytearray()
             async for audio_chunk in synthesize_stream(text):
                 if audio_chunk:
-                    audio_buffer.extend(audio_chunk)
-                    await websocket.send_bytes(audio_chunk)
-                    chunk_count += 1
+                    if is_smartflo:
+                        pcm_buffer.extend(audio_buffer)
+                        while len(pcm_buffer) >= PCM_FRAME_SIZE:
+                            pcm_frame = pcm_buffer[:PCM_FRAME_SIZE]
+                            del pcm_buffer[:PCM_FRAME_SIZE]
+
+                            from smartflo.integration import send_audio_to_smartflo
+                            await send_audio_to_smartflo(
+                                websocket=websocket,
+                                pcm16_frame=bytes(pcm_frame),
+                                stream_sid=utterance_id)
+                    else:
+                        audio_buffer.extend(audio_chunk)
+                        await websocket.send_bytes(audio_chunk)
+                        chunk_count += 1
+
 
             await websocket.send_json({"type": "tts_end", "chunks_sent": chunk_count})
+
             logger.info(f"✅ TTS complete: {chunk_count} chunks sent")
 
             tts_audio_url = None
@@ -563,9 +589,9 @@ async def process_tts_queue(websocket_id: str):
                     state["last_user_input_time"] = time.time()
                     logger.info(f"⏰ Reset last_user_input_time after TTS for {websocket_id}")
 
-            if utterance_id:
-                record_event(utterance_id, "TTS_COMPLETE")
-                cleanup_tracking(utterance_id)
+            if stream_sid:
+                record_event(stream_sid, "TTS_COMPLETE")
+                cleanup_tracking(stream_sid)
 
             await _log_interaction_if_ready(websocket_id, text, tts_audio_url)
 
