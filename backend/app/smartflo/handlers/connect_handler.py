@@ -29,7 +29,7 @@ async def handle_connect(event: ConnectedEvent, websocket: WebSocket, **kwargs) 
         websocket: WebSocket connection
         **kwargs: Additional context
     """
-    websocket_id = get_websocket_id(websocket)
+    websocket_id = id(websocket)
     logger.info(f"Handshake with smartflo for connection established: {websocket.client} with event: {event.event}")
     asr_processor_task = asyncio.create_task(process_asr_queue(websocket_id))
     tts_processor_task = asyncio.create_task(process_tts_queue(websocket_id))
