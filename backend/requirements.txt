@@ -1,5 +1,6 @@
 python-dotenv 
 google-generativeai
+google-genai   # required for context tools (get_transcript_examples, get_session_summary)
 fastapi
 uvicorn[standard]
 websockets
@@ -15,3 +16,4 @@ numpy
 gspread
 google-auth
 google-auth-oauthlib
+openpyxl

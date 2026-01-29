@@ -1,4 +1,12 @@
+import sys
 from pathlib import Path
+
+# Ensure app package root is on path so "from core.xxx", "from flow.xxx", etc. resolve
+# when running: uvicorn app.main:app (from backend/)
+_app_dir = Path(__file__).resolve().parent
+if str(_app_dir) not in sys.path:
+    sys.path.insert(0, str(_app_dir))
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -34,9 +42,14 @@ print("ASR exists =", ASR_AUDIO_DIR.exists())
 print("TTS exists =", TTS_AUDIO_DIR.exists())
 
 # -------- STATIC MOUNTS --------
+ASR_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
+TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/asr_audios", StaticFiles(directory=ASR_AUDIO_DIR), name="asr_audios")
 app.mount("/tts_audios", StaticFiles(directory=TTS_AUDIO_DIR), name="tts_audios")
-app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
+if STATIC_DIR.exists():
+    app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
+else:
+    print("STATIC_DIR not found:", STATIC_DIR, "- frontend mount skipped")
 
 if __name__ == "__main__":
     import uvicorn

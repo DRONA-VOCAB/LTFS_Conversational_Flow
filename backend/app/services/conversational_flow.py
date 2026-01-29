@@ -4,7 +4,7 @@ Handles intelligent conversation flow with dynamic question skipping
 """
 
 import logging
-from typing import Dict, Any, Optional
+from typing import Dict, Any, Optional, List
 from config.prompt import PROMPT as CONVERSATIONAL_PROMPT
 import logging
 
@@ -16,8 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Conditional import to avoid initialization issues during testing
 try:
-    from llm.gemini_client import call_gemini
-
+    from llm.gemini_client import call_gemini, call_gemini_with_tools
     LLM_AVAILABLE = True
 except Exception as e:
     logger.warning(f"LLM not available: {e}")
@@ -31,6 +30,9 @@ except Exception as e:
             "next_action": "continue",
             "call_end_reason": None,
         }
+
+    def call_gemini_with_tools(prompt, session, user_input, conversation_stage):
+        return call_gemini(prompt)
 
 
 def process_conversational_response(
@@ -92,48 +94,23 @@ def process_conversational_response(
         ]
     )
 
-    # Build the full prompt with enhanced context
-    full_prompt = f"""
-    {CONVERSATIONAL_PROMPT}
-
-    CURRENT CONVERSATION CONTEXT:
-    - Customer Name: {customer_name}
-    - Conversation Stage: {conversation_stage}
-    - Current Data Collected: {current_data}
-    - Missing Information: {missing_info}
-    - All Information Collected: {all_info_collected}
-    - Is Correction Request: {is_correction}
-    - Last Bot Response: {session.get('last_bot_response', 'Initial greeting')}
-    - Previous Summary (if any): {session.get('generated_summary', 'None')}
-
-    CUSTOMER'S RESPONSE: "{user_input}"
-
-    ANALYSIS REQUIRED:
-    1. What type of response is this? (clear answer, unclear, irrelevant, rude, confused, partial, correction, etc.)
-    2. What information can be extracted from this response?
-    3. Is this a correction/editing request? If yes, which field needs to be updated?
-    4. How should I acknowledge their response?
-    5. If all information is collected AND not a correction, provide summary in bot_response with provide_summary=true
-    6. If this is a correction, update the field and provide updated summary
-    7. What should I ask next or how should I redirect?
-
-    REMEMBER:
-    - ALWAYS acknowledge what they said first
-    - Be patient and understanding regardless of their response type
-    - Extract ANY useful information mentioned
-    - Handle difficult customers with empathy
-    - Keep the conversation natural and human-like
-    - Don't repeat questions unnecessarily if information is already provided
-    - When all info is collected, provide summary naturally in bot_response (set provide_summary=true)
-    - If customer corrects information, update extracted_data and provide updated summary
-    - After providing summary, wait for confirmation before ending call
-
-    Based on the customer's response and current context, provide your response:
-    """
+    # Build the full prompt; context comes only from tools (get_transcript_examples, get_session_summary)
+    full_prompt = build_context_for_turn(
+        user_input=user_input,
+        session=session,
+        customer_name=customer_name,
+        conversation_stage=conversation_stage,
+        current_data=current_data,
+        missing_info=missing_info,
+        all_info_collected=all_info_collected,
+        is_correction=is_correction,
+    )
 
     try:
-        # Call LLM with enhanced prompt
-        response = call_gemini(full_prompt)
+        # Call LLM with context-catching tools
+        response = call_gemini_with_tools(
+            full_prompt, session, user_input, conversation_stage
+        )
         logger.info("LLM Raw Response: %s", response)
 
         if response and isinstance(response, dict):
@@ -441,6 +418,69 @@ def is_conversation_complete(session: Dict[str, Any]) -> bool:
         "payment_amount",
     ]
     return all(session.get(field) for field in payment_fields)
+
+
+def build_context_for_turn(
+    user_input: str,
+    session: Dict[str, Any],
+    customer_name: str,
+    conversation_stage: str,
+    current_data: Dict[str, Any],
+    missing_info: list,
+    all_info_collected: bool,
+    is_correction: bool,
+) -> str:
+    """
+    Assemble the full prompt for Gemini using:
+    - Core system prompt (`CONVERSATIONAL_PROMPT`)
+    - Instruction to use get_transcript_examples / get_session_summary tools for context
+    - Compact session state and current user input
+    """
+    examples_block = (
+        "CONTEXT TOOLS: Use get_transcript_examples(phase, query, max_results) and/or get_session_summary() "
+        "to fetch relevant call examples and session state before responding. Do not assume examples are in the prompt."
+    )
+
+    full_prompt = f"""
+    {CONVERSATIONAL_PROMPT}
+
+    {examples_block}
+
+    CURRENT CONVERSATION CONTEXT:
+    - Customer Name: {customer_name}
+    - Conversation Stage: {conversation_stage}
+    - Current Data Collected: {current_data}
+    - Missing Information: {missing_info}
+    - All Information Collected: {all_info_collected}
+    - Is Correction Request: {is_correction}
+    - Last Bot Response: {session.get('last_bot_response', 'Initial greeting')}
+    - Previous Summary (if any): {session.get('generated_summary', 'None')}
+
+    CUSTOMER'S RESPONSE: "{user_input}"
+
+    ANALYSIS REQUIRED:
+    1. What type of response is this? (clear answer, unclear, irrelevant, rude, confused, partial, correction, etc.)
+    2. What information can be extracted from this response?
+    3. Is this a correction/editing request? If yes, which field needs to be updated?
+    4. How should I acknowledge their response?
+    5. If all information is collected AND not a correction, provide summary in bot_response with provide_summary=true
+    6. If this is a correction, update the field and provide updated summary
+    7. What should I ask next or how should I redirect?
+
+    REMEMBER:
+    - ALWAYS acknowledge what they said first
+    - Be patient and understanding regardless of their response type
+    - Extract ANY useful information mentioned
+    - Handle difficult customers with empathy
+    - Keep the conversation natural and human-like
+    - Don't repeat questions unnecessarily if information is already provided
+    - When all info is collected, provide summary naturally in bot_response (set provide_summary=true)
+    - If customer corrects information, update extracted_data and provide updated summary
+    - After providing summary, wait for confirmation before ending call
+
+    Based on the customer's response and current context, provide your response:
+    """
+    return full_prompt
 
 
 def generate_conversation_summary(session: Dict[str, Any]) -> str:
