@@ -83,7 +83,6 @@ def load_model():
         return _model, _tokenizer
     
     import torch
-    from transformers import BitsAndBytesConfig
     
     model_path = Path(MISTRAL_MODEL_PATH)
     model_id = "mistralai/Mistral-7B-Instruct-v0.3"
@@ -91,18 +90,12 @@ def load_model():
     logger.info(f"🔄 Loading Mistral model with 4-bit quantization...")
     logger.info(f"📱 Device: {MISTRAL_DEVICE}")
     
-    # Configure 4-bit quantization for faster inference and lower memory
-    quantization_config = None
-    use_quantization = MISTRAL_DEVICE == "cuda" and torch.cuda.is_available()
-    
-    if use_quantization:
-        logger.info("🚀 Using 4-bit quantization for faster inference")
-        quantization_config = BitsAndBytesConfig(
-            load_in_4bit=True,
-            bnb_4bit_compute_dtype=torch.float16,
-            bnb_4bit_use_double_quant=True,  # Double quantization for better compression
-            bnb_4bit_quant_type="nf4"  # Normal float 4-bit
-        )
+    # NOTE: 4-bit quantization via bitsandbytes is disabled here because it
+    # requires additional GPU toolchain dependencies (triton, C compiler, etc.)
+    # which complicate Docker deployment. We instead load the model in fp16
+    # on CUDA (or fp32 on CPU), which works reliably with the standard
+    # PyTorch + transformers stack.
+    use_quantization = False
     
     # Check if local path has config.json (required for transformers)
     use_local = model_path.exists() and (model_path / "config.json").exists()
@@ -111,22 +104,14 @@ def load_model():
         logger.info(f"Loading from local path: {model_path}")
         try:
             _tokenizer = AutoTokenizer.from_pretrained(str(model_path), trust_remote_code=True)
-            if use_quantization:
-                _model = AutoModelForCausalLM.from_pretrained(
-                    str(model_path),
-                    quantization_config=quantization_config,
-                    device_map="auto",
-                    trust_remote_code=True
-                )
-            else:
-                _model = AutoModelForCausalLM.from_pretrained(
-                    str(model_path),
-                    torch_dtype=torch.float16 if MISTRAL_DEVICE == "cuda" else torch.float32,
-                    device_map="auto" if MISTRAL_DEVICE == "cuda" else None,
-                    trust_remote_code=True
-                )
-                if MISTRAL_DEVICE == "cpu":
-                    _model = _model.to(MISTRAL_DEVICE)
+            _model = AutoModelForCausalLM.from_pretrained(
+                str(model_path),
+                torch_dtype=torch.float16 if MISTRAL_DEVICE == "cuda" else torch.float32,
+                device_map="auto" if MISTRAL_DEVICE == "cuda" else None,
+                trust_remote_code=True
+            )
+            if MISTRAL_DEVICE == "cpu":
+                _model = _model.to(MISTRAL_DEVICE)
         except Exception as e:
             logger.warning(f"Failed to load from local path: {e}")
             logger.info(f"Falling back to Hugging Face: {model_id}")
@@ -136,22 +121,14 @@ def load_model():
         logger.info(f"Loading from Hugging Face: {model_id}")
         logger.info("This may take a few minutes on first run...")
         _tokenizer = AutoTokenizer.from_pretrained(model_id, trust_remote_code=True)
-        if use_quantization:
-            _model = AutoModelForCausalLM.from_pretrained(
-                model_id,
-                quantization_config=quantization_config,
-                device_map="auto",
-                trust_remote_code=True
-            )
-        else:
-            _model = AutoModelForCausalLM.from_pretrained(
-                model_id,
-                torch_dtype=torch.float16 if MISTRAL_DEVICE == "cuda" else torch.float32,
-                device_map="auto" if MISTRAL_DEVICE == "cuda" else None,
-                trust_remote_code=True
-            )
-            if MISTRAL_DEVICE == "cpu":
-                _model = _model.to(MISTRAL_DEVICE)
+        _model = AutoModelForCausalLM.from_pretrained(
+            model_id,
+            torch_dtype=torch.float16 if MISTRAL_DEVICE == "cuda" else torch.float32,
+            device_map="auto" if MISTRAL_DEVICE == "cuda" else None,
+            trust_remote_code=True
+        )
+        if MISTRAL_DEVICE == "cpu":
+            _model = _model.to(MISTRAL_DEVICE)
     
     _model.eval()
     
@@ -160,8 +137,6 @@ def load_model():
         memory_allocated = torch.cuda.memory_allocated() / 1024**3
         memory_reserved = torch.cuda.memory_reserved() / 1024**3
         logger.info(f"📊 GPU Memory: {memory_allocated:.2f}GB allocated, {memory_reserved:.2f}GB reserved")
-        if use_quantization:
-            logger.info(f"⚡ 4-bit quantization enabled - expect 1.5-2x faster inference")
     
     logger.info(f"✅ Model loaded successfully on {MISTRAL_DEVICE}")
     return _model, _tokenizer

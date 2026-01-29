@@ -168,7 +168,7 @@ def _chat_completion_api(
     temperature: float = 0.1,
     timeout_s: float = 60.0,
     require_json: bool = False,
-) -> str:
+ ) -> str:
     """Call Mistral via OpenAI-compatible API"""
     if not HTTPX_AVAILABLE:
         raise ImportError("httpx library is required for API inference")
@@ -218,7 +218,7 @@ def _chat_completion_direct(
     temperature: float = 0.1,
     max_tokens: int = 2048,
     require_json: bool = False,
-) -> str:
+ ) -> str:
     """Call Mistral model directly using transformers"""
     import torch  # Import here to ensure it's available
     
@@ -261,7 +261,7 @@ def _chat_completion(
     temperature: float = 0.1,
     timeout_s: float = 60.0,
     require_json: bool = False,
-) -> str:
+ ) -> str:
     """Main chat completion function - routes to API or direct inference"""
     if MISTRAL_USE_API and MISTRAL_API_BASE:
         return _chat_completion_api(prompt, temperature, timeout_s, require_json=require_json)
@@ -721,71 +721,71 @@ def call_mistral(prompt: str) -> dict:
     try:
         # Add date handling instructions to the prompt
         date_instruction = """
-IMPORTANT DATE RULES:
-- Current year is 2026
-- When processing dates, ALWAYS use 2026 as the year unless explicitly told otherwise
-- NEVER use years like 2025, 2024, 2023, or any year before 2026
-"""
+    IMPORTANT DATE RULES:
+    - Current year is 2026
+    - When processing dates, ALWAYS use 2026 as the year unless explicitly told otherwise
+    - NEVER use years like 2025, 2024, 2023, or any year before 2026
+    """
         
         # Enhance prompt with VERY strict JSON requirement
         enhanced_prompt = date_instruction + "\n\n" + prompt + """
 
-═══════════════════════════════════════════════════════════════════════════
-🔴 MANDATORY JSON OUTPUT STRUCTURE - NO EXCEPTIONS
-═══════════════════════════════════════════════════════════════════════════
+    ═══════════════════════════════════════════════════════════════════════════
+    🔴 MANDATORY JSON OUTPUT STRUCTURE - NO EXCEPTIONS
+    ═══════════════════════════════════════════════════════════════════════════
 
-YOU MUST OUTPUT EXACTLY THIS STRUCTURE WITH ALL 4 FIELDS:
+    YOU MUST OUTPUT EXACTLY THIS STRUCTURE WITH ALL 4 FIELDS:
 
-{
-  "bot_response": "your natural Hindi response here",
-  "extracted_data": {
-    // Put extracted customer data here, or leave empty: {}
-  },
-  "next_action": "continue",  // or "summary" or "end_call"
-  "call_end_reason": null     // or reason string if ending call
-}
+    {
+    "bot_response": "your natural Hindi response here",
+    "extracted_data": {
+        // Put extracted customer data here, or leave empty: {}
+    },
+    "next_action": "continue",  // or "summary" or "end_call"
+    "call_end_reason": null     // or reason string if ending call
+    }
 
-═══════════════════════════════════════════════════════════════════════════
-⚠️ CRITICAL RULES - VIOLATION CAUSES SYSTEM ERROR:
-═══════════════════════════════════════════════════════════════════════════
+    ═══════════════════════════════════════════════════════════════════════════
+    ⚠️ CRITICAL RULES - VIOLATION CAUSES SYSTEM ERROR:
+    ═══════════════════════════════════════════════════════════════════════════
 
-1. FIRST CHARACTER must be: {
-2. LAST CHARACTER must be: }
-3. ALL 4 fields REQUIRED: bot_response, extracted_data, next_action, call_end_reason
-4. NO text before or after the JSON
-5. NO markdown (no ```json)
-6. Put extracted data INSIDE "extracted_data", NOT at root level
+    1. FIRST CHARACTER must be: {
+    2. LAST CHARACTER must be: }
+    3. ALL 4 fields REQUIRED: bot_response, extracted_data, next_action, call_end_reason
+    4. NO text before or after the JSON
+    5. NO markdown (no ```json)
+    6. Put extracted data INSIDE "extracted_data", NOT at root level
 
-═══════════════════════════════════════════════════════════════════════════
-✅ CORRECT EXAMPLES:
-═══════════════════════════════════════════════════════════════════════════
+    ═══════════════════════════════════════════════════════════════════════════
+    ✅ CORRECT EXAMPLES:
+    ═══════════════════════════════════════════════════════════════════════════
 
-Example 1 (with extracted data):
-{"bot_response": "धन्यवाद, राज जी", "extracted_data": {"payment_date": "20/01/2026", "payment_amount": "5000"}, "next_action": "continue", "call_end_reason": null}
+    Example 1 (with extracted data):
+    {"bot_response": "धन्यवाद, राज जी", "extracted_data": {"payment_date": "20/01/2026", "payment_amount": "5000"}, "next_action": "continue", "call_end_reason": null}
 
-Example 2 (no data extracted):
-{"bot_response": "नमस्ते", "extracted_data": {}, "next_action": "continue", "call_end_reason": null}
+    Example 2 (no data extracted):
+    {"bot_response": "नमस्ते", "extracted_data": {}, "next_action": "continue", "call_end_reason": null}
 
-Example 3 (ending call):
-{"bot_response": "धन्यवाद, अलविदा", "extracted_data": {}, "next_action": "end_call", "call_end_reason": "customer_busy"}
+    Example 3 (ending call):
+    {"bot_response": "धन्यवाद, अलविदा", "extracted_data": {}, "next_action": "end_call", "call_end_reason": "customer_busy"}
 
-═══════════════════════════════════════════════════════════════════════════
-❌ WRONG - DO NOT DO THIS:
-═══════════════════════════════════════════════════════════════════════════
+    ═══════════════════════════════════════════════════════════════════════════
+    ❌ WRONG - DO NOT DO THIS:
+    ═══════════════════════════════════════════════════════════════════════════
 
-WRONG 1 (missing fields):
-{"payment_date": "20/01/2026", "payment_amount": "5000"}
+    WRONG 1 (missing fields):
+    {"payment_date": "20/01/2026", "payment_amount": "5000"}
 
-WRONG 2 (data at root level):
-{"bot_response": "hi", "payment_date": "20/01/2026"}
+    WRONG 2 (data at root level):
+    {"bot_response": "hi", "payment_date": "20/01/2026"}
 
-WRONG 3 (has text before):
-Here is the JSON: {"bot_response": "hi"}
+    WRONG 3 (has text before):
+    Here is the JSON: {"bot_response": "hi"}
 
-═══════════════════════════════════════════════════════════════════════════
+    ═══════════════════════════════════════════════════════════════════════════
 
-NOW RESPOND WITH ONLY THE JSON (starting with { immediately):
-"""
+    NOW RESPOND WITH ONLY THE JSON (starting with { immediately):
+    """
         
         # Call Mistral
         raw_response = _chat_completion(enhanced_prompt, temperature=0.1, require_json=True)
