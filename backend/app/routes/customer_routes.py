@@ -3,14 +3,21 @@ from fastapi import APIRouter, HTTPException, Depends
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select, func
 from typing import List
+import uuid
+from datetime import datetime
 
 from schemas.customer_schemas import CustomerResponse, CustomerListResponse
+from schemas.session_schemas import CreateSessionRequest, CreateSessionResponse
 from database.models import CustomerData, get_db
 
 router = APIRouter(prefix="/customers", tags=["customers"])
 
+# Also create routes for legacy /sessions/customers endpoint
+sessions_router = APIRouter(prefix="/sessions", tags=["sessions"])
+
 
 @router.get("", response_model=CustomerListResponse)
+@sessions_router.get("/customers", response_model=CustomerListResponse)
 async def get_customers(
     skip: int = 0,
     limit: int = 100,
@@ -103,3 +110,24 @@ async def get_customer(
                 f"Original error: {error_msg}"
             )
         raise HTTPException(status_code=500, detail=f"Error fetching customer: {error_msg}")
+
+
+@sessions_router.post("", response_model=CreateSessionResponse)
+async def create_session(request: CreateSessionRequest):
+    """Create a session ID for frontend compatibility.
+
+    Note: Actual session initialization happens via WebSocket init_session event.
+    This endpoint just generates a session ID for the frontend to use when connecting.
+    """
+    try:
+        # Generate unique session ID
+        session_id = f"session_{uuid.uuid4().hex[:8]}_{int(datetime.now().timestamp())}"
+
+        return CreateSessionResponse(
+            session_id=session_id,
+            customer_name=request.customer_name,
+            question=None,  # No question yet - will be provided via WebSocket
+            status="PENDING"  # Session created but not initialized
+        )
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating session: {str(e)}")

@@ -1,21 +1,6 @@
 # Schemas package
-from .session_schemas import (
-    CreateSessionRequest,
-    CreateSessionResponse,
-    SubmitAnswerRequest,
-    SubmitAnswerResponse,
-    SummaryResponse,
-    ConfirmRequest,
-    ConfirmResponse,
-)
+# Session schemas are not actively used (WebSocket-based flow now)
+# Import only customer schemas
 
-__all__ = [
-    "CreateSessionRequest",
-    "CreateSessionResponse",
-    "SubmitAnswerRequest",
-    "SubmitAnswerResponse",
-    "SummaryResponse",
-    "ConfirmRequest",
-    "ConfirmResponse",
-]
+__all__ = []
 

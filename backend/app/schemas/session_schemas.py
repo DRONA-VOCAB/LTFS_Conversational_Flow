@@ -1,17 +1,6 @@
+"""Session-related schema definitions (legacy - not actively used)"""
 from pydantic import BaseModel
 from typing import Optional, List
-
-
-class CustomerResponse(BaseModel):
-    """Response schema for customer data"""
-    id: int
-    customer_name: str
-    contact_number: Optional[str] = None
-
-
-class CustomersListResponse(BaseModel):
-    """Response schema for customers list"""
-    customers: List[CustomerResponse]
 
 
 class CreateSessionRequest(BaseModel):
@@ -55,4 +44,6 @@ class ConfirmResponse(BaseModel):
     """Response schema for confirmation"""
     closing_statement: str
     session_id: str
+
+
 

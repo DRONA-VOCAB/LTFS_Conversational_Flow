@@ -74,8 +74,11 @@ if (
 # Extract SSL-related parameters for connect_args
 connect_args = {}
 
-# Set SSL to False (disabled) - as requested
-connect_args["ssl"] = False
+# Enable SSL for Neon database (required)
+ssl_context = ssl.create_default_context()
+ssl_context.check_hostname = False
+ssl_context.verify_mode = ssl.CERT_NONE
+connect_args["ssl"] = ssl_context
 
 # Debug: Print the connection URL (without password for security)
 if database_url:
@@ -90,7 +93,7 @@ if database_url:
                 if len(user_pass) >= 2:
                     debug_url = f"{scheme_user[0]}://{user_pass[0]}:****@{parts[1]}"
     print(f"[DEBUG] Using database URL: {debug_url}")
-    print(f"[DEBUG] SSL disabled (ssl=False)")
+    print(f"[DEBUG] SSL enabled (required for Neon)")
     # Print hostname for debugging
     parsed_debug = urlparse(database_url)
     print(f"[DEBUG] Hostname: {parsed_debug.hostname}")

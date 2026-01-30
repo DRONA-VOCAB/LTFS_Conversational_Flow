@@ -3,7 +3,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
 from core.websocket_handler import websocket_audio_endpoint
-from routes import session_router
+from routes import customer_router, sessions_router
 
 app = FastAPI(
     title="L and T Finance Customer Survey API",
@@ -18,8 +18,11 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# routers
-app.include_router(session_router)
+# Include customer routes (both /customers and /sessions/customers)
+app.include_router(customer_router)
+app.include_router(sessions_router)
+
+# Main WebSocket endpoint
 app.websocket("/ws/audio")(websocket_audio_endpoint)
 
 # -------- PATHS (ABSOLUTE) --------
@@ -40,5 +43,6 @@ app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
 
 if __name__ == "__main__":
     import uvicorn
+    from config.settings import HOST, PORT
 
-    uvicorn.run("main:app", host="0.0.0.0", port=8001, reload=True)
+    uvicorn.run("main:app", host=HOST, port=PORT, reload=True)

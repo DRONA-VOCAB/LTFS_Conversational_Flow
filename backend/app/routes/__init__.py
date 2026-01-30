@@ -1,5 +1,7 @@
 # Routes package
-from .session_routes import router as session_router
+# session_routes removed - using WebSocket with external chatbot API instead
+# Keeping only customer_routes for frontend customer list
+from .customer_routes import router as customer_router, sessions_router
 
-__all__ = ["session_router"]
+__all__ = ["customer_router", "sessions_router"]
 

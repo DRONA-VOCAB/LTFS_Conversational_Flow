@@ -1,13 +1,27 @@
 import time
 import logging
 import asyncio
+import json
+from pathlib import Path
 from typing import Dict, Any, Optional
 
-# --- NEW IMPORT ---
-# NOTE: Assuming save_record is defined in a 'data_persistence' module
-from .data_persistence import save_record
-
 logger = logging.getLogger(__name__)
+
+# Latency records directory
+LATENCY_DIR = Path("data/latency_records")
+LATENCY_DIR.mkdir(parents=True, exist_ok=True)
+
+
+def save_record(record_data: Dict[str, Any]):
+    """Save latency record to JSON file"""
+    try:
+        filename = f"{record_data['utterance_id']}.json"
+        filepath = LATENCY_DIR / filename
+        with open(filepath, 'w', encoding='utf-8') as f:
+            json.dump(record_data, f, indent=2, ensure_ascii=False)
+        logger.debug(f"Saved latency record: {filename}")
+    except Exception as e:
+        logger.error(f"Error saving latency record: {e}")
 
 # Dictionary to store tracking data, keyed by the unique Utterance ID.
 # This allows multiple concurrent utterances from the same WebSocket.

@@ -14,16 +14,23 @@ SSL_CERT_FILE="/opt/ssl/fullchain.pem"
 SSL_KEY_FILE="/opt/ssl/privkey.pem"
 
 # =========================
-# Load .env from root
+# Load .env from root and backend
 # =========================
 if [ -f "$BASE_DIR/.env" ]; then
     echo "Loading environment variables from .env"
     set -a
     source "$BASE_DIR/.env"
     set +a
-else
-    echo "No .env file found in root, continuing without it"
 fi
+if [ -f "$BASE_DIR/backend/.env" ]; then
+    echo "Loading backend environment (HOST, PORT, etc.) from backend/.env"
+    set -a
+    source "$BASE_DIR/backend/.env"
+    set +a
+fi
+# Defaults if not set
+: "${HOST:=0.0.0.0}"
+: "${PORT:=8001}"
 
 # =========================
 # FRONTEND BUILD
@@ -56,13 +63,13 @@ cd app
 echo "Starting FastAPI server with HTTPS..."
 
 nohup uvicorn main:app \
-    --host 0.0.0.0 \
-    --port 8001 \
+    --host "$HOST" \
+    --port "$PORT" \
     --ssl-certfile "$SSL_CERT_FILE" \
     --ssl-keyfile "$SSL_KEY_FILE" \
     > "$LOG_FILE" 2>&1 &
 
 echo "✅ Application running with HTTPS"
-echo "🌐 URL: https://server6.vo-cab.dev:8001/"
+echo "🌐 URL: https://server6.vo-cab.dev:$PORT/"
 echo "📄 Logs: $LOG_FILE"
 echo "🆔 PID: $!"
