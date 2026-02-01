@@ -4,9 +4,9 @@ import logging
 import numpy as np
 import torch
 
-from  queues.asr_queue import asr_queue
+from queues.asr_queue import asr_queue
 from services.playback_state import get_playback_state
-from  utils.latency_tracker import start_tracking, record_event
+from utils.latency_tracker import start_tracking, record_event
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -37,7 +37,7 @@ TRAILING_SILENCE_FRAMES = TRAILING_SILENCE_MS // FRAME_DURATION_MS
 
 MIN_UTTERANCE_DURATION_S = 0.8  # Minimum speech duration
 MIN_UTTERANCE_BYTES = (
-    int(SAMPLE_RATE * MIN_UTTERANCE_DURATION_S) * 2
+        int(SAMPLE_RATE * MIN_UTTERANCE_DURATION_S) * 2
 )  # 25600 bytes at 16kHz
 
 
@@ -77,7 +77,7 @@ async def process_vad_chunk(websocket, frame_bytes: bytes, stream_sid: str):
     state = connections[websocket]
 
     audio = np.frombuffer(frame_bytes, dtype=np.int16).astype(np.float32)
-    rms = np.sqrt(np.mean(audio**2)) / 32768.0
+    rms = np.sqrt(np.mean(audio ** 2)) / 32768.0
 
     if rms < 0.012:  # Increased RMS threshold to filter noise
         state.speech_prob = 0.0

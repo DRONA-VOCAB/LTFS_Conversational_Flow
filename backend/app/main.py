@@ -1,7 +1,9 @@
 from pathlib import Path
+
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.staticfiles import StaticFiles
+
 from core.websocket_handler import websocket_audio_endpoint
 from routes import customer_router, sessions_router
 

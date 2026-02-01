@@ -5,8 +5,9 @@ Combines API calls and queue processing
 
 import asyncio
 import logging
-import httpx
 from typing import Dict, Any, Optional
+
+import httpx
 
 from config.settings import CHATBOT_API_URL
 from queues.llm_queue import llm_queue

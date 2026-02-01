@@ -6,12 +6,10 @@ Combines API calls and queue processing with audio saving
 import asyncio
 import logging
 from typing import Dict
+
 import aiohttp
 
 from config.settings import TTS_API_URL
-from queues.tts_queue import tts_queue
-from services.google_sheet_logger import log_interaction
-from utils.latency_tracker import record_event, cleanup_tracking
 from core.audio_utils import (
     TTS_AUDIO_DIR,
     prepare_audio_bytes,
@@ -19,6 +17,9 @@ from core.audio_utils import (
     save_audio_non_blocking,
     sanitize_session_id,
 )
+from queues.tts_queue import tts_queue
+from services.google_sheet_logger import log_interaction
+from utils.latency_tracker import record_event, cleanup_tracking
 
 logger = logging.getLogger(__name__)
 

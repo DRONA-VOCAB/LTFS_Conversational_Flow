@@ -6,9 +6,6 @@ from typing import Dict
 import aiohttp
 
 from config.settings import ASR_API_URL
-from queues.asr_queue import asr_queue
-from queues.llm_queue import llm_queue
-from utils.latency_tracker import record_event, cleanup_tracking
 from core.audio_utils import (
     ASR_AUDIO_DIR,
     prepare_audio_bytes,
@@ -17,6 +14,9 @@ from core.audio_utils import (
     get_next_turn_id,
     pcm16_to_wav,
 )
+from queues.asr_queue import asr_queue
+from queues.llm_queue import llm_queue
+from utils.latency_tracker import record_event, cleanup_tracking
 
 logger = logging.getLogger(__name__)
 
