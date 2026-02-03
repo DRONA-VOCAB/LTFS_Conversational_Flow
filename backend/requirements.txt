@@ -1,6 +1,7 @@
 python-dotenv 
 google-generativeai
 google-genai   # required for context tools (get_transcript_examples, get_session_summary)
+langchain-openai  # required for OpenAI integration
 fastapi
 uvicorn[standard]
 websockets

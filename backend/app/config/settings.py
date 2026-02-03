@@ -24,6 +24,12 @@ if not env_loaded:
         f"[WARNING] No .env file found in any of these locations: {[str(p) for p in env_paths]}"
     )
 
+# OpenAI Configuration
+OPENAI_BASE_URL = os.getenv("OPENAI_BASE_URL")
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+OPENAI_MODEL = os.getenv("OPENAI_MODEL")
+
+# Legacy Gemini Configuration (for backward compatibility)
 GEMINI_MODEL = os.getenv("GEMINI_MODEL")
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
@@ -45,6 +51,9 @@ DATABASE_URL = os.getenv("DATABASE_URL")
 # Settings object for compatibility
 class Settings:
     def __init__(self):
+        self.openai_base_url = OPENAI_BASE_URL
+        self.openai_api_key = OPENAI_API_KEY
+        self.openai_model = OPENAI_MODEL
         self.gemini_model = GEMINI_MODEL
         self.gemini_api_key = GEMINI_API_KEY
         self.max_retries = MAX_RETRIES

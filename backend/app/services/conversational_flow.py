@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 
 # Conditional import to avoid initialization issues during testing
 try:
-    from llm.gemini_client import call_gemini, call_gemini_with_tools
+    from app.llm.openai_client import call_gemini, call_gemini_with_tools
     LLM_AVAILABLE = True
 except Exception as e:
     logger.warning(f"LLM not available: {e}")

@@ -1,8 +1,9 @@
 """Service for generating summaries and closing statements"""
 
-from  llm.gemini_client import model
+from app.llm.openai_client import llm as model
 import logging
 import json
+import time
 
 logger = logging.getLogger(__name__)
 
@@ -25,26 +26,34 @@ def transliterate_to_devanagari(name: str) -> str:
         logger.info(f"Name: {name}")
         logger.info("-" * 80)
 
-        response = model.generate_content(prompt)
+        start_time = time.time()
+        response = model.invoke(prompt)
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
 
-        if response and response.text:
-            result = response.text.strip()
+        if response and response.content:
+            result = response.content.strip()
             logger.info("📥 LLM CALL (transliterate_to_devanagari) - Raw Response:")
-            logger.info(response.text)
+            logger.info(response.content)
             logger.info("-" * 80)
             logger.info(f"✅ LLM CALL (transliterate_to_devanagari) - Result: {result}")
+            logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
             logger.info("=" * 80)
             return result
 
         logger.warning(
             "⚠️ LLM CALL (transliterate_to_devanagari) - Empty response, returning original name"
         )
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return name
     except Exception as e:
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
         logger.error(
             f"❌ LLM CALL (transliterate_to_devanagari) - Error: {e}", exc_info=True
         )
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return name
 
@@ -119,28 +128,36 @@ def generate_human_summary(session: dict) -> str:
         logger.info(json.dumps(summary_data, indent=2, ensure_ascii=False))
         logger.info("-" * 80)
 
-        response = model.generate_content(prompt)
+        start_time = time.time()
+        response = model.invoke(prompt)
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
 
-        if response and response.text:
-            result = response.text.strip()
+        if response and response.content:
+            result = response.content.strip()
             logger.info("📥 LLM CALL (generate_human_summary) - Raw Response:")
-            logger.info(response.text)
+            logger.info(response.content)
             logger.info("-" * 80)
             logger.info(f"✅ LLM CALL (generate_human_summary) - Generated Summary:")
             logger.info(result)
+            logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
             logger.info("=" * 80)
             return result
         else:
             logger.warning(
                 "⚠️ LLM CALL (generate_human_summary) - Empty response, using fallback summary"
             )
+            logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
             logger.info("=" * 80)
             # Fallback to basic summary if LLM fails
             return generate_fallback_summary(summary_data)
     except Exception as e:
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
         logger.error(
             f"❌ LLM CALL (generate_human_summary) - Error: {e}", exc_info=True
         )
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return generate_fallback_summary(summary_data)
 
@@ -214,8 +231,8 @@ def generate_fallback_summary(data: dict) -> str:
 def is_survey_completed(session: dict) -> bool:
     """Check if survey is completed without modifying the session"""
     # Lazy import to avoid circular dependency
-    from  flow.flow_manager import get_next_question_index
-    from  flow.question_order import QUESTIONS
+    from app.flow.flow_manager import get_next_question_index
+    from app.flow.question_order import QUESTIONS
 
     next_idx = get_next_question_index(session)
     return next_idx >= len(QUESTIONS) or session.get("call_should_end", False)
@@ -243,28 +260,37 @@ def detect_confirmation(user_input: str) -> str:
         logger.info(f"User response: {user_input}")
         logger.info("-" * 80)
 
-        response = model.generate_content(prompt)
+        start_time = time.time()
+        response = model.invoke(prompt)
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
 
-        if response and response.text:
-            result = response.text.strip().upper()
+        if response and response.content:
+            result = response.content.strip().upper()
             logger.info("📥 LLM CALL (detect_confirmation) - Raw Response:")
-            logger.info(response.text)
+            logger.info(response.content)
             logger.info("-" * 80)
 
             if "YES" in result:
                 logger.info("✅ LLM CALL (detect_confirmation) - Result: YES")
+                logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
                 logger.info("=" * 80)
                 return "YES"
             elif "NO" in result:
                 logger.info("✅ LLM CALL (detect_confirmation) - Result: NO")
+                logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
                 logger.info("=" * 80)
                 return "NO"
 
         logger.warning("⚠️ LLM CALL (detect_confirmation) - Result: UNCLEAR")
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return "UNCLEAR"
     except Exception as e:
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
         logger.error(f"❌ LLM CALL (detect_confirmation) - Error: {e}", exc_info=True)
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return "UNCLEAR"
 
@@ -324,14 +350,17 @@ def detect_field_to_edit(user_input: str, session: dict) -> dict:
         )
         logger.info("-" * 80)
 
-        response = model.generate_content(prompt)
+        start_time = time.time()
+        response = model.invoke(prompt)
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
 
-        if response and response.text:
+        if response and response.content:
             logger.info("📥 LLM CALL (detect_field_to_edit) - Raw Response:")
-            logger.info(response.text)
+            logger.info(response.content)
             logger.info("-" * 80)
 
-            lines = response.text.strip().split("\n")
+            lines = response.content.strip().split("\n")
             field = None
             value = None
             for line in lines:
@@ -345,16 +374,21 @@ def detect_field_to_edit(user_input: str, session: dict) -> dict:
                 logger.info(
                     f"✅ LLM CALL (detect_field_to_edit) - Result: {json.dumps(result, indent=2, ensure_ascii=False)}"
                 )
+                logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
                 logger.info("=" * 80)
                 return result
 
         logger.warning(
             "⚠️ LLM CALL (detect_field_to_edit) - Could not detect field, returning None"
         )
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return None
     except Exception as e:
+        end_time = time.time()
+        latency_ms = (end_time - start_time) * 1000
         logger.error(f"❌ LLM CALL (detect_field_to_edit) - Error: {e}", exc_info=True)
+        logger.info(f"⏱️ Latency: {latency_ms:.2f}ms")
         logger.info("=" * 80)
         return None
 
