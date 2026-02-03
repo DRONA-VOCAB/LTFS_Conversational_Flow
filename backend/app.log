@@ -1,0 +1,784 @@
+2026-02-03 12:48:32,954 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 12:48:32,955 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 12:48:32,955 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 12:48:32,955 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 12:48:32,955 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 12:48:43,904 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 12:48:43,904 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 12:48:43,904 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 12:48:43,904 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 12:48:43,904 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 12:51:00,892 - services.summary_service - INFO - ================================================================================
+2026-02-03 12:51:00,893 - services.summary_service - INFO - 🤖 LLM CALL (transliterate_to_devanagari) - Input:
+2026-02-03 12:51:00,893 - services.summary_service - INFO - Name: AAKASH  .
+2026-02-03 12:51:00,893 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 12:51:01,676 - utils.session_data_storage - INFO - 💾 Saved DB data for session: session_ad748504_1770103260
+2026-02-03 12:51:07,499 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:51:07,500 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 5822.73 ms
+2026-02-03 12:51:07,502 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 858 chars
+2026-02-03 12:51:07,503 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 5822.73ms, Tokens: N/A
+2026-02-03 12:51:07,511 - core.websocket_handler - INFO - 🔌 WebSocket connection attempt received
+2026-02-03 12:51:07,512 - core.websocket_handler - INFO - ✅ WebSocket accepted
+2026-02-03 12:51:07,512 - core.websocket_handler - INFO - 📝 WebSocket ID assigned: 5011922416
+2026-02-03 12:51:07,512 - core.websocket_handler - INFO - 📊 Connection state initialized for 5011922416
+2026-02-03 12:51:07,512 - core.websocket_handler - INFO - ✅ WebSocket connected: 5011922416
+2026-02-03 12:51:07,512 - core.websocket_handler - INFO - 🚀 Starting background tasks for 5011922416
+2026-02-03 12:51:07,513 - core.websocket_handler - INFO - ✅ Background tasks started for 5011922416
+2026-02-03 12:51:07,514 - core.websocket_handler - INFO - 📤 Sent websocket_ready message to client
+2026-02-03 12:51:07,618 - core.websocket_handler - INFO - 📝 Text message: {"type":"init_session","session_id":"session_ad748504_1770103260","customer_name":"AAKASH  ."}...
+2026-02-03 12:51:07,618 - core.router - INFO - 🚀 Dispatching init_session event to handler: handle_init_session
+2026-02-03 12:51:07,618 - core.websocket_handler - INFO - 📞 Outbound call to: AAKASH  . (session: session_ad748504_1770103260)
+2026-02-03 12:51:12,964 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:51:12,964 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 5345.57 ms
+2026-02-03 12:51:12,968 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 832 chars
+2026-02-03 12:51:12,968 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 5345.57ms, Tokens: N/A
+2026-02-03 12:51:12,970 - core.websocket_handler - INFO - 📋 Sending first question: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रही हूँ, क्या मेरी बात AAKASH  . जी से हो रही है?
+2026-02-03 12:51:12,970 - core.router - INFO - ✅ Handler handle_init_session completed successfully
+2026-02-03 12:51:12,971 - core.websocket_handler - INFO - 🗣️ TTS playing: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 12:51:12,971 - services.tts_service - INFO - 🎵 TTS: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 12:51:12,982 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:51:12,982 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:51:12,982 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:51:12,982 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:51:19,694 - services.tts_service - INFO - ✅ TTS complete: 56 chunks
+2026-02-03 12:51:19,695 - core.websocket_handler - INFO - ✅ TTS complete: 56 chunks sent
+2026-02-03 12:51:19,696 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:51:19,697 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:51:19,697 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:51:19,698 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:51:19,698 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:51:20,571 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 12:51:25,929 - services.vad_silero - INFO - 🔚 Speech ended, sending 187392 bytes to ASR
+2026-02-03 12:51:25,930 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:51:26,863 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हा मैं आकश बोल रहा हूं।'
+2026-02-03 12:51:26,863 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:51:26,863 - core.websocket_handler - INFO - 📥 Processing answer: 'हा मैं आकश बोल रहा हूं।' for phase=conversation, question=0
+2026-02-03 12:51:26,864 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हा मैं आकश बोल रहा हूं।'
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - User Input: हा मैं आकश बोल रहा हूं।
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन'}
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - Conversation Stage: identity_confirmation
+2026-02-03 12:51:26,864 - services.conversational_flow - INFO - Missing Information: ['identity confirmation', 'loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 12:51:36,954 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:51:36,955 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 10089.89 ms
+2026-02-03 12:51:36,960 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 2190 chars
+2026-02-03 12:51:36,961 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 10089.89ms, Tokens: N/A
+2026-02-03 12:51:36,962 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'जी, आप आकश हैं? क्या आपके पास एल एंड टी फाइनेंस से लोन है?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': 'आकश', 'speaker_relation': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने अपना नाम पहचानांकित कर दिया है, अब लोन के बारे में पूछा जाएगा', '_latency_ms': 10089.89, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:51:36,962 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': 'आकश', 'speaker_relation': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 12:51:36,963 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 12:51:36,963 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 12:51:36,963 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश'}
+2026-02-03 12:51:36,963 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 12:51:36,963 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 12:51:36,964 - core.websocket_handler - INFO - 🗣️ TTS playing: जी, आप आकश हैं? क्या आपके पास एल एंड टी फाइनेंस से...
+2026-02-03 12:51:36,965 - services.tts_service - INFO - 🎵 TTS: जी, आप आकश हैं? क्या आपके पास एल एंड टी फाइनेंस से...
+2026-02-03 12:51:36,984 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:51:36,984 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:51:36,984 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:51:36,984 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:51:41,199 - services.tts_service - INFO - ✅ TTS complete: 31 chunks
+2026-02-03 12:51:41,200 - core.websocket_handler - INFO - ✅ TTS complete: 31 chunks sent
+2026-02-03 12:51:41,201 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:51:41,202 - services.google_sheet_logger - WARNING - Google Sheet creds not found at /Users/snehakiranmanded/LTFS_Conversational_Flow/backend/google_sheet_creds.json - sheet logging disabled
+2026-02-03 12:51:41,203 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:51:41,203 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:51:41,204 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:51:41,204 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:51:41,580 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 0.90)
+2026-02-03 12:51:45,539 - services.vad_silero - INFO - 🔚 Speech ended, sending 139264 bytes to ASR
+2026-02-03 12:51:45,540 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:51:46,524 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैंने एक लोन लिया है।'
+2026-02-03 12:51:46,524 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:51:46,524 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैंने एक लोन लिया है।' for phase=conversation, question=0
+2026-02-03 12:51:46,525 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैंने एक लोन लिया है।'
+2026-02-03 12:51:46,525 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:51:46,525 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:51:46,525 - services.conversational_flow - INFO - User Input: हाँ मैंने एक लोन लिया है।
+2026-02-03 12:51:46,525 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'जी, आप आकश हैं? क्या आपके पास एल एंड टी फाइनेंस से लोन है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश', 'last_conversation_notes': 'ग्राहक ने अपना नाम पहचानांकित कर दिया है, अब लोन के बारे में पूछा जाएगा'}
+2026-02-03 12:51:46,525 - services.conversational_flow - INFO - Conversation Stage: loan_confirmation
+2026-02-03 12:51:46,526 - services.conversational_flow - INFO - Missing Information: ['loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 12:51:55,951 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:51:55,951 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 9424.71 ms
+2026-02-03 12:51:55,957 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 2023 chars
+2026-02-03 12:51:55,957 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 9424.71ms, Tokens: N/A
+2026-02-03 12:51:55,959 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'अच्छा, आपके लोन के बारे में बताइए। पिछले महीने भुगतान किया गया कि?', 'extracted_data': {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने लोन के बारे में पुष्टि की, अब पिछले महीने भुगतान के बारे में पूछा जाएगा', '_latency_ms': 9424.71, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:51:55,959 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 12:51:55,959 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 12:51:55,959 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 12:51:55,959 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'जी, आप आकश हैं? क्या आपके पास एल एंड टी फाइनेंस से लोन है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश', 'last_conversation_notes': 'ग्राहक ने अपना नाम पहचानांकित कर दिया है, अब लोन के बारे में पूछा जाएगा'}
+2026-02-03 12:51:55,959 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 12:51:55,959 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 12:51:55,961 - core.websocket_handler - INFO - 🗣️ TTS playing: अच्छा, आपके लोन के बारे में बताइए। पिछले महीने भुग...
+2026-02-03 12:51:55,961 - services.tts_service - INFO - 🎵 TTS: अच्छा, आपके लोन के बारे में बताइए। पिछले महीने भुग...
+2026-02-03 12:51:55,978 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:51:55,978 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:51:55,979 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:51:55,979 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:52:00,585 - services.tts_service - INFO - ✅ TTS complete: 40 chunks
+2026-02-03 12:52:00,586 - core.websocket_handler - INFO - ✅ TTS complete: 40 chunks sent
+2026-02-03 12:52:00,586 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:52:00,587 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:52:00,588 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:52:00,588 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:52:00,588 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:52:02,764 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 12:52:04,779 - services.vad_silero - INFO - 🔚 Speech ended, sending 79872 bytes to ASR
+2026-02-03 12:52:04,780 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:52:05,673 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैंने किया था।'
+2026-02-03 12:52:05,673 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:52:05,673 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैंने किया था।' for phase=conversation, question=0
+2026-02-03 12:52:05,673 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैंने किया था।'
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - User Input: हाँ मैंने किया था।
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'अच्छा, आपके लोन के बारे में बताइए। पिछले महीने भुगतान किया गया कि?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश', 'last_conversation_notes': 'ग्राहक ने लोन के बारे में पुष्टि की, अब पिछले महीने भुगतान के बारे में पूछा जाएगा'}
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - Conversation Stage: payment_confirmation
+2026-02-03 12:52:05,674 - services.conversational_flow - INFO - Missing Information: ['last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 12:52:15,390 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:52:15,390 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 9715.54 ms
+2026-02-03 12:52:15,395 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 2457 chars
+2026-02-03 12:52:15,395 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 9715.54ms, Tokens: N/A
+2026-02-03 12:52:15,397 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, भुगतान किस व्यक्ति द्वारा किया गया था?', 'extracted_data': {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES'}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount'], '_latency_ms': 9715.54, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:52:15,397 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES'}
+2026-02-03 12:52:15,397 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 12:52:15,397 - services.conversational_flow - INFO - Call End Reason from LLM: None
+2026-02-03 12:52:15,398 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'अच्छा, आपके लोन के बारे में बताइए। पिछले महीने भुगतान किया गया कि?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश', 'last_conversation_notes': 'ग्राहक ने लोन के बारे में पुष्टि की, अब पिछले महीने भुगतान के बारे में पूछा जाएगा'}
+2026-02-03 12:52:15,398 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 12:52:15,398 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 12:52:15,399 - core.websocket_handler - INFO - 🗣️ TTS playing: ठीक है, भुगतान किस व्यक्ति द्वारा किया गया था?...
+2026-02-03 12:52:15,400 - services.tts_service - INFO - 🎵 TTS: ठीक है, भुगतान किस व्यक्ति द्वारा किया गया था?...
+2026-02-03 12:52:15,415 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:52:15,415 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:52:15,415 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:52:15,415 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:52:19,292 - services.tts_service - INFO - ✅ TTS complete: 32 chunks
+2026-02-03 12:52:19,293 - core.websocket_handler - INFO - ✅ TTS complete: 32 chunks sent
+2026-02-03 12:52:19,293 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:52:19,294 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:52:19,294 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:52:19,294 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:52:19,294 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:52:19,901 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 12:52:21,819 - services.vad_silero - INFO - 🔚 Speech ended, sending 76800 bytes to ASR
+2026-02-03 12:52:21,820 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:52:22,664 - core.websocket_handler - INFO - 📝 ASR Transcript: 'मैंने खुद किया था।'
+2026-02-03 12:52:22,664 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:52:22,664 - core.websocket_handler - INFO - 📥 Processing answer: 'मैंने खुद किया था।' for phase=conversation, question=0
+2026-02-03 12:52:22,665 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'मैंने खुद किया था।'
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - User Input: मैंने खुद किया था।
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'ठीक है, भुगतान किस व्यक्ति द्वारा किया गया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'आकश', 'last_conversation_notes': ''}
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - Conversation Stage: payee_identification
+2026-02-03 12:52:22,665 - services.conversational_flow - INFO - Missing Information: ['who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 12:52:33,054 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:52:33,055 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 10388.60 ms
+2026-02-03 12:52:33,061 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 2259 chars
+2026-02-03 12:52:33,061 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 10388.60ms, Tokens: N/A
+2026-02-03 12:52:33,063 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'समझ गई हूँ, किस तारीख को भुगतान किया गया था?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': 'AAKASH', 'speaker_relation': 'self', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['payment date', 'payment method', 'payment reason', 'payment amount'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने भुगतान करने वाले व्यक्ति की पहचान स्वयं के रूप में दी है, अब भुगतान तारीख के बारे में पूछा जा रहा है', '_latency_ms': 10388.6, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:52:33,063 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': 'AAKASH', 'speaker_relation': 'self', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 12:52:33,063 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 12:52:33,063 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 12:52:33,063 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'ठीक है, भुगतान किस व्यक्ति द्वारा किया गया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'AAKASH', 'last_conversation_notes': '', 'speaker_relation': 'self'}
+2026-02-03 12:52:33,063 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 12:52:33,063 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 12:52:33,065 - core.websocket_handler - INFO - 🗣️ TTS playing: समझ गई हूँ, किस तारीख को भुगतान किया गया था?...
+2026-02-03 12:52:33,065 - services.tts_service - INFO - 🎵 TTS: समझ गई हूँ, किस तारीख को भुगतान किया गया था?...
+2026-02-03 12:52:33,079 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:52:33,079 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:52:33,079 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:52:33,079 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:52:36,394 - services.tts_service - INFO - ✅ TTS complete: 33 chunks
+2026-02-03 12:52:36,395 - core.websocket_handler - INFO - ✅ TTS complete: 33 chunks sent
+2026-02-03 12:52:36,395 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:52:36,396 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:52:36,397 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:52:36,397 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:52:36,397 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:52:38,925 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 12:52:42,085 - services.vad_silero - INFO - 🔚 Speech ended, sending 116736 bytes to ASR
+2026-02-03 12:52:42,085 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:52:43,154 - core.websocket_handler - INFO - 📝 ASR Transcript: 'जैनेवरी 20 को किया गया था।'
+2026-02-03 12:52:43,154 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:52:43,155 - core.websocket_handler - INFO - 📥 Processing answer: 'जैनेवरी 20 को किया गया था।' for phase=conversation, question=0
+2026-02-03 12:52:43,155 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'जैनेवरी 20 को किया गया था।'
+2026-02-03 12:52:43,155 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:52:43,155 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:52:43,155 - services.conversational_flow - INFO - User Input: जैनेवरी 20 को किया गया था।
+2026-02-03 12:52:43,155 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'समझ गई हूँ, किस तारीख को भुगतान किया गया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'AAKASH', 'last_conversation_notes': 'ग्राहक ने भुगतान करने वाले व्यक्ति की पहचान स्वयं के रूप में दी है, अब भुगतान तारीख के बारे में पूछा जा रहा है', 'speaker_relation': 'self'}
+2026-02-03 12:52:43,155 - services.conversational_flow - INFO - Conversation Stage: date_collection
+2026-02-03 12:52:43,156 - services.conversational_flow - INFO - Missing Information: ['payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 12:52:53,722 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:52:53,722 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 10565.82 ms
+2026-02-03 12:52:53,728 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 2186 chars
+2026-02-03 12:52:53,728 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 10565.82ms, Tokens: N/A
+2026-02-03 12:52:53,729 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, कौन सा भुगतान विधि उपयोग की गई थी?', 'extracted_data': {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['payment method', 'payment reason', 'payment amount'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने भुगतान तारीख प्रदान की, वर्तमान वर्ष 2025 के साथ तारीख के रूपांतरण कर लिया गया। अगला सवाल भुगतान विधि होगा।', '_latency_ms': 10565.82, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:52:53,730 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 12:52:53,730 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 12:52:53,730 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 12:52:53,730 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'समझ गई हूँ, किस तारीख को भुगतान किया गया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'AAKASH', 'last_conversation_notes': 'ग्राहक ने भुगतान करने वाले व्यक्ति की पहचान स्वयं के रूप में दी है, अब भुगतान तारीख के बारे में पूछा जा रहा है', 'speaker_relation': 'self'}
+2026-02-03 12:52:53,730 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 12:52:53,730 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 12:52:53,731 - core.websocket_handler - INFO - 🗣️ TTS playing: ठीक है, कौन सा भुगतान विधि उपयोग की गई थी?...
+2026-02-03 12:52:53,732 - services.tts_service - INFO - 🎵 TTS: ठीक है, कौन सा भुगतान विधि उपयोग की गई थी?...
+2026-02-03 12:52:53,747 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:52:53,747 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:52:53,747 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:52:53,747 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:52:57,902 - services.tts_service - INFO - ✅ TTS complete: 36 chunks
+2026-02-03 12:52:57,903 - core.websocket_handler - INFO - ✅ TTS complete: 36 chunks sent
+2026-02-03 12:52:57,904 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:52:57,904 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:52:57,905 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:52:57,905 - core.websocket_handler - INFO - 🎤 Mic enabled for 5011922416
+2026-02-03 12:52:57,905 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 12:52:58,539 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 12:53:06,059 - services.vad_silero - INFO - 🔚 Speech ended, sending 256000 bytes to ASR
+2026-02-03 12:53:06,059 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5011922416
+2026-02-03 12:53:07,732 - core.websocket_handler - INFO - 📝 ASR Transcript: 'मैंने UPI से पे किया था और मैंने 3000 रूपय EMI के ले पे किया था।'
+2026-02-03 12:53:07,732 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5011922416
+2026-02-03 12:53:07,733 - core.websocket_handler - INFO - 📥 Processing answer: 'मैंने UPI से पे किया था और मैंने 3000 रूपय EMI के ले पे किया था।' for phase=conversation, question=0
+2026-02-03 12:53:07,733 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'मैंने UPI से पे किया था और मैंने 3000 रूपय EMI के ले पे किया था।'
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - Customer Name: AAKASH  .
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - User Input: मैंने UPI से पे किया था और मैंने 3000 रूपय EMI के ले पे किया था।
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'ठीक है, कौन सा भुगतान विधि उपयोग की गई थी?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'AAKASH', 'last_conversation_notes': 'ग्राहक ने भुगतान तारीख प्रदान की, वर्तमान वर्ष 2025 के साथ तारीख के रूपांतरण कर लिया गया। अगला सवाल भुगतान विधि होगा।', 'speaker_relation': 'self'}
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - Conversation Stage: mode_collection
+2026-02-03 12:53:07,734 - services.conversational_flow - INFO - Missing Information: ['payment method', 'payment reason', 'payment amount']
+2026-02-03 12:53:16,347 - llm.gemini_client - INFO - 🤖 [Qubrid API] Response status: 200
+2026-02-03 12:53:16,348 - llm.gemini_client - INFO - ⏱️ [Qubrid API] Latency: 8612.82 ms
+2026-02-03 12:53:16,354 - llm.gemini_client - INFO - 📡 [Qubrid API] Streaming response completed, content length: 1906 chars
+2026-02-03 12:53:16,355 - llm.gemini_client - INFO - ✅ [Qubrid API] Response processed successfully - Latency: 8612.82ms, Tokens: N/A
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'अच्छा, क्या यह जानकारी सही है?', 'extracted_data': {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': 'online_lan', 'payment_reason': 'emi', 'payment_amount': 3000}, 'next_action': 'end_call', 'provide_summary': True, 'call_end_reason': 'completed', '_latency_ms': 8612.82, '_model': 'nvidia/Orchestrator-8B'}
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': 'online_lan', 'payment_reason': 'emi', 'payment_amount': 3000}
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - Next Action from LLM: end_call
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - Call End Reason from LLM: completed
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_ad748504_1770103260', 'customer_name': 'AAKASH  .', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '20/01/2025', 'payment_mode': 'online_lan', 'payment_reason': 'emi', 'payment_amount': 3000, 'conversation_started': True, 'last_bot_response': 'ठीक है, कौन सा भुगतान विधि उपयोग की गई थी?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'speaker_name': 'AAKASH', 'last_conversation_notes': 'ग्राहक ने भुगतान तारीख प्रदान की, वर्तमान वर्ष 2025 के साथ तारीख के रूपांतरण कर लिया गया। अगला सवाल भुगतान विधि होगा।', 'speaker_relation': 'self'}
+2026-02-03 12:53:16,356 - services.conversational_flow - INFO - 📝 Summary provided in bot_response
+2026-02-03 12:53:16,356 - flow.flow_manager - INFO - 📝 Summary provided in conversational response
+2026-02-03 12:53:16,356 - services.summary_service - INFO - ================================================================================
+2026-02-03 12:53:16,357 - services.summary_service - INFO - 🤖 LLM CALL (detect_confirmation) - Input:
+2026-02-03 12:53:16,357 - services.summary_service - INFO - User response: मैंने UPI से पे किया था और मैंने 3000 रूपय EMI के ले पे किया था।
+2026-02-03 12:53:16,357 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 12:53:16,357 - core.websocket_handler - INFO - 📤 Answer result: CLOSING
+2026-02-03 12:53:16,357 - core.websocket_handler - INFO - 👋 Saying closing statement...
+2026-02-03 12:53:16,358 - utils.session_data_storage - INFO - 💾 Saved session data for session: session_ad748504_1770103260 (fields: 22)
+2026-02-03 12:53:16,358 - core.websocket_handler - INFO - 🗣️ TTS playing: धन्यवाद आपके समय के लिए।
+आपकी फीडबैक हमारे लिए बहु...
+2026-02-03 12:53:16,359 - services.tts_service - INFO - 🎵 TTS: धन्यवाद आपके समय के लिए।
+आपकी फीडबैक हमारे लिए बहु...
+2026-02-03 12:53:16,369 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 12:53:16,369 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 12:53:16,369 - core.websocket_handler - INFO - 🔇 Mic disabled for 5011922416 (TTS playing)
+2026-02-03 12:53:16,370 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 12:53:23,804 - services.tts_service - INFO - ✅ TTS complete: 57 chunks
+2026-02-03 12:53:23,805 - core.websocket_handler - INFO - ✅ TTS complete: 57 chunks sent
+2026-02-03 12:53:23,806 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5011922416
+2026-02-03 12:53:23,807 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 12:53:23,807 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 12:53:23,808 - core.websocket_handler - INFO - ✅ Survey completed, call ended
+2026-02-03 12:53:23,808 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:07:35,197 - core.websocket_handler - ERROR - Error in WebSocket loop: Cannot call "receive" once a disconnect message has been received.
+2026-02-03 13:13:36,732 - llm.gemini_client - INFO - ✅ LangChain OpenAI client initialized successfully
+2026-02-03 13:13:37,900 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 13:13:37,900 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 13:13:37,901 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 13:13:37,901 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 13:13:37,901 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 13:13:45,014 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:13:45,014 - services.summary_service - INFO - 🤖 LLM CALL (transliterate_to_devanagari) - Input:
+2026-02-03 13:13:45,015 - services.summary_service - INFO - Name: AAKASH  PAWAR
+2026-02-03 13:13:45,015 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:13:47,913 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:13:47,947 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:13:47,947 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 2932.06 ms
+2026-02-03 13:13:47,947 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 2932.06ms, Tokens: N/A
+2026-02-03 13:13:47,947 - services.summary_service - INFO - 📥 LLM CALL (transliterate_to_devanagari) - Response:
+2026-02-03 13:13:47,947 - services.summary_service - INFO - Devanagari Name: आकाश पवार
+2026-02-03 13:13:47,947 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:13:47,947 - services.summary_service - INFO - ✅ LLM CALL (transliterate_to_devanagari) - Result: आकाश पवार
+2026-02-03 13:13:47,947 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:13:48,563 - utils.session_data_storage - INFO - 💾 Saved DB data for session: session_2248e61f_1770104625
+2026-02-03 13:13:51,823 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:13:51,871 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:13:51,871 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 3306.70 ms
+2026-02-03 13:13:51,871 - llm.gemini_client - ERROR - ❌ [LangChain OpenAI] JSON Decode Error: Expecting value: line 1 column 1 (char 0)
+2026-02-03 13:13:51,871 - llm.gemini_client - ERROR - [LangChain OpenAI] Response content: analysisto produce greeting for a female CS rep. Should be warm, professional, greet the customer, confirm speaking to the right person. Use name "आकाश पवार". It's gender neutral? But we greet to that name. Use feminine form: "बात कर रही हूँ". Use natural conversational tone. Should say "नमस्ते आकाश पवार जी, मैं लिटेल एंड टेक्सटाइल फाइनेंस से बात कर रही हूँ।"
+
+We need to check the requirements: "Use feminine form: 'बात कर रही हूँ' (not 'बात कर रहा हूँ')" So we must use feminine pronoun. "I'm talking" -> "मैं बात कर रही हूँ". Confirm speaking to the right person: "क्या मैं सही व्यक्ति से बात कर रही हूँ?" Maybe "क्या आप आकाश पवार जी हैं?" Or "क्या मैं आपको सही पते पर पहुँच रही हूँ?" We need to confirm.
+
+We also need to be warm, professional, natural conversation. Use the customer's name appropriately. So greeting could be:
+
+"नमस्ते आकाश पवार जी, मैं लिटेल एंड टेक्सटाइल फाइनेंस (L&T Finance) से बात कर रही हूँ, क्या मैं सही व्यक्ति से बात
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - 🔌 WebSocket connection attempt received
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - ✅ WebSocket accepted
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - 📝 WebSocket ID assigned: 4491587328
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - 📊 Connection state initialized for 4491587328
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - ✅ WebSocket connected: 4491587328
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - 🚀 Starting background tasks for 4491587328
+2026-02-03 13:13:51,877 - core.websocket_handler - INFO - ✅ Background tasks started for 4491587328
+2026-02-03 13:13:51,878 - core.websocket_handler - INFO - 📤 Sent websocket_ready message to client
+2026-02-03 13:13:51,983 - core.websocket_handler - INFO - 📝 Text message: {"type":"init_session","session_id":"session_2248e61f_1770104625","customer_name":"AAKASH  PAWAR"}...
+2026-02-03 13:13:51,983 - core.router - INFO - 🚀 Dispatching init_session event to handler: handle_init_session
+2026-02-03 13:13:51,983 - core.websocket_handler - INFO - 📞 Outbound call to: AAKASH  PAWAR (session: session_2248e61f_1770104625)
+2026-02-03 13:13:54,926 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:13:54,943 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:13:54,943 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 2958.99 ms
+2026-02-03 13:13:54,943 - llm.gemini_client - ERROR - ❌ [LangChain OpenAI] JSON Decode Error: Expecting value: line 1 column 1 (char 0)
+2026-02-03 13:13:54,943 - llm.gemini_client - ERROR - [LangChain OpenAI] Response content: analysisto produce greeting from a female representative. Must say "बात कर रही हूँ" not "बात कर रहा हूँ". So greeting: "नमस्ते आकाश जी, मैं एल एंड टी फाइनेंस की ग्राहक सेवा प्रतिनिधि [Name] बोल रही हूँ। क्या मैं सही व्यक्ति से बात कर रही हूँ?" Or something like that. Must confirm speaking to the right person. The greeting should sound natural, warm, professional. Use feminine language. Must not add any other text. Only greeting. Make sure to use "बात कर रही हूँ" exactly. Also greet, say "नमस्ते आकाश जी" or "नमस्ते आकाश पवार जी". The requirement: Use customer's name appropriately. So "नमस्ते आकाश पवार जी" or "नमस्ते आकाश पवार जी, मैं..." The requirement also: "Confirm you're speaking to the right person." So we might say "कृपया पुष्टि करें कि मैं सही व्यक्ति से बात कर रही हूँ।"
+
+Better: "नमस्ते आकाश पवार जी, मैं एल एंड टी फाइनेंस की ग्राहक सेवा प्रतिनिधि [आपका नाम] बोल रही हूँ। क्या मैं सही व्यक्ति से बात कर
+2026-02-03 13:13:54,943 - core.websocket_handler - INFO - 📋 Sending first question: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रही हूँ, क्या मेरी बात आकाश पवार जी से हो रही है?
+2026-02-03 13:13:54,943 - core.router - INFO - ✅ Handler handle_init_session completed successfully
+2026-02-03 13:13:54,943 - core.websocket_handler - INFO - 🗣️ TTS playing: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 13:13:54,943 - services.tts_service - INFO - 🎵 TTS: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 13:13:54,950 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:13:54,950 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:13:54,950 - core.websocket_handler - INFO - 🔇 Mic disabled for 4491587328 (TTS playing)
+2026-02-03 13:13:54,950 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:14:02,293 - services.tts_service - INFO - ✅ TTS complete: 67 chunks
+2026-02-03 13:14:02,294 - core.websocket_handler - INFO - ✅ TTS complete: 67 chunks sent
+2026-02-03 13:14:02,295 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 4491587328
+2026-02-03 13:14:02,296 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:14:02,296 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:14:02,297 - core.websocket_handler - INFO - 🎤 Mic enabled for 4491587328
+2026-02-03 13:14:02,297 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:14:03,233 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 0.99)
+2026-02-03 13:14:06,912 - services.vad_silero - INFO - 🔚 Speech ended, sending 133120 bytes to ASR
+2026-02-03 13:14:06,913 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 4491587328
+2026-02-03 13:14:08,187 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैं अकाश पवर बोल रहूं।'
+2026-02-03 13:14:08,187 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 4491587328
+2026-02-03 13:14:08,188 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैं अकाश पवर बोल रहूं।' for phase=conversation, question=0
+2026-02-03 13:14:08,188 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैं अकाश पवर बोल रहूं।'
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - Customer Name: आकाश पवार
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - User Input: हाँ मैं अकाश पवर बोल रहूं।
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन'}
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - Conversation Stage: identity_confirmation
+2026-02-03 13:14:08,188 - services.conversational_flow - INFO - Missing Information: ['identity confirmation', 'loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:14:15,057 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:14:15,091 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:14:15,092 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 6903.26 ms
+2026-02-03 13:14:15,092 - llm.gemini_client - ERROR - ❌ [LangChain OpenAI] JSON Decode Error: Expecting value: line 1 column 1 (char 0)
+2026-02-03 13:14:15,092 - llm.gemini_client - ERROR - [LangChain OpenAI] Response content: analysisto produce JSON response according to given format. Summarize conversation: We are at identity_confirmation. The customer says "हाँ मैं अकाश पवर बोल रहूं।" Actually they are saying "Yes I am Akash Pawar speaking." So name is Akash Pawar. The identity_confirmed is probably "YES". They are confirming they are the customer. Also loan_taken? not yet. last_month_payment? not yet. payee? not yet. payment_date? not yet. payment_mode? not yet. payment_reason? not yet. payment_amount? not yet. The "speaker_name" field should be "आकाश पवार" or "Akash Pawar"? Should follow rule: only in first greeting we can use name. We have collected identity? yes. So we can use it here. Next we need to ask the next missing information. According to missing_info list: loan confirmation, last month payment check, who made payment, payment date, payment method, payment reason, payment amount. We need to ask next question. Maybe ask: "क्या आपने अभी ऋण लिया है?" which is loan_taken. So ask "क्या आपने अभी ऋण लिया है?" Also we need to ask who made the payment:
+2026-02-03 13:14:15,092 - services.conversational_flow - INFO - LLM Raw Response: {'value': 'UNCLEAR', 'is_clear': False}
+2026-02-03 13:14:15,092 - services.conversational_flow - INFO - Extracted Data from LLM: None
+2026-02-03 13:14:15,092 - services.conversational_flow - INFO - Next Action from LLM: None
+2026-02-03 13:14:15,092 - services.conversational_flow - INFO - Call End Reason from LLM: None
+2026-02-03 13:14:15,092 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन'}
+2026-02-03 13:14:15,092 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:14:15,092 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:14:15,093 - core.websocket_handler - INFO - 🗣️ TTS playing: कृपया दोबारा बताइए।...
+2026-02-03 13:14:15,093 - services.tts_service - INFO - 🎵 TTS: कृपया दोबारा बताइए।...
+2026-02-03 13:14:15,100 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:14:15,100 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:14:15,100 - core.websocket_handler - INFO - 🔇 Mic disabled for 4491587328 (TTS playing)
+2026-02-03 13:14:15,100 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:14:17,923 - services.tts_service - INFO - ✅ TTS complete: 25 chunks
+2026-02-03 13:14:17,924 - core.websocket_handler - INFO - ✅ TTS complete: 25 chunks sent
+2026-02-03 13:14:17,925 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 4491587328
+2026-02-03 13:14:17,925 - services.google_sheet_logger - WARNING - Google Sheet creds not found at /Users/snehakiranmanded/LTFS_Conversational_Flow/backend/google_sheet_creds.json - sheet logging disabled
+2026-02-03 13:14:17,926 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:14:17,926 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:14:17,926 - core.websocket_handler - INFO - 🎤 Mic enabled for 4491587328
+2026-02-03 13:14:17,926 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:14:19,771 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:14:21,915 - services.vad_silero - INFO - 🔚 Speech ended, sending 83968 bytes to ASR
+2026-02-03 13:14:21,915 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 4491587328
+2026-02-03 13:14:22,807 - core.websocket_handler - INFO - 📝 ASR Transcript: 'मैं अकाश बोल रहा हूं।'
+2026-02-03 13:14:22,807 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 4491587328
+2026-02-03 13:14:22,807 - core.websocket_handler - INFO - 📥 Processing answer: 'मैं अकाश बोल रहा हूं।' for phase=conversation, question=0
+2026-02-03 13:14:22,807 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'मैं अकाश बोल रहा हूं।'
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - Customer Name: आकाश पवार
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - User Input: मैं अकाश बोल रहा हूं।
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'कृपया दोबारा बताइए।', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': ''}
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - Conversation Stage: identity_confirmation
+2026-02-03 13:14:22,807 - services.conversational_flow - INFO - Missing Information: ['identity confirmation', 'loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:14:29,417 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:14:29,452 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:14:29,452 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 6644.45 ms
+2026-02-03 13:14:29,452 - llm.gemini_client - ERROR - ❌ [LangChain OpenAI] JSON Decode Error: Expecting value: line 1 column 1 (char 0)
+2026-02-03 13:14:29,452 - llm.gemini_client - ERROR - [LangChain OpenAI] Response content: analysisto respond as the assistant. The system says we must reply in Hindi using Devanagari script only. Use feminine form. Use "आप" for address. We have some collected data: identity_confirmed, loan_taken, last_month_payment, etc. The customer says "मैं अकाश बोल रहा हूं।" They corrected name: earlier we had "आकाश पवार" as given. The system gave that as customer name. Now the assistant must respond acknowledging perhaps that they are a male? But it's a correction? Actually "मैं अकाश बोल रहा हूं" means "I am Akash speaking" clarifying they are speaking. They might be the customer or a relative. We need to ask identity confirmation: we must ask their name and relation if relative. We have identity_confirmed set to null currently. So we need to ask them to confirm identity: "कृपया अपना नाम और पता बताएं" or "कृपया बताइए कि आपका नाम क्या है और आप ग्राहक से कितने नजदीक हैं" but we have to ask for name and relation in the first question. The guidelines: "If speaking directly to the customer, proceed normally. If a relative answers, first politely ask the speaker
+2026-02-03 13:14:29,452 - services.conversational_flow - INFO - LLM Raw Response: {'value': 'UNCLEAR', 'is_clear': False}
+2026-02-03 13:14:29,452 - services.conversational_flow - INFO - Extracted Data from LLM: None
+2026-02-03 13:14:29,452 - services.conversational_flow - INFO - Next Action from LLM: None
+2026-02-03 13:14:29,452 - services.conversational_flow - INFO - Call End Reason from LLM: None
+2026-02-03 13:14:29,452 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'कृपया दोबारा बताइए।', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': ''}
+2026-02-03 13:14:29,452 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:14:29,453 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:14:29,453 - core.websocket_handler - INFO - 🗣️ TTS playing: कृपया दोबारा बताइए।...
+2026-02-03 13:14:29,453 - services.tts_service - INFO - 🎵 TTS: कृपया दोबारा बताइए।...
+2026-02-03 13:14:29,459 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:14:29,459 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:14:29,459 - core.websocket_handler - INFO - 🔇 Mic disabled for 4491587328 (TTS playing)
+2026-02-03 13:14:29,459 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:14:32,127 - services.tts_service - INFO - ✅ TTS complete: 30 chunks
+2026-02-03 13:14:32,128 - core.websocket_handler - INFO - ✅ TTS complete: 30 chunks sent
+2026-02-03 13:14:32,128 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 4491587328
+2026-02-03 13:14:32,129 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:14:32,130 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:14:32,130 - core.websocket_handler - INFO - 🎤 Mic enabled for 4491587328
+2026-02-03 13:14:32,130 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:14:35,042 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:14:37,001 - services.vad_silero - INFO - 🔚 Speech ended, sending 77824 bytes to ASR
+2026-02-03 13:14:37,002 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 4491587328
+2026-02-03 13:14:37,554 - core.websocket_handler - INFO - 📝 ASR Transcript: 'I'll check with this white'
+2026-02-03 13:14:37,555 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 4491587328
+2026-02-03 13:14:37,555 - core.websocket_handler - INFO - 📥 Processing answer: 'I'll check with this white' for phase=conversation, question=0
+2026-02-03 13:14:37,555 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'I'll check with this white'
+2026-02-03 13:14:37,555 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:14:37,555 - services.conversational_flow - INFO - Customer Name: आकाश पवार
+2026-02-03 13:14:37,556 - services.conversational_flow - INFO - User Input: I'll check with this white
+2026-02-03 13:14:37,556 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'कृपया दोबारा बताइए।', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': ''}
+2026-02-03 13:14:37,556 - services.conversational_flow - INFO - Conversation Stage: identity_confirmation
+2026-02-03 13:14:37,556 - services.conversational_flow - INFO - Missing Information: ['identity confirmation', 'loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:14:44,074 - httpx - INFO - HTTP Request: POST http://192.168.30.132:8001/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:14:44,108 - llm.gemini_client - INFO - 🤖 [LangChain OpenAI] Response received
+2026-02-03 13:14:44,109 - llm.gemini_client - INFO - ⏱️ [LangChain OpenAI] Latency: 6552.13 ms
+2026-02-03 13:14:44,109 - llm.gemini_client - ERROR - ❌ [LangChain OpenAI] JSON Decode Error: Expecting value: line 1 column 1 (char 0)
+2026-02-03 13:14:44,109 - llm.gemini_client - ERROR - [LangChain OpenAI] Response content: analysisto produce JSON response. The user says: "I'll check with this white". It's unclear. Probably means "I'll check with this person" maybe a relative. They didn't give identity, loan, etc. They are being vague. We need to ask clarifying question: e.g., who is 'white'? And what do they want to confirm? They may want to say they'll check on a name. So we need to ask what the payee is? Actually we need to ask identity (the customer themselves). But conversation stage: identity_confirmation. So we need to ask them to confirm their identity. Also loan taken, last month payment, payee, payment date, mode, reason, amount. They haven't answered anything. They said "I'll check with this white" presumably means "This person is the payee"? Not sure.
+
+Maybe they are referring to the person who gave them the loan? Or "white" as a relative? The phrase is incomplete. We need to ask who "white" is. But we should follow guidelines: don't ask same question twice. We haven't asked identity. So we can ask a new question: "कृपया बताइए कि आप किसके लिए भुगतान कर रहे हैं?" or "क्या आप
+2026-02-03 13:14:44,109 - services.conversational_flow - INFO - LLM Raw Response: {'value': 'UNCLEAR', 'is_clear': False}
+2026-02-03 13:14:44,109 - services.conversational_flow - INFO - Extracted Data from LLM: None
+2026-02-03 13:14:44,109 - services.conversational_flow - INFO - Next Action from LLM: None
+2026-02-03 13:14:44,109 - services.conversational_flow - INFO - Call End Reason from LLM: None
+2026-02-03 13:14:44,109 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_2248e61f_1770104625', 'customer_name': 'आकाश पवार', 'customer_name_english': 'AAKASH  PAWAR', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'कृपया दोबारा बताइए।', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': ''}
+2026-02-03 13:14:44,109 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:14:44,109 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:14:44,110 - core.websocket_handler - INFO - 🗣️ TTS playing: कृपया दोबारा बताइए।...
+2026-02-03 13:14:44,110 - services.tts_service - INFO - 🎵 TTS: कृपया दोबारा बताइए।...
+2026-02-03 13:14:44,116 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:14:44,116 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:14:44,116 - core.websocket_handler - INFO - 🔇 Mic disabled for 4491587328 (TTS playing)
+2026-02-03 13:14:44,116 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:14:46,370 - services.tts_service - INFO - ✅ TTS complete: 20 chunks
+2026-02-03 13:14:46,371 - core.websocket_handler - INFO - ✅ TTS complete: 20 chunks sent
+2026-02-03 13:14:46,371 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 4491587328
+2026-02-03 13:14:46,372 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:14:46,373 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:14:46,373 - core.websocket_handler - INFO - 🎤 Mic enabled for 4491587328
+2026-02-03 13:14:46,373 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:14:46,883 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:14:48,356 - core.websocket_handler - ERROR - Error in WebSocket loop: Cannot call "receive" once a disconnect message has been received.
+2026-02-03 13:21:28,386 - llm.gemini_client - INFO - ✅ OpenAI client (Hugging Face Router) initialized successfully
+2026-02-03 13:21:29,464 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 13:21:29,464 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 13:21:29,464 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 13:21:29,464 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 13:21:29,464 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 13:21:41,160 - llm.gemini_client - INFO - ✅ OpenAI client (Hugging Face Router) initialized successfully
+2026-02-03 13:21:42,099 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 13:21:42,099 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 13:21:42,099 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 13:21:42,099 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 13:21:42,099 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 13:22:00,283 - llm.gemini_client - INFO - ✅ OpenAI client (Hugging Face Router) initialized successfully
+2026-02-03 13:22:01,197 - core.router - INFO - ✅ Registered handler for event type: init_session -> handle_init_session
+2026-02-03 13:22:01,197 - core.router - INFO - ✅ Registered handler for event type: tts_finished -> handle_tts_finished
+2026-02-03 13:22:01,197 - core.router - INFO - ✅ Registered handler for event type: tts_started -> handle_tts_started
+2026-02-03 13:22:01,197 - core.router - INFO - ✅ Registered handler for event type: tts_request -> handle_tts_request
+2026-02-03 13:22:01,197 - core.router - INFO - ✅ Registered handler for event type: ping -> handle_ping
+2026-02-03 13:22:06,478 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:22:06,478 - services.summary_service - INFO - 🤖 LLM CALL (transliterate_to_devanagari) - Input:
+2026-02-03 13:22:06,478 - services.summary_service - INFO - Name: AAKASH  .
+2026-02-03 13:22:06,478 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:22:07,155 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:07,165 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:07,165 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 687.03 ms
+2026-02-03 13:22:07,165 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=237, output_tokens=76, total_tokens=313
+2026-02-03 13:22:07,166 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 687.03ms, Tokens: 313
+2026-02-03 13:22:07,166 - services.summary_service - INFO - 📥 LLM CALL (transliterate_to_devanagari) - Response:
+2026-02-03 13:22:07,166 - services.summary_service - INFO - Devanagari Name: आकाश
+2026-02-03 13:22:07,166 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:22:07,166 - services.summary_service - INFO - ✅ LLM CALL (transliterate_to_devanagari) - Result: आकाश
+2026-02-03 13:22:07,166 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:22:07,835 - utils.session_data_storage - INFO - 💾 Saved DB data for session: session_e6d2ea0b_1770105126
+2026-02-03 13:22:08,615 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:08,617 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:08,617 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 781.09 ms
+2026-02-03 13:22:08,617 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=271, output_tokens=454, total_tokens=725
+2026-02-03 13:22:08,617 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 781.09ms, Tokens: 725
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - 🔌 WebSocket connection attempt received
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - ✅ WebSocket accepted
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - 📝 WebSocket ID assigned: 5016739984
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - 📊 Connection state initialized for 5016739984
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - ✅ WebSocket connected: 5016739984
+2026-02-03 13:22:08,626 - core.websocket_handler - INFO - 🚀 Starting background tasks for 5016739984
+2026-02-03 13:22:08,627 - core.websocket_handler - INFO - ✅ Background tasks started for 5016739984
+2026-02-03 13:22:08,628 - core.websocket_handler - INFO - 📤 Sent websocket_ready message to client
+2026-02-03 13:22:08,731 - core.websocket_handler - INFO - 📝 Text message: {"type":"init_session","session_id":"session_e6d2ea0b_1770105126","customer_name":"AAKASH  ."}...
+2026-02-03 13:22:08,731 - core.router - INFO - 🚀 Dispatching init_session event to handler: handle_init_session
+2026-02-03 13:22:08,731 - core.websocket_handler - INFO - 📞 Outbound call to: AAKASH  . (session: session_e6d2ea0b_1770105126)
+2026-02-03 13:22:09,381 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:09,382 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:09,382 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 650.29 ms
+2026-02-03 13:22:09,382 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=271, output_tokens=297, total_tokens=568
+2026-02-03 13:22:09,382 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 650.29ms, Tokens: 568
+2026-02-03 13:22:09,382 - core.websocket_handler - INFO - 📋 Sending first question: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रही हूँ, क्या मेरी बात आकाश जी से हो रही है?
+2026-02-03 13:22:09,382 - core.router - INFO - ✅ Handler handle_init_session completed successfully
+2026-02-03 13:22:09,383 - core.websocket_handler - INFO - 🗣️ TTS playing: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 13:22:09,383 - services.tts_service - INFO - 🎵 TTS: नमस्ते, मैं एल एंड टी फाइनेंस की तरफ़ से बात कर रह...
+2026-02-03 13:22:09,390 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:22:09,390 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:22:09,390 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:22:09,390 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:22:16,027 - services.tts_service - INFO - ✅ TTS complete: 60 chunks
+2026-02-03 13:22:16,029 - core.websocket_handler - INFO - ✅ TTS complete: 60 chunks sent
+2026-02-03 13:22:16,029 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:22:16,031 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:22:16,031 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:22:16,031 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:22:16,031 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:22:17,723 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 0.94)
+2026-02-03 13:22:19,860 - services.vad_silero - INFO - 🔚 Speech ended, sending 83968 bytes to ASR
+2026-02-03 13:22:19,861 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:22:20,861 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैं आकाश पात कर रहूं।'
+2026-02-03 13:22:20,862 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:22:20,862 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैं आकाश पात कर रहूं।' for phase=conversation, question=0
+2026-02-03 13:22:20,862 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैं आकाश पात कर रहूं।'
+2026-02-03 13:22:20,862 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:22:20,862 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:22:20,862 - services.conversational_flow - INFO - User Input: हाँ मैं आकाश पात कर रहूं।
+2026-02-03 13:22:20,862 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन'}
+2026-02-03 13:22:20,863 - services.conversational_flow - INFO - Conversation Stage: identity_confirmation
+2026-02-03 13:22:20,863 - services.conversational_flow - INFO - Missing Information: ['identity confirmation', 'loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:22:22,047 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:22,048 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:22,048 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1185.33 ms
+2026-02-03 13:22:22,048 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2946, output_tokens=554, total_tokens=3500
+2026-02-03 13:22:22,049 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1185.33ms, Tokens: 3500
+2026-02-03 13:22:22,049 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'समझ गई, क्या आपने अभी तक कोई ऋण लिया है?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने पहचान की पुष्टि की।', '_input_tokens': 2946, '_output_tokens': 554, '_total_tokens': 3500, '_latency_ms': 1185.33, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:22:22,049 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 13:22:22,049 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:22:22,049 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:22:22,049 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': None, 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन'}
+2026-02-03 13:22:22,049 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:22:22,049 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:22:22,050 - core.websocket_handler - INFO - 🗣️ TTS playing: समझ गई, क्या आपने अभी तक कोई ऋण लिया है?...
+2026-02-03 13:22:22,050 - services.tts_service - INFO - 🎵 TTS: समझ गई, क्या आपने अभी तक कोई ऋण लिया है?...
+2026-02-03 13:22:22,057 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:22:22,057 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:22:22,058 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:22:22,058 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:22:25,656 - services.tts_service - INFO - ✅ TTS complete: 29 chunks
+2026-02-03 13:22:25,657 - core.websocket_handler - INFO - ✅ TTS complete: 29 chunks sent
+2026-02-03 13:22:25,657 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:22:25,659 - services.google_sheet_logger - WARNING - Google Sheet creds not found at /Users/snehakiranmanded/LTFS_Conversational_Flow/backend/google_sheet_creds.json - sheet logging disabled
+2026-02-03 13:22:25,659 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:22:25,660 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:22:25,660 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:22:25,660 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:22:26,859 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 0.99)
+2026-02-03 13:22:28,618 - services.vad_silero - INFO - 🔚 Speech ended, sending 71680 bytes to ASR
+2026-02-03 13:22:28,618 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:22:29,399 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैंने लिया है।'
+2026-02-03 13:22:29,399 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:22:29,400 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैंने लिया है।' for phase=conversation, question=0
+2026-02-03 13:22:29,400 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैंने लिया है।'
+2026-02-03 13:22:29,400 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:22:29,400 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:22:29,400 - services.conversational_flow - INFO - User Input: हाँ मैंने लिया है।
+2026-02-03 13:22:29,400 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': None, 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'समझ गई, क्या आपने अभी तक कोई ऋण लिया है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने पहचान की पुष्टि की।'}
+2026-02-03 13:22:29,401 - services.conversational_flow - INFO - Conversation Stage: loan_confirmation
+2026-02-03 13:22:29,401 - services.conversational_flow - INFO - Missing Information: ['loan confirmation', 'last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:22:30,469 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:30,472 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:30,472 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1071.14 ms
+2026-02-03 13:22:30,472 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2949, output_tokens=457, total_tokens=3406
+2026-02-03 13:22:30,473 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1071.14ms, Tokens: 3406
+2026-02-03 13:22:30,473 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, क्या आपने पिछले महीने कोई भुगतान किया है?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': [], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने ऋण लिया है की पुष्टि की', '_input_tokens': 2949, '_output_tokens': 457, '_total_tokens': 3406, '_latency_ms': 1071.14, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:22:30,473 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payee_name': None, 'payee_contact': None, 'payment_date': None, 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': None}
+2026-02-03 13:22:30,473 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:22:30,473 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:22:30,473 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'समझ गई, क्या आपने अभी तक कोई ऋण लिया है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने पहचान की पुष्टि की।'}
+2026-02-03 13:22:30,473 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:22:30,473 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:22:30,474 - core.websocket_handler - INFO - 🗣️ TTS playing: ठीक है, क्या आपने पिछले महीने कोई भुगतान किया है?...
+2026-02-03 13:22:30,475 - services.tts_service - INFO - 🎵 TTS: ठीक है, क्या आपने पिछले महीने कोई भुगतान किया है?...
+2026-02-03 13:22:30,481 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:22:30,481 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:22:30,482 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:22:30,482 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:22:34,360 - services.tts_service - INFO - ✅ TTS complete: 42 chunks
+2026-02-03 13:22:34,361 - core.websocket_handler - INFO - ✅ TTS complete: 42 chunks sent
+2026-02-03 13:22:34,361 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:22:34,362 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:22:34,362 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:22:34,362 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:22:34,363 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:22:35,004 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:22:38,821 - services.vad_silero - INFO - 🔚 Speech ended, sending 137216 bytes to ASR
+2026-02-03 13:22:38,821 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:22:40,064 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हाँ मैंने जनेवरे 30 को 2000 रूपे दिये थे।'
+2026-02-03 13:22:40,064 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:22:40,064 - core.websocket_handler - INFO - 📥 Processing answer: 'हाँ मैंने जनेवरे 30 को 2000 रूपे दिये थे।' for phase=conversation, question=0
+2026-02-03 13:22:40,065 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हाँ मैंने जनेवरे 30 को 2000 रूपे दिये थे।'
+2026-02-03 13:22:40,065 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:22:40,065 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:22:40,065 - services.conversational_flow - INFO - User Input: हाँ मैंने जनेवरे 30 को 2000 रूपे दिये थे।
+2026-02-03 13:22:40,065 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': None, 'payee': None, 'payment_date': None, 'payment_mode': None, 'payment_reason': None, 'payment_amount': None, 'conversation_started': True, 'last_bot_response': 'ठीक है, क्या आपने पिछले महीने कोई भुगतान किया है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने ऋण लिया है की पुष्टि की'}
+2026-02-03 13:22:40,065 - services.conversational_flow - INFO - Conversation Stage: payment_confirmation
+2026-02-03 13:22:40,066 - services.conversational_flow - INFO - Missing Information: ['last month payment confirmation', 'who made payment', 'payment date', 'payment method', 'payment reason', 'payment amount']
+2026-02-03 13:22:41,734 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:22:41,736 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:22:41,736 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1670.38 ms
+2026-02-03 13:22:41,736 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2958, output_tokens=859, total_tokens=3817
+2026-02-03 13:22:41,737 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1670.38ms, Tokens: 3817
+2026-02-03 13:22:41,737 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, आपने 30/01/2025 को 2000 रुपये का भुगतान किया, यह सही है। अब बताइए कि आपने यह भुगतान किस तरीके से किया था?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['payment_reason', 'payment_mode'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने पिछले महीने 30 जनवरी 2025 को 2000 रुपये का भुगतान स्वयं किया, तारीख और राशि स्पष्ट।', '_input_tokens': 2958, '_output_tokens': 859, '_total_tokens': 3817, '_latency_ms': 1670.38, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:22:41,737 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': None, 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}
+2026-02-03 13:22:41,737 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:22:41,737 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:22:41,737 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'ठीक है, क्या आपने पिछले महीने कोई भुगतान किया है?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने ऋण लिया है की पुष्टि की'}
+2026-02-03 13:22:41,737 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:22:41,737 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:22:41,738 - core.websocket_handler - INFO - 🗣️ TTS playing: ठीक है, आपने 30/01/2025 को 2000 रुपये का भुगतान कि...
+2026-02-03 13:22:41,739 - services.tts_service - INFO - 🎵 TTS: ठीक है, आपने 30/01/2025 को 2000 रुपये का भुगतान कि...
+2026-02-03 13:22:41,746 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:22:41,746 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:22:41,746 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:22:41,746 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:22:52,534 - services.tts_service - INFO - ✅ TTS complete: 83 chunks
+2026-02-03 13:22:52,535 - core.websocket_handler - INFO - ✅ TTS complete: 83 chunks sent
+2026-02-03 13:22:52,535 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:22:52,535 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:22:52,535 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:22:52,535 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:22:52,535 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:22:53,753 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:22:58,128 - services.vad_silero - INFO - 🔚 Speech ended, sending 155648 bytes to ASR
+2026-02-03 13:22:58,129 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:22:59,673 - core.websocket_handler - INFO - 📝 ASR Transcript: 'एक लडका ऐया था लेने, मैंने उसकी हात में कैश दिया था।'
+2026-02-03 13:22:59,673 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:22:59,673 - core.websocket_handler - INFO - 📥 Processing answer: 'एक लडका ऐया था लेने, मैंने उसकी हात में कैश दिया था।' for phase=conversation, question=0
+2026-02-03 13:22:59,673 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'एक लडका ऐया था लेने, मैंने उसकी हात में कैश दिया था।'
+2026-02-03 13:22:59,673 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:22:59,673 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:22:59,673 - services.conversational_flow - INFO - User Input: एक लडका ऐया था लेने, मैंने उसकी हात में कैश दिया था।
+2026-02-03 13:22:59,673 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': None, 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'ठीक है, आपने 30/01/2025 को 2000 रुपये का भुगतान किया, यह सही है। अब बताइए कि आपने यह भुगतान किस तरीके से किया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने पिछले महीने 30 जनवरी 2025 को 2000 रुपये का भुगतान स्वयं किया, तारीख और राशि स्पष्ट।'}
+2026-02-03 13:22:59,674 - services.conversational_flow - INFO - Conversation Stage: mode_collection
+2026-02-03 13:22:59,674 - services.conversational_flow - INFO - Missing Information: ['payment method', 'payment reason']
+2026-02-03 13:23:01,564 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:23:01,565 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:23:01,565 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1891.49 ms
+2026-02-03 13:23:01,565 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2975, output_tokens=785, total_tokens=3760
+2026-02-03 13:23:01,565 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1891.49ms, Tokens: 3760
+2026-02-03 13:23:01,565 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, आपने कैश दिया था। यह किस कारण से था, जैसे EMI, शुल्क, या कोई अन्य कारण?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['payment_reason'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने भुगतान के तरीके के रूप में कैश दिया बताया, भुगतान कारण अभी अस्पष्ट है।', '_input_tokens': 2975, '_output_tokens': 785, '_total_tokens': 3760, '_latency_ms': 1891.49, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:23:01,565 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}
+2026-02-03 13:23:01,565 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:23:01,565 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:23:01,566 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'ठीक है, आपने 30/01/2025 को 2000 रुपये का भुगतान किया, यह सही है। अब बताइए कि आपने यह भुगतान किस तरीके से किया था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने पिछले महीने 30 जनवरी 2025 को 2000 रुपये का भुगतान स्वयं किया, तारीख और राशि स्पष्ट।'}
+2026-02-03 13:23:01,566 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:23:01,566 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:23:01,566 - core.websocket_handler - INFO - 🗣️ TTS playing: ठीक है, आपने कैश दिया था। यह किस कारण से था, जैसे ...
+2026-02-03 13:23:01,566 - services.tts_service - INFO - 🎵 TTS: ठीक है, आपने कैश दिया था। यह किस कारण से था, जैसे ...
+2026-02-03 13:23:01,572 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:23:01,572 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:23:01,572 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:23:01,572 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:23:07,959 - services.tts_service - INFO - ✅ TTS complete: 54 chunks
+2026-02-03 13:23:07,960 - core.websocket_handler - INFO - ✅ TTS complete: 54 chunks sent
+2026-02-03 13:23:07,961 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:23:07,962 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:23:07,962 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:23:07,962 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:23:07,962 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:23:09,314 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:23:10,993 - services.vad_silero - INFO - 🔚 Speech ended, sending 69632 bytes to ASR
+2026-02-03 13:23:10,993 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:23:11,940 - core.websocket_handler - INFO - 📝 ASR Transcript: 'यह मैं के ले था।'
+2026-02-03 13:23:11,941 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:23:11,941 - core.websocket_handler - INFO - 📥 Processing answer: 'यह मैं के ले था।' for phase=conversation, question=0
+2026-02-03 13:23:11,941 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'यह मैं के ले था।'
+2026-02-03 13:23:11,941 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:23:11,941 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:23:11,941 - services.conversational_flow - INFO - User Input: यह मैं के ले था।
+2026-02-03 13:23:11,941 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'ठीक है, आपने कैश दिया था। यह किस कारण से था, जैसे EMI, शुल्क, या कोई अन्य कारण?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने भुगतान के तरीके के रूप में कैश दिया बताया, भुगतान कारण अभी अस्पष्ट है।'}
+2026-02-03 13:23:11,942 - services.conversational_flow - INFO - Conversation Stage: reason_collection
+2026-02-03 13:23:11,942 - services.conversational_flow - INFO - Missing Information: ['payment reason']
+2026-02-03 13:23:13,681 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:23:13,683 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:23:13,683 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1740.90 ms
+2026-02-03 13:23:13,683 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2947, output_tokens=1019, total_tokens=3966
+2026-02-03 13:23:13,683 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1740.90ms, Tokens: 3966
+2026-02-03 13:23:13,683 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'क्या यह EMI के लिए था?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}, 'next_action': 'continue', 'provide_summary': False, 'missing_info': ['payment_reason'], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने अस्पष्ट उत्तर दिया, भुगतान कारण स्पष्ट करने के लिये पूछताछ जारी रखी।', '_input_tokens': 2947, '_output_tokens': 1019, '_total_tokens': 3966, '_latency_ms': 1740.9, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:23:13,683 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': None, 'payment_amount': '2000'}
+2026-02-03 13:23:13,684 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:23:13,684 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:23:13,684 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'ठीक है, आपने कैश दिया था। यह किस कारण से था, जैसे EMI, शुल्क, या कोई अन्य कारण?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने भुगतान के तरीके के रूप में कैश दिया बताया, भुगतान कारण अभी अस्पष्ट है।'}
+2026-02-03 13:23:13,684 - core.websocket_handler - INFO - 📤 Answer result: CONTINUE_CONVERSATION
+2026-02-03 13:23:13,684 - core.websocket_handler - INFO - 💬 Continuing conversation .
+2026-02-03 13:23:13,685 - core.websocket_handler - INFO - 🗣️ TTS playing: क्या यह EMI के लिए था?...
+2026-02-03 13:23:13,685 - services.tts_service - INFO - 🎵 TTS: क्या यह EMI के लिए था?...
+2026-02-03 13:23:13,692 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:23:13,692 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:23:13,692 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:23:13,692 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:23:17,026 - services.tts_service - INFO - ✅ TTS complete: 34 chunks
+2026-02-03 13:23:17,027 - core.websocket_handler - INFO - ✅ TTS complete: 34 chunks sent
+2026-02-03 13:23:17,027 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:23:17,028 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:23:17,028 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:23:17,028 - core.websocket_handler - INFO - 🎤 Mic enabled for 5016739984
+2026-02-03 13:23:17,029 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:23:17,330 - services.vad_silero - INFO - 🎤 Voice detected! (prob: 1.00)
+2026-02-03 13:23:19,673 - services.vad_silero - INFO - 🔚 Speech ended, sending 84992 bytes to ASR
+2026-02-03 13:23:19,673 - core.websocket_handler - INFO - 🔍 ASR: Processing audio for 5016739984
+2026-02-03 13:23:20,442 - core.websocket_handler - INFO - 📝 ASR Transcript: 'हा जी करेट।'
+2026-02-03 13:23:20,442 - core.websocket_handler - INFO - ⏰ Updated last_user_input_time for 5016739984
+2026-02-03 13:23:20,442 - core.websocket_handler - INFO - 📥 Processing answer: 'हा जी करेट।' for phase=conversation, question=0
+2026-02-03 13:23:20,442 - flow.flow_manager - INFO - 🔄 Processing conversational response: 'हा जी करेट।'
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - ===== New Conversational Turn =====
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - Customer Name: आकाश
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - User Input: हा जी करेट।
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - Session (before): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'payment_reason': None, 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'क्या यह EMI के लिए था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने अस्पष्ट उत्तर दिया, भुगतान कारण स्पष्ट करने के लिये पूछताछ जारी रखी।'}
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - Conversation Stage: reason_collection
+2026-02-03 13:23:20,443 - services.conversational_flow - INFO - Missing Information: ['payment reason']
+2026-02-03 13:23:21,596 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:23:21,607 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:23:21,607 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 1162.95 ms
+2026-02-03 13:23:21,607 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=2928, output_tokens=489, total_tokens=3417
+2026-02-03 13:23:21,607 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 1162.95ms, Tokens: 3417
+2026-02-03 13:23:21,607 - services.conversational_flow - INFO - LLM Raw Response: {'bot_response': 'ठीक है, आपका भुगतान 30/01/2025 को नकद में 2000 रुपये का था, और यह EMI के लिए था। क्या यह जानकारी सही है?', 'extracted_data': {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': 'emi', 'payment_amount': '2000'}, 'next_action': 'continue', 'provide_summary': True, 'missing_info': [], 'call_end_reason': 'null', 'conversation_notes': 'ग्राहक ने पुष्टि की कि भुगतान EMI के लिए था, भुगतान विवरण अपडेट किया गया', '_input_tokens': 2928, '_output_tokens': 489, '_total_tokens': 3417, '_latency_ms': 1162.95, '_model': 'openai/gpt-oss-20b:groq'}
+2026-02-03 13:23:21,607 - services.conversational_flow - INFO - Extracted Data from LLM: {'identity_confirmed': 'YES', 'speaker_name': None, 'speaker_relation': None, 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payee_name': None, 'payee_contact': None, 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'field_executive_name': None, 'field_executive_contact': None, 'payment_reason': 'emi', 'payment_amount': '2000'}
+2026-02-03 13:23:21,608 - services.conversational_flow - INFO - Next Action from LLM: continue
+2026-02-03 13:23:21,608 - services.conversational_flow - INFO - Call End Reason from LLM: null
+2026-02-03 13:23:21,608 - services.conversational_flow - INFO - Session (after): {'session_id': 'session_e6d2ea0b_1770105126', 'customer_name': 'आकाश', 'customer_name_english': 'AAKASH  .', 'identity_confirmed': 'YES', 'loan_taken': 'YES', 'last_month_payment': 'YES', 'payee': 'self', 'payment_date': '30/01/2025', 'payment_mode': 'cash', 'payment_reason': 'emi', 'payment_amount': '2000', 'conversation_started': True, 'last_bot_response': 'क्या यह EMI के लिए था?', 'identify_confirmation': None, 'availability': None, 'user_contact': None, 'last_month_emi_payment': None, 'payee_name': None, 'payee_contact': None, 'pay_date': None, 'mode_of_payment': None, 'field_executive_name': None, 'field_executive_contact': None, 'reason': None, 'amount': None, 'current_question': 0, 'retry_count': 0, 'call_should_end': False, 'call_end_reason': None, 'phase': 'conversation', 'generated_summary': None, 'summary_confirmed': False, 'product_type': 'पर्सनल लोन', 'last_conversation_notes': 'ग्राहक ने अस्पष्ट उत्तर दिया, भुगतान कारण स्पष्ट करने के लिये पूछताछ जारी रखी।'}
+2026-02-03 13:23:21,608 - services.conversational_flow - INFO - 📝 Summary provided in bot_response
+2026-02-03 13:23:21,608 - flow.flow_manager - INFO - 📝 Summary provided in conversational response
+2026-02-03 13:23:21,608 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:23:21,608 - services.summary_service - INFO - 🤖 LLM CALL (detect_confirmation) - Input:
+2026-02-03 13:23:21,608 - services.summary_service - INFO - User response: हा जी करेट।
+2026-02-03 13:23:21,608 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:23:22,027 - httpx - INFO - HTTP Request: POST https://router.huggingface.co/v1/chat/completions "HTTP/1.1 200 OK"
+2026-02-03 13:23:22,029 - llm.gemini_client - INFO - 🤖 [OpenAI HF] Response received
+2026-02-03 13:23:22,029 - llm.gemini_client - INFO - ⏱️ [OpenAI HF] Latency: 420.76 ms
+2026-02-03 13:23:22,029 - llm.gemini_client - INFO - 🎯 [OpenAI HF usage] input_tokens=310, output_tokens=90, total_tokens=400
+2026-02-03 13:23:22,029 - llm.gemini_client - INFO - ✅ [LangChain OpenAI] Response processed successfully - Latency: 420.76ms, Tokens: 400
+2026-02-03 13:23:22,029 - services.summary_service - INFO - 📥 LLM CALL (detect_confirmation) - Response:
+2026-02-03 13:23:22,030 - services.summary_service - INFO - Confirmation: YES
+2026-02-03 13:23:22,030 - services.summary_service - INFO - --------------------------------------------------------------------------------
+2026-02-03 13:23:22,030 - services.summary_service - INFO - ✅ LLM CALL (detect_confirmation) - Result: YES
+2026-02-03 13:23:22,030 - services.summary_service - INFO - ================================================================================
+2026-02-03 13:23:22,030 - flow.flow_manager - INFO - ✅ User confirmed summary - moving to closing
+2026-02-03 13:23:22,030 - core.websocket_handler - INFO - 📤 Answer result: CLOSING
+2026-02-03 13:23:22,030 - core.websocket_handler - INFO - 👋 Saying closing statement...
+2026-02-03 13:23:22,031 - utils.session_data_storage - INFO - 💾 Saved session data for session: session_e6d2ea0b_1770105126 (fields: 19)
+2026-02-03 13:23:22,032 - core.websocket_handler - INFO - 🗣️ TTS playing: आपके मूल्यवान फ़ीडबैक और समय देने के लिए धन्यवाद।
+...
+2026-02-03 13:23:22,032 - services.tts_service - INFO - 🎵 TTS: आपके मूल्यवान फ़ीडबैक और समय देने के लिए धन्यवाद।
+...
+2026-02-03 13:23:22,039 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_started"}...
+2026-02-03 13:23:22,040 - core.router - INFO - 🚀 Dispatching tts_started event to handler: handle_tts_started
+2026-02-03 13:23:22,040 - core.websocket_handler - INFO - 🔇 Mic disabled for 5016739984 (TTS playing)
+2026-02-03 13:23:22,040 - core.router - INFO - ✅ Handler handle_tts_started completed successfully
+2026-02-03 13:23:27,738 - services.tts_service - INFO - ✅ TTS complete: 50 chunks
+2026-02-03 13:23:27,739 - core.websocket_handler - INFO - ✅ TTS complete: 50 chunks sent
+2026-02-03 13:23:27,740 - core.websocket_handler - INFO - ⏰ Reset last_user_input_time after TTS for 5016739984
+2026-02-03 13:23:27,741 - core.websocket_handler - INFO - 📝 Text message: {"type":"tts_finished"}...
+2026-02-03 13:23:27,741 - core.router - INFO - 🚀 Dispatching tts_finished event to handler: handle_tts_finished
+2026-02-03 13:23:27,741 - core.websocket_handler - INFO - ✅ Survey completed, call ended
+2026-02-03 13:23:27,741 - core.router - INFO - ✅ Handler handle_tts_finished completed successfully
+2026-02-03 13:37:03,332 - core.websocket_handler - ERROR - Error in WebSocket loop: Cannot call "receive" once a disconnect message has been received.
