@@ -4,12 +4,15 @@
  */
 
 // Backend API Base URL
-// Can be overridden by environment variable VITE_API_URL
+// Use relative URL if served from same origin, otherwise use env var or default
+// This allows the app to work whether served from same domain or different port
 export const API_BASE_URL =
-  import.meta.env.VITE_API_URL || "http://localhost:8001";
+  import.meta.env.VITE_API_URL || 
+  (typeof window !== 'undefined' ? window.location.origin : "http://localhost:8001");
 
 // WebSocket URL (derived from API_BASE_URL)
-export const WS_URL = API_BASE_URL.replace(/^http/, "ws") + "/ws/audio";
+// Use wss:// for HTTPS, ws:// for HTTP
+export const WS_URL = API_BASE_URL.replace(/^https/, "wss").replace(/^http/, "ws") + "/ws/audio";
 
 // API Endpoints
 export const API_ENDPOINTS = {

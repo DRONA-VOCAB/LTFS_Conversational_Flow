@@ -46,6 +46,12 @@ ASR_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 TTS_AUDIO_DIR.mkdir(parents=True, exist_ok=True)
 app.mount("/asr_audios", StaticFiles(directory=ASR_AUDIO_DIR), name="asr_audios")
 app.mount("/tts_audios", StaticFiles(directory=TTS_AUDIO_DIR), name="tts_audios")
+
+# Mount ACME challenge directory for Let's Encrypt (before frontend mount)
+ACME_CHALLENGE_DIR = STATIC_DIR / ".well-known" / "acme-challenge"
+ACME_CHALLENGE_DIR.mkdir(parents=True, exist_ok=True)
+app.mount("/.well-known/acme-challenge", StaticFiles(directory=ACME_CHALLENGE_DIR), name="acme_challenge")
+
 if STATIC_DIR.exists():
     app.mount("/", StaticFiles(directory=STATIC_DIR, html=True), name="frontend")
 else:

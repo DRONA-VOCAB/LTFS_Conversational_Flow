@@ -22,6 +22,7 @@ from queues.asr_queue import asr_queue
 from queues.tts_queue import tts_queue
 from utils.latency_tracker import record_event, cleanup_tracking
 from utils.session_data_storage import save_session_data
+from utils.filler_manager import get_filler
 from sessions.session_store import get_session, save_session
 from flow.flow_manager import (
     get_question_text,
@@ -231,6 +232,190 @@ async def send_tts(websocket_id: str, text: str, audio_base: Optional[str] = Non
         logger.error(f"❌ WebSocket not found: {websocket_id}")
 
 
+async def send_tts_and_wait(websocket_id: str, text: str, audio_base: Optional[str] = None):
+    """
+    Send TTS and wait for it to complete playing.
+    Returns when TTS finishes playing.
+    """
+    websocket = active_connections.get(websocket_id)
+    state = connection_states.get(websocket_id, {})
+    
+    if not websocket:
+        logger.error(f"❌ WebSocket not found: {websocket_id}")
+        return
+    
+    # Create an event to track when TTS finishes
+    tts_finished_event = asyncio.Event()
+    
+    # Store callback to set event when TTS finishes
+    def on_tts_finished():
+        if state.get("_tts_finished_callback") == on_tts_finished:
+            state["_tts_finished_callback"] = None
+            tts_finished_event.set()
+    
+    state["_tts_finished_callback"] = on_tts_finished
+    
+    # Send TTS
+    await send_tts(websocket_id, text, audio_base)
+    
+    # Wait for TTS to finish (with timeout)
+    try:
+        await asyncio.wait_for(tts_finished_event.wait(), timeout=30.0)
+    except asyncio.TimeoutError:
+        logger.warning(f"⚠️ TTS wait timeout for: {text[:50]}...")
+        # Clear callback on timeout
+        if state.get("_tts_finished_callback") == on_tts_finished:
+            state["_tts_finished_callback"] = None
+
+
+async def process_with_filler(
+    websocket_id: str,
+    session: Dict,
+    transcription: str,
+    response_audio_base: Optional[str] = None,
+):
+    """
+    Process user input with filler support:
+    1. Check if filler should be used (85% chance, skip for opening/closing)
+    2. Start LLM processing in parallel
+    3. Play filler if selected
+    4. Wait for LLM response
+    5. Play LLM response after filler completes (if LLM finishes while filler is playing, wait)
+    """
+    state = connection_states.get(websocket_id)
+    if not state:
+        return
+    
+    # Check if this is opening (first user input) or will result in closing
+    is_opening = not session.get("conversation_started", False)
+    phase = session.get("phase", "conversation")
+    is_closing_phase = phase == "closing"
+    
+    # Get current question text for similarity search (if available)
+    current_question = None
+    try:
+        from flow.flow_manager import get_question_text
+        current_question = get_question_text(session)
+    except Exception as e:
+        logger.debug(f"Could not get current question: {e}")
+    
+    # Check if we should use filler (85% probability, skip for opening/closing)
+    # Pass transcript and question for similarity-based filler selection
+    filler_text = get_filler(
+        transcript=transcription,
+        question=current_question,
+        skip_for_opening=is_opening,
+        skip_for_closing=is_closing_phase,
+        use_similarity=True
+    )
+    use_filler = filler_text is not None
+    
+    # Also check if result will be closing (to skip filler)
+    # We'll check this after LLM processing
+    
+    # Start LLM processing in parallel (run in executor since process_answer is sync)
+    loop = asyncio.get_event_loop()
+    llm_task = loop.run_in_executor(None, process_answer, session, transcription)
+    
+    filler_playing = False
+    filler_task = None
+    
+    # Play filler if selected (this will start playing immediately)
+    if use_filler:
+        logger.info(f"🎭 Playing filler: '{filler_text}' (LLM processing in parallel)")
+        filler_playing = True
+        filler_task = asyncio.create_task(
+            send_tts_and_wait(websocket_id, filler_text, response_audio_base)
+        )
+    
+    # Wait for LLM processing to complete
+    try:
+        result = await llm_task
+        logger.info(f"📤 LLM result: {result}")
+        save_session(session)
+        
+        # Check if result indicates closing (skip filler for closing responses)
+        is_closing_result = result in ["CLOSING", "END"]
+        
+        # If LLM finished before filler started or finished, log it
+        if use_filler and filler_task:
+            if filler_task.done():
+                logger.info("✅ LLM finished after filler completed")
+            else:
+                logger.info("⏳ LLM finished, waiting for filler to complete...")
+    except Exception as e:
+        logger.error(f"❌ Error in LLM processing: {e}")
+        result = "REPEAT"
+        is_closing_result = False
+    
+    # Wait for filler to finish if it's still playing (unless it's a closing result)
+    # This ensures LLM response plays AFTER filler completes
+    if filler_playing and filler_task and not is_closing_result:
+        try:
+            await filler_task
+            logger.info("✅ Filler playback completed, now playing LLM response")
+        except Exception as e:
+            logger.error(f"❌ Error waiting for filler: {e}")
+    elif is_closing_result and filler_playing and filler_task:
+        # For closing, cancel filler if still playing
+        logger.info("🚫 Cancelling filler for closing statement")
+        filler_task.cancel()
+        try:
+            await filler_task
+        except asyncio.CancelledError:
+            pass
+    
+    # Now process the result and play response
+    if result == "CONTINUE_CONVERSATION":
+        logger.info("💬 Continuing conversation")
+        from flow.flow_manager import get_conversation_response_text
+        response_text = get_conversation_response_text(session)
+        save_session(session)
+        await send_tts(websocket_id, response_text, audio_base=response_audio_base)
+    
+    elif result == "CLOSING":
+        ack_text = session.get("acknowledgment_text")
+        if ack_text:
+            logger.info(f"💬 Speaking acknowledgment: {ack_text}")
+            await send_tts(websocket_id, ack_text, audio_base=response_audio_base)
+            session.pop("acknowledgment_text", None)
+            save_session(session)
+        
+        logger.info("👋 Saying closing statement...")
+        closing_text = get_closing_text(session)
+        save_session(session)
+        save_session_data(state.get("session_id"), session)
+        await send_tts(websocket_id, closing_text, audio_base=response_audio_base)
+        state["pending_end"] = True
+        state["timeout_monitoring"] = False
+    
+    elif result == "END":
+        logger.info("❌ Max retries exceeded, saying closing...")
+        closing_text = get_closing_text(session)
+        save_session(session)
+        save_session_data(state.get("session_id"), session)
+        await send_tts(websocket_id, closing_text, audio_base=response_audio_base)
+        state["pending_end"] = True
+        state["timeout_monitoring"] = False
+    
+    elif result in ["NEXT", "REPEAT"]:
+        question_text = get_question_text(session)
+        save_session(session)
+        logger.info(f"📋 Next question: {question_text[:50] if question_text else 'None'}...")
+        
+        if question_text:
+            await send_tts(websocket_id, question_text, audio_base=response_audio_base)
+        else:
+            logger.info("📝 No more questions, generating summary...")
+            session["phase"] = "summary"
+            summary_text = get_summary_text(session)
+            save_session(session)
+            await send_tts(websocket_id, summary_text)
+            state["pending_confirmation"] = True
+    else:
+        logger.warning(f"⚠️ Unknown result from process_answer: {result}")
+
+
 async def process_asr_queue(websocket_id: str):
     """Process ASR queue items"""
     while websocket_id in active_connections:
@@ -340,7 +525,7 @@ async def process_asr_queue(websocket_id: str):
                     )
                     state["last_transcription"] = transcription
 
-                # Process answer
+                # Process answer with filler support
                 session_id = state["session_id"]
                 session = get_session(session_id)
                 response_audio_base = state.get("current_turn_base")
@@ -349,81 +534,10 @@ async def process_asr_queue(websocket_id: str):
                     logger.info(
                         f"📥 Processing answer: '{transcription}' for phase={session.get('phase', 'questions')}, question={session.get('current_question')}"
                     )
-                    result = process_answer(session, transcription)
-                    logger.info(f"📤 Answer result: {result}")
-                    save_session(session)
-
-                    if result == "CONTINUE_CONVERSATION":
-                        # Continue conversational flow
-                        logger.info("💬 Continuing conversation .")
-                        from  flow.flow_manager import get_conversation_response_text
-                        response_text = get_conversation_response_text(session)
-                        save_session(session)
-                        await send_tts(
-                            websocket_id, response_text, audio_base=response_audio_base
-                        )
-
-                    elif result == "CLOSING":
-                        # Check if there's an acknowledgment text (e.g., edit confirmation) to speak first
-                        ack_text = session.get("acknowledgment_text")
-                        if ack_text:
-                            logger.info(f"💬 Speaking acknowledgment: {ack_text}")
-                            await send_tts(
-                                websocket_id, ack_text, audio_base=response_audio_base
-                            )
-                            # Clear it so closing message can be spoken
-                            session.pop("acknowledgment_text", None)
-                            save_session(session)
-
-                        # Say closing statement and end
-                        logger.info("👋 Saying closing statement...")
-                        closing_text = get_closing_text(session)
-                        save_session(session)
-                        save_session_data(session_id, session)
-                        await send_tts(
-                            websocket_id, closing_text, audio_base=response_audio_base
-                        )
-                        state["pending_end"] = True
-                        state["timeout_monitoring"] = False
-
-
-                    elif result == "END":
-                        # Max retries exceeded, say closing and end
-                        logger.info("❌ Max retries exceeded, saying closing...")
-                        closing_text = get_closing_text(session)
-                        save_session(session)
-                        save_session_data(session_id, session)
-                        await send_tts(
-                            websocket_id, closing_text, audio_base=response_audio_base
-                        )
-                        state["pending_end"] = True
-                        state["timeout_monitoring"] = False
-
-                    elif result in ["NEXT", "REPEAT"]:
-                        question_text = get_question_text(session)
-                        save_session(session)
-                        logger.info(
-                            f"📋 Next question: {question_text[:50] if question_text else 'None'}..."
-                        )
-
-                        if question_text:
-                            await send_tts(
-                                websocket_id,
-                                question_text,
-                                audio_base=response_audio_base,
-                            )
-                        else:
-                            # No more questions, move to summary
-                            logger.info("📝 No more questions, generating summary...")
-                            session["phase"] = "summary"
-                            summary_text = get_summary_text(session)
-                            save_session(session)
-                            await send_tts(websocket_id, summary_text)
-                            state["pending_confirmation"] = True
-                    else:
-                        logger.warning(
-                            f"⚠️ Unknown result from process_answer: {result}"
-                        )
+                    # Use new process_with_filler function that handles filler + LLM in parallel
+                    await process_with_filler(
+                        websocket_id, session, transcription, response_audio_base
+                    )
 
             if not state.get("tts_playing"):
                 state["mic_enabled"] = True
@@ -506,6 +620,15 @@ async def process_tts_queue(websocket_id: str):
 
             await websocket.send_json({"type": "tts_end", "chunks_sent": chunk_count})
             logger.info(f"✅ TTS complete: {chunk_count} chunks sent")
+            
+            # Call TTS finished callback if set
+            if state and state.get("_tts_finished_callback"):
+                callback = state.get("_tts_finished_callback")
+                if callable(callback):
+                    try:
+                        callback()
+                    except Exception as e:
+                        logger.error(f"❌ Error in TTS finished callback: {e}")
 
             tts_audio_url = None
             if audio_buffer:

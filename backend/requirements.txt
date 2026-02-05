@@ -1,6 +1,5 @@
 python-dotenv 
-google-generativeai
-google-genai   # required for context tools (get_transcript_examples, get_session_summary)
+google-genai   # required for all Gemini API calls (replaces deprecated google-generativeai)
 fastapi
 uvicorn[standard]
 websockets
