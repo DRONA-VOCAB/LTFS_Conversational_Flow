@@ -10,3 +10,5 @@ static/
 logs/
 google_sheet_creds.json
 audio_files/
+certs/*.pem
+ssl/*.pem
