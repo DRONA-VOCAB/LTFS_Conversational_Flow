@@ -144,6 +144,11 @@ async def websocket_audio_endpoint(websocket: WebSocket):
             except WebSocketDisconnect:
                 logger.info(f"❌ Disconnected: {websocket_id}")
                 break
+            except RuntimeError as e:
+                # Starlette raises RuntimeError('Cannot call "receive" once a disconnect message has been received.')
+                # Handle cleanly without noisy stacktrace.
+                logger.info(f"Receive loop ended for {websocket_id}: {e}")
+                break
             except Exception as e:
                 logger.error(f"Error in loop: {e}", exc_info=True)
                 break

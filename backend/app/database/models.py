@@ -11,110 +11,121 @@ from  config.settings import settings
 
 # Process database URL for asyncpg compatibility
 database_url = settings.database_url
+
+# If DATABASE_URL isn't set, fall back to a local SQLite DB to allow local development.
 if not database_url:
-    raise ValueError(
-        "DATABASE_URL is not configured. Please set it in your .env file.\n"
-        f"Checked locations: {[str(Path(__file__).parent.parent / '.env'), str(Path(__file__).parent / '.env'), '.env']}"
+    db_path = Path(__file__).parent.parent.parent / "data" / "app.db"
+    db_path.parent.mkdir(parents=True, exist_ok=True)
+    database_url = f"sqlite+aiosqlite:///{db_path}"
+    print(f"[INFO] No DATABASE_URL configured; falling back to SQLite DB at {db_path}")
+
+# If using SQLite, skip the Postgres-specific validation and SSL rules
+if database_url.startswith("sqlite"):
+    connect_args = {}
+    engine = create_async_engine(
+        database_url,
+        echo=False,
+        future=True,
     )
+else:
+    # Parse URL first to validate and fix
+    parsed = urlparse(database_url)
 
-# Parse URL first to validate and fix
-parsed = urlparse(database_url)
-
-# Validate hostname
-if not parsed.hostname:
-    raise ValueError(
-        f"Invalid DATABASE_URL format. Missing hostname.\n"
-        f"Expected format: postgresql://user:password@host:port/database\n"
-        f"Your URL: {database_url[:50]}..."
-    )
-
-# Ensure database name is specified
-if not parsed.path or parsed.path == "/":
-    raise ValueError(
-        f"Invalid DATABASE_URL format. Missing database name.\n"
-        f"Expected format: postgresql://user:password@host:port/database\n"
-        f"Your URL ends with: {database_url[-50:]}"
-    )
-
-# Extract and remove SSL-related query parameters BEFORE adding port
-query_params = parse_qs(parsed.query)
-
-# Remove sslmode and channel_binding from query params
-if "sslmode" in query_params:
-    del query_params["sslmode"]
-if "channel_binding" in query_params:
-    del query_params["channel_binding"]
-
-# Reconstruct query string without SSL params
-new_query = urlencode(query_params, doseq=True) if query_params else ""
-parsed = parsed._replace(query=new_query)
-
-# Ensure port is specified (default to 5432 if missing)
-if not parsed.port:
-    # Reconstruct netloc with port
-    if parsed.username and parsed.password:
-        netloc = f"{parsed.username}:{parsed.password}@{parsed.hostname}:5432"
-    elif parsed.username:
-        netloc = f"{parsed.username}@{parsed.hostname}:5432"
-    else:
-        netloc = f"{parsed.hostname}:5432"
-    parsed = parsed._replace(netloc=netloc)
-    print(f"[INFO] Added default port 5432 to connection string")
-
-# Reconstruct the URL
-database_url = urlunparse(parsed)
-
-# Convert postgresql:// to postgresql+asyncpg:// if needed
-if (
-    database_url.startswith("postgresql://")
-    and "postgresql+asyncpg://" not in database_url
-):
-    database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
-
-# Extract SSL-related parameters for connect_args
-connect_args = {}
-
-# Enable SSL for Neon database (required)
-ssl_context = ssl.create_default_context()
-ssl_context.check_hostname = False
-ssl_context.verify_mode = ssl.CERT_NONE
-connect_args["ssl"] = ssl_context
-
-# Debug: Print the connection URL (without password for security)
-if database_url:
-    # Mask password in debug output
-    debug_url = database_url
-    if "@" in debug_url:
-        parts = debug_url.split("@")
-        if ":" in parts[0] and "://" in parts[0]:
-            scheme_user = parts[0].split("://")
-            if len(scheme_user) == 2:
-                user_pass = scheme_user[1].split(":")
-                if len(user_pass) >= 2:
-                    debug_url = f"{scheme_user[0]}://{user_pass[0]}:****@{parts[1]}"
-    print(f"[DEBUG] Using database URL: {debug_url}")
-    print(f"[DEBUG] SSL enabled (required for Neon)")
-    # Print hostname for debugging
-    parsed_debug = urlparse(database_url)
-    print(f"[DEBUG] Hostname: {parsed_debug.hostname}")
-    print(f"[DEBUG] Port: {parsed_debug.port}")
-    print(f"[DEBUG] Database: {parsed_debug.path.lstrip('/')}")
-
-    # Check if using pooler and suggest direct connection if DNS fails
-    if "pooler" in parsed_debug.hostname:
-        print(
-            f"[INFO] Using connection pooler. If you get DNS errors, try the direct connection URL from your Supabase/Neon dashboard."
+    # Validate hostname
+    if not parsed.hostname:
+        raise ValueError(
+            f"Invalid DATABASE_URL format. Missing hostname.\n"
+            f"Expected format: postgresql://user:password@host:port/database\n"
+            f"Your URL: {database_url[:50]}..."
         )
 
-engine = create_async_engine(
-    database_url,
-    connect_args=connect_args,
-    echo=False,  # Set to True for SQL debugging
-    future=True,
-    pool_pre_ping=True,
-    pool_size=5,
-    max_overflow=10,
-)
+    # Ensure database name is specified
+    if not parsed.path or parsed.path == "/":
+        raise ValueError(
+            f"Invalid DATABASE_URL format. Missing database name.\n"
+            f"Expected format: postgresql://user:password@host:port/database\n"
+            f"Your URL ends with: {database_url[-50:]}"
+        )
+
+    # Extract and remove SSL-related query parameters BEFORE adding port
+    query_params = parse_qs(parsed.query)
+
+    # Remove sslmode and channel_binding from query params
+    if "sslmode" in query_params:
+        del query_params["sslmode"]
+    if "channel_binding" in query_params:
+        del query_params["channel_binding"]
+
+    # Reconstruct query string without SSL params
+    new_query = urlencode(query_params, doseq=True) if query_params else ""
+    parsed = parsed._replace(query=new_query)
+
+    # Ensure port is specified (default to 5432 if missing)
+    if not parsed.port:
+        # Reconstruct netloc with port
+        if parsed.username and parsed.password:
+            netloc = f"{parsed.username}:{parsed.password}@{parsed.hostname}:5432"
+        elif parsed.username:
+            netloc = f"{parsed.username}@{parsed.hostname}:5432"
+        else:
+            netloc = f"{parsed.hostname}:5432"
+        parsed = parsed._replace(netloc=netloc)
+        print(f"[INFO] Added default port 5432 to connection string")
+
+    # Reconstruct the URL
+    database_url = urlunparse(parsed)
+
+    # Convert postgresql:// to postgresql+asyncpg:// if needed
+    if (
+        database_url.startswith("postgresql://")
+        and "postgresql+asyncpg://" not in database_url
+    ):
+        database_url = database_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+
+    # Extract SSL-related parameters for connect_args
+    connect_args = {}
+
+    # Enable SSL for Neon database (required)
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_NONE
+    connect_args["ssl"] = ssl_context
+
+    # Debug: Print the connection URL (without password for security)
+    if database_url:
+        # Mask password in debug output
+        debug_url = database_url
+        if "@" in debug_url:
+            parts = debug_url.split("@")
+            if ":" in parts[0] and "://" in parts[0]:
+                scheme_user = parts[0].split("://")
+                if len(scheme_user) == 2:
+                    user_pass = scheme_user[1].split(":")
+                    if len(user_pass) >= 2:
+                        debug_url = f"{scheme_user[0]}://{user_pass[0]}:****@{parts[1]}"
+        print(f"[DEBUG] Using database URL: {debug_url}")
+        print(f"[DEBUG] SSL enabled (required for Neon)")
+        # Print hostname for debugging
+        parsed_debug = urlparse(database_url)
+        print(f"[DEBUG] Hostname: {parsed_debug.hostname}")
+        print(f"[DEBUG] Port: {parsed_debug.port}")
+        print(f"[DEBUG] Database: {parsed_debug.path.lstrip('/')}")
+
+        # Check if using pooler and suggest direct connection if DNS fails
+        if "pooler" in parsed_debug.hostname:
+            print(
+                f"[INFO] Using connection pooler. If you get DNS errors, try the direct connection URL from your Supabase/Neon dashboard."
+            )
+
+    engine = create_async_engine(
+        database_url,
+        connect_args=connect_args,
+        echo=False,  # Set to True for SQL debugging
+        future=True,
+        pool_pre_ping=True,
+        pool_size=5,
+        max_overflow=10,
+    )
 
 # Create async session factory
 AsyncSessionLocal = async_sessionmaker(

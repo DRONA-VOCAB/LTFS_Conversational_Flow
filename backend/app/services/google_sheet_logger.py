@@ -13,6 +13,14 @@ logger = logging.getLogger(__name__)
 SCOPES = ["https://www.googleapis.com/auth/spreadsheets"]
 CREDS_PATH = Path(__file__).resolve().parents[2] / "google_sheet_creds.json"
 
+# Determine availability once to avoid repeated noisy errors at runtime
+SHEETS_AVAILABLE = CREDS_PATH.exists() and bool(GOOGLE_SHEET_ID)
+if not SHEETS_AVAILABLE:
+    logger.info(
+        "Google Sheets logging disabled: missing credentials or GOOGLE_SHEET_ID."
+        f" CREDS_PATH={CREDS_PATH} GOOGLE_SHEET_ID={GOOGLE_SHEET_ID}"
+    )
+
 
 def _get_client() -> gspread.Client:
     """Create an authenticated gspread client."""
@@ -43,6 +51,9 @@ def _append_row(row_data: Dict[str, str]) -> int:
 
 async def log_interaction(row_data: Dict[str, str]) -> Optional[int]:
     """Append interaction data to Google Sheet asynchronously."""
+    if not SHEETS_AVAILABLE:
+        return None
+
     try:
         return await asyncio.to_thread(_append_row, row_data)
     except Exception as exc:  # pragma: no cover - logging only

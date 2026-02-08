@@ -8,7 +8,7 @@ env_paths = [
     Path(__file__).parent.parent.parent / ".env",  # backend/.env
     Path(__file__).parent.parent / ".env",  # backend/app/.env
     Path(__file__).parent / ".env",  # backend/app/config/.env
-    ".env",  # current directory
+    Path(".env"),  # current directory
 ]
 
 env_loaded = False
@@ -34,8 +34,8 @@ MAX_RETRIES = int(os.getenv("MAX_RETRIES", "3"))
 
 # ASR, TTS, and Chatbot API URLs
 ASR_API_URL = os.getenv("ASR_API_URL", "http://27.111.72.52:5073/transcribe")
-TTS_API_URL = os.getenv("TTS_API_URL", "http://27.111.72.52:5057/synthesize")
-CHATBOT_API_URL = os.getenv("CHATBOT_API_URL", "http://27.111.72.50:4000")
+TTS_API_URL = os.getenv("TTS_API_URL", "http://27.111.72.48:5060/synthesize")
+CHATBOT_API_URL = os.getenv("CHATBOT_API_URL", "http://27.111.72.50:4001")
 # Default to FastAPI's common local port; override in env when deployed
 PUBLIC_BASE_URL = os.getenv("PUBLIC_BASE_URL", "https://server6.vo-cab.dev:8001/")
 GOOGLE_SHEET_ID = os.getenv(
